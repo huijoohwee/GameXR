@@ -1,17 +1,35 @@
+import {
+  createFlightSimModelProfile,
+  integrateFlightModel,
+  type FlightSimAircraftState,
+  type FlightSimModelProfile,
+} from '@knowgrph/apple-spatial-input/flight'
 import { Euler, Quaternion, Vector3 } from 'three'
 import type { ControlState, SceneManifest, Vector3Tuple } from '../config/types.ts'
 
-const FORWARD = new Vector3(0, 0, -1)
 const EPSILON = 1e-6
-
-function clamp(value: number, minimum: number, maximum: number): number {
-  return Math.min(maximum, Math.max(minimum, value))
-}
 
 export interface FlightState {
   position: Vector3
   rotation: Quaternion
   velocity: Vector3
+}
+
+function createProfile(manifest: SceneManifest): FlightSimModelProfile {
+  const flight = manifest.ship.flight
+  return createFlightSimModelProfile({
+    maximumRollRadians: flight.bankAngle,
+    stableRollRadians: Math.min(0.35, flight.bankAngle),
+    pitchRateRadiansPerSecond: flight.pitchRate,
+    yawRateRadiansPerSecond: flight.yawRate,
+    rollRateRadiansPerSecond: flight.rollRate,
+    thrustAcceleration: flight.acceleration,
+    baseDrag: flight.drag,
+    maximumAirspeedMetersPerSecond: flight.maxForwardSpeed,
+    fullControlSpeedMetersPerSecond: Math.min(12, flight.maxForwardSpeed),
+    stallSpeedMetersPerSecond: Math.min(7, Math.max(EPSILON, flight.maxForwardSpeed / 2)),
+    velocityAlignmentRate: Math.min(1, flight.lateralAssist / 30),
+  })
 }
 
 export class FlightSimulation {
@@ -22,72 +40,71 @@ export class FlightSimulation {
   }
 
   private manifest: SceneManifest
-  private readonly forward = new Vector3()
-  private readonly lateralVelocity = new Vector3()
-  private readonly rotationDelta = new Quaternion()
-  private readonly eulerDelta = new Euler(0, 0, 0, 'YXZ')
-  private readonly boundedOrientation = new Euler(0, 0, 0, 'YXZ')
+  private profile: FlightSimModelProfile
+  private aircraft: FlightSimAircraftState
 
   constructor(manifest: SceneManifest) {
     this.manifest = manifest
-    this.reset(manifest)
+    this.profile = createProfile(manifest)
+    this.aircraft = this.initialAircraft(manifest)
+    this.projectState()
   }
 
   configure(manifest: SceneManifest): void {
     this.manifest = manifest
+    this.profile = createProfile(manifest)
   }
 
   reset(manifest = this.manifest): void {
     this.manifest = manifest
-    this.state.position.fromArray(manifest.ship.position)
-    this.state.rotation.setFromEuler(new Euler(...manifest.ship.rotation, 'YXZ')).normalize()
-    this.state.velocity.set(0, 0, 0)
+    this.profile = createProfile(manifest)
+    this.aircraft = this.initialAircraft(manifest)
+    this.projectState()
   }
 
   step(deltaSeconds: number, controls: ControlState): void {
     if (!Number.isFinite(deltaSeconds) || deltaSeconds <= 0) return
-    const flight = this.manifest.ship.flight
-    const pitch = clamp(controls.pitch, -1, 1) * flight.pitchRate * deltaSeconds
-    const yaw = clamp(controls.yaw, -1, 1) * flight.yawRate * deltaSeconds
-    const roll = clamp(controls.roll, -1, 1) * flight.rollRate * deltaSeconds
-
-    this.eulerDelta.set(pitch, yaw, -roll, 'YXZ')
-    this.rotationDelta.setFromEuler(this.eulerDelta)
-    this.state.rotation.multiply(this.rotationDelta).normalize()
-    this.boundedOrientation.setFromQuaternion(this.state.rotation, 'YXZ')
-    this.boundedOrientation.z = clamp(this.boundedOrientation.z, -flight.bankAngle, flight.bankAngle)
-    this.state.rotation.setFromEuler(this.boundedOrientation).normalize()
-
-    this.forward.copy(FORWARD).applyQuaternion(this.state.rotation).normalize()
-    const throttle = clamp(controls.throttle, -1, 1)
-    const acceleration = throttle >= 0 ? flight.acceleration : flight.braking
-    this.state.velocity.addScaledVector(this.forward, throttle * acceleration * deltaSeconds)
-
-    const forwardSpeed = this.state.velocity.dot(this.forward)
-    this.lateralVelocity.copy(this.state.velocity).addScaledVector(this.forward, -forwardSpeed)
-    const lateralRetention = Math.exp(-flight.lateralAssist * deltaSeconds)
-    this.state.velocity.addScaledVector(this.lateralVelocity, lateralRetention - 1)
-
-    const dragRetention = Math.exp(-flight.drag * deltaSeconds)
-    this.state.velocity.multiplyScalar(dragRetention)
-    const brake = clamp(controls.brake, 0, 1)
-    if (brake > 0) this.state.velocity.multiplyScalar(Math.exp(-flight.braking * brake * deltaSeconds))
-
-    const currentForwardSpeed = this.state.velocity.dot(this.forward)
-    if (currentForwardSpeed > flight.maxForwardSpeed) {
-      this.state.velocity.addScaledVector(this.forward, flight.maxForwardSpeed - currentForwardSpeed)
-    } else if (currentForwardSpeed < -flight.maxReverseSpeed) {
-      this.state.velocity.addScaledVector(this.forward, -flight.maxReverseSpeed - currentForwardSpeed)
-    }
-
-    this.state.position.addScaledVector(this.state.velocity, deltaSeconds)
+    const requestedThrottle = controls.brake > 0 ? 0 : Math.max(0, Math.min(1, controls.throttle))
+    this.aircraft = integrateFlightModel(this.aircraft, {
+      pitch: controls.pitch,
+      roll: controls.roll,
+      yaw: controls.yaw,
+      throttleDelta: Math.max(-1, Math.min(1, requestedThrottle - this.aircraft.throttle)),
+    }, deltaSeconds, this.profile)
     this.wrapAtBounds(this.manifest.scene.boundsRadius)
+    this.projectState()
+  }
+
+  private initialAircraft(manifest: SceneManifest): FlightSimAircraftState {
+    return Object.freeze({
+      position: Object.freeze([...manifest.ship.position]) as Vector3Tuple,
+      velocity: Object.freeze([0, 0, 0]) as Vector3Tuple,
+      pitch: manifest.ship.rotation[0],
+      yaw: manifest.ship.rotation[1],
+      roll: -manifest.ship.rotation[2],
+      throttle: 0,
+    })
   }
 
   private wrapAtBounds(radius: number): void {
-    const distance = this.state.position.length()
+    const position = new Vector3().fromArray(this.aircraft.position)
+    const distance = position.length()
     if (distance <= radius || distance < EPSILON) return
-    this.state.position.multiplyScalar(-(radius - 1) / distance)
+    position.multiplyScalar(-(radius - 1) / distance)
+    this.aircraft = Object.freeze({
+      ...this.aircraft,
+      position: Object.freeze(position.toArray()) as Vector3Tuple,
+    })
+  }
+
+  private projectState(): void {
+    this.state.position.fromArray(this.aircraft.position)
+    this.state.velocity.fromArray(this.aircraft.velocity)
+    this.state.rotation.setFromEuler(new Euler(this.aircraft.pitch, this.aircraft.yaw, -this.aircraft.roll, 'YXZ')).normalize()
+  }
+
+  get canonicalAircraft(): FlightSimAircraftState {
+    return this.aircraft
   }
 
   get speed(): number {
@@ -99,7 +116,6 @@ export class FlightSimulation {
   }
 
   get rotationTuple(): Vector3Tuple {
-    const euler = new Euler().setFromQuaternion(this.state.rotation, 'YXZ')
-    return [euler.x, euler.y, euler.z]
+    return [this.aircraft.pitch, this.aircraft.yaw, -this.aircraft.roll]
   }
 }

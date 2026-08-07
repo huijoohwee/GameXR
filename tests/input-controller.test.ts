@@ -4,7 +4,7 @@ import test from 'node:test'
 import { getDefaultSceneManifest } from '../src/config/manifest.ts'
 import {
   mapDeviceOrientationDeltaToScreen,
-} from '../shared/apple-spatial-input.ts'
+} from '@knowgrph/apple-spatial-input'
 import { DeviceOrientationController } from '../src/runtime/DeviceOrientationController.ts'
 import { InputController } from '../src/runtime/InputController.ts'
 

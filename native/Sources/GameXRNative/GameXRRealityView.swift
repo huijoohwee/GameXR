@@ -1,5 +1,7 @@
 #if canImport(RealityKit) && canImport(SwiftUI) && (os(iOS) || os(visionOS))
 import Observation
+import KnowgrphRealityKitFlight
+import KnowgrphSpatialCore
 import RealityKit
 import SwiftUI
 import UIKit
@@ -19,7 +21,7 @@ public final class GameXRNativeCoordinator {
 
     public init(manifest: GameXRSceneManifest) {
         self.manifest = manifest
-        GameXRNativeRegistration.ensure()
+        KnowgrphRealityKitFlightRegistration.ensureRegistered()
         rebuildScene()
     }
 
@@ -58,7 +60,8 @@ public final class GameXRNativeCoordinator {
         let pitchRotation = simd_quatf(angle: Float(manifest.ship.rotation[safe: 0] ?? 0), axis: [1, 0, 0])
         let yawRotation = simd_quatf(angle: Float(manifest.ship.rotation[safe: 1] ?? 0), axis: [0, 1, 0])
         shipEntity.orientation = yawRotation * pitchRotation * rollRotation
-        shipEntity.components.set(GameXRFlightStateComponent())
+        shipEntity.components.set(KnowgrphFlightStateComponent(state: initialFlightState()))
+        shipEntity.components.set(KnowgrphFlightAccumulatorComponent())
     }
 
     private func rebuildScene() {
@@ -96,8 +99,9 @@ public final class GameXRNativeCoordinator {
         }
 
         shipEntity.scale = .one * Float(manifest.ship.scale)
-        shipEntity.components.set(GameXRFlightConfigurationComponent(manifest.ship.flight))
-        shipEntity.components.set(GameXRFlightStateComponent())
+        shipEntity.components.set(KnowgrphFlightConfigurationComponent(profile: flightProfile()))
+        shipEntity.components.set(KnowgrphFlightStateComponent(state: initialFlightState()))
+        shipEntity.components.set(KnowgrphFlightAccumulatorComponent())
         shipEntity.components.set(InputTargetComponent())
         shipEntity.components.set(CollisionComponent(shapes: [.generateBox(size: [2.6, 0.5, 3.2])]))
         writeControlComponent()
@@ -107,16 +111,51 @@ public final class GameXRNativeCoordinator {
 
     private func writeControlComponent() {
         let control = isRunning
-            ? GameXRFlightControlComponent(throttle: throttle, pitch: pitch, yaw: yaw, roll: roll)
-            : GameXRFlightControlComponent()
+            ? KnowgrphFlightControlComponent(input: FlightSimTickInput(
+                pitch: Double(pitch),
+                roll: Double(roll),
+                yaw: Double(yaw),
+                throttleDelta: Double(throttle)
+            ))
+            : KnowgrphFlightControlComponent()
         shipEntity.components.set(control)
-        let effectiveThrottle = control.throttle
+        let effectiveThrottle = Float(control.input.throttleDelta)
         let exhaustScale = max(0.2, 0.35 + max(0, effectiveThrottle) * 1.5)
         for exhaust in exhaustEntities { exhaust.scale.z = exhaustScale }
     }
 
     private func vector(_ values: [Double]) -> SIMD3<Float> {
         [Float(values[safe: 0] ?? 0), Float(values[safe: 1] ?? 0), Float(values[safe: 2] ?? 0)]
+    }
+
+    private func initialFlightState() -> FlightSimAircraftState {
+        FlightSimAircraftState(
+            position: SpatialVector3(
+                x: manifest.ship.position[safe: 0] ?? 0,
+                y: manifest.ship.position[safe: 1] ?? 0,
+                z: manifest.ship.position[safe: 2] ?? 0
+            ),
+            pitch: manifest.ship.rotation[safe: 0] ?? 0,
+            roll: manifest.ship.rotation[safe: 2] ?? 0,
+            yaw: manifest.ship.rotation[safe: 1] ?? 0
+        )
+    }
+
+    private func flightProfile() -> FlightSimModelProfile {
+        let flight = manifest.ship.flight
+        return (try? FlightSimModelProfile(
+            maximumRollRadians: flight.bankAngle,
+            pitchRateRadiansPerSecond: flight.pitchRate,
+            rollRateRadiansPerSecond: flight.rollRate,
+            yawRateRadiansPerSecond: flight.yawRate,
+            thrustAcceleration: flight.acceleration,
+            baseDrag: flight.drag,
+            velocityAlignmentRate: min(1, flight.lateralAssist / 30),
+            maximumAirspeedMetersPerSecond: flight.maxForwardSpeed,
+            stallSpeedMetersPerSecond: min(7, max(.leastNonzeroMagnitude, flight.maxForwardSpeed / 2)),
+            fullControlSpeedMetersPerSecond: min(12, flight.maxForwardSpeed),
+            stableRollRadians: min(0.35, flight.bankAngle)
+        )) ?? .default
     }
 }
 

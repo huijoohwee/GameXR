@@ -29,7 +29,7 @@ The following manifest domains are validated but not yet projected into native r
 - environment, fog, stars, asteroids, planet, lighting, and chase-camera configuration;
 - local GLB lookup or any USD/USDC/USDZ/Reality Composer Pro asset resolver;
 - canopy/accent/exhaust material parity beyond the small procedural adapter;
-- bank angle, lateral assist, haptics, configurable braking input, and the browser-wide sensitivity/dead-zone layer beyond the portable device-orientation profile;
+- bank angle, lateral assist, haptics, idle-thrust input, and the browser-wide sensitivity/dead-zone layer beyond the portable device-orientation profile;
 - animation timelines/imported clips, procedural animation parameters, audio, dynamic resolution, frame targeting, and native offline asset persistence.
 
 Native runtime readiness therefore means the package and conditional RealityKit/Core Motion sources compile for the stated Apple SDK baseline and the shared manifest contract is rejected safely when malformed. It does not prove physical sensor quality or mean every browser feature has a native projection.
@@ -58,9 +58,9 @@ Samples, neutral calibration, and filtered axes stay in process memory. They are
 
 The Swift adapter uses one owned `CMMotionManager`, checks processed-device-motion availability, starts the `.xArbitraryZVertical` reference frame only from the visible control, polls the latest sample at the game cadence, and stops updates when disabled, when the scene becomes inactive, or when the `RealityView` disappears. Its host application must include a non-empty `NSMotionUsageDescription`. Browser permission state and native Core Motion availability deliberately remain adapter-local; only the finite sample-to-axis math and profile schema are shared.
 
-Both adapters implement `airvio.apple-spatial-input/v1`: control range, angular jitter threshold, settled-axis threshold, smoothing rate, and calibration timeout. TypeScript and Swift conformance tests run the same cardinal-screen-rotation and event-rate-independent smoothing vectors. [`../shared/apple-spatial-input.schema.json`](../shared/apple-spatial-input.schema.json) is the portable JSON profile contract.
+Both adapters consume Knowgrph's `airvio.apple-spatial-input/v1`: control range, angular jitter threshold, settled-axis threshold, smoothing rate, and calibration timeout. TypeScript and Swift conformance tests run the same cardinal-screen-rotation and event-rate-independent smoothing vectors. The installed Knowgrph package exports the portable JSON profile contract and the build projects it into the release schema directory.
 
-This behavior is a clean-room GameXR implementation of lifecycle and input-shaping concepts observed in Knowgrph. Knowgrph has no root source license, and its device-sensor owner records independent telemetry rather than projecting orientation into camera axes; GameXR therefore neither copies that source nor claims it as an implemented camera mapper. Promotion of the DOM-neutral math into Knowgrph's licensed shared package remains a separately admitted repository change.
+Knowgrph protected revision `1288749a170e1e5790fccd4130e8f76562370745` owns the shared browser and Swift spatial-input implementations, deterministic flight model, camera target resolver, and RealityKit flight system. GameXR retains thin lifecycle/UI and scene-profile adapters only.
 
 Repository checks with mocked browser events and native conformance vectors can prove permission ordering, calibration, screen-angle math, smoothing, cleanup, and no-egress boundaries. Simulator builds cannot prove WebKit's real prompt, Core Motion hardware behavior, physical sensor quality, orientation-change timing, thermal behavior, or installed-PWA behavior. Until named current iPhone/Safari and Apple Vision Pro/visionOS runs pass their platform matrices, physical compatibility remains a promotion gate rather than a completed claim.
 

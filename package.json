@@ -20,6 +20,7 @@
     "release:check": "node scripts/check-release.mjs"
   },
   "dependencies": {
+    "@knowgrph/apple-spatial-input": "file:vendor/knowgrph-apple-spatial-input-0.1.0.tgz",
     "three": "0.185.1"
   },
   "devDependencies": {

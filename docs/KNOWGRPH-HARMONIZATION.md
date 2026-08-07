@@ -1,43 +1,20 @@
 # Knowgrph shared-utility harmonization
 
-## Portable owner
+Knowgrph is the backend SSOT for Apple spatial input, deterministic flight, and follow-camera projection. GameXR differs only in frontend visuals, interaction presentation, scene configuration, and local persistence.
 
-GameXR currently owns the clean-room `airvio.apple-spatial-input/v1` reference
-implementation in [`../shared/apple-spatial-input.ts`](../shared/apple-spatial-input.ts).
-It contains only DOM-neutral profile validation, calibration state, screen-relative
-axis mapping, jitter suppression, clamping, and elapsed-time smoothing.
+## Immutable consumer pins
 
-Safari permission/listener lifecycle remains owned by GameXR's browser adapter.
-Core Motion availability and lifecycle remain owned by `GameXRNative`. Camera,
-flight, persistence, and network policy are consumers rather than shared-math
-responsibilities.
+- Protected Knowgrph revision: `1288749a170e1e5790fccd4130e8f76562370745`.
+- Browser package: `@knowgrph/apple-spatial-input@0.1.0`, stored as `vendor/knowgrph-apple-spatial-input-0.1.0.tgz`.
+- Artifact SHA-256: `d3c91d63751332cdfdc7dc4a856896e714b3985093538578227a7b2431f06e17`.
+- SwiftPM products: `KnowgrphSpatialCore` and `KnowgrphRealityKitFlight`, resolved at the same protected revision.
 
-## Knowgrph promotion target
+## Ownership boundary
 
-The intended Knowgrph package export is
-`grph-shared/spatial-input/appleSpatialInput`, backed by:
+Knowgrph owns permission-safe Safari sensor lifecycle, calibration/filter math, input normalization, deterministic flight integration, follow-camera target resolution, Swift spatial core, and RealityKit flight integration. GameXR adapters translate its user-configurable scene manifest into those canonical profiles and project results into Three.js, SwiftUI, and RealityView visuals.
 
-- `grph-shared/src/spatial-input/appleSpatialInput.ts`;
-- `grph-shared/__tests__/apple-spatial-input.test.mjs`;
-- one explicit `grph-shared/package.json#exports` entry;
-- focused `grph-shared` build and conformance proof.
+GameXR contains no duplicate Apple filter, browser sensor lifecycle, flight integrator, RealityKit flight system, or canonical schema source. The build copies the installed package schema into the release output; it does not maintain a downstream fork.
 
-After admission, Knowgrph's existing device-sensor runtime can consume the pure
-mapper while retaining ownership of browser permission, telemetry, and teardown.
-GameXR should replace its local TypeScript copy only after the shared package is
-available through the repository-owned dependency path; no alias or fallback shim
-is permitted.
+## Update procedure
 
-## Current admission boundary
-
-On 2026-08-07, Knowgrph `origin/main` revision
-`c7b7fd3954b087def061397b0e9a53fdd9d09da2` was clean and the proposed paths were
-disjoint from active XR claims. Formal authoring admission nevertheless failed
-closed because five registered worktrees lacked authoritative owners. The report
-digest is
-`990faf3bd51ed37335a8902527ed314859be241f1a6ca82c0adb4718573202ab`.
-
-Therefore no Knowgrph checkout, branch, claim, lifecycle record, or source file was
-changed. A local, unapplied promotion bundle is retained outside both repositories
-at `.codex-lanes/knowgrph-apple-spatial-input-proposal/`; it must be revalidated
-against the then-current protected revision after owner-led lane disposition.
+Admit a new protected Knowgrph revision first, regenerate the npm tarball, verify its digest, update both npm and SwiftPM pins together, then run `npm run check`, `npm run check:apex`, and `npm run native:check`. Do not float either dependency or add compatibility aliases.

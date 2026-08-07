@@ -12,9 +12,27 @@ let package = Package(
     products: [
         .library(name: "GameXRNative", targets: ["GameXRNative"])
     ],
+    dependencies: [
+        .package(
+            url: "https://github.com/huijoohwee/knowgrph.git",
+            revision: "1288749a170e1e5790fccd4130e8f76562370745"
+        )
+    ],
     targets: [
-        .target(name: "GameXRNative"),
-        .testTarget(name: "GameXRNativeTests", dependencies: ["GameXRNative"])
+        .target(
+            name: "GameXRNative",
+            dependencies: [
+                .product(name: "KnowgrphSpatialCore", package: "knowgrph"),
+                .product(name: "KnowgrphRealityKitFlight", package: "knowgrph")
+            ]
+        ),
+        .testTarget(
+            name: "GameXRNativeTests",
+            dependencies: [
+                "GameXRNative",
+                .product(name: "KnowgrphSpatialCore", package: "knowgrph")
+            ]
+        )
     ],
     swiftLanguageModes: [.v6]
 )

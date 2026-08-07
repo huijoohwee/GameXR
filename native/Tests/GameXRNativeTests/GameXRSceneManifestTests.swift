@@ -1,4 +1,5 @@
 import Foundation
+import KnowgrphSpatialCore
 import Testing
 @testable import GameXRNative
 
@@ -78,21 +79,21 @@ import Testing
 }
 
 @Test func appleSpatialInputMatchesBrowserConformanceVectors() {
-    let portrait = AppleSpatialInputFilter.mapToScreen(
+    let portrait = AppleSpatialInputFilter.mapDeviceOrientationDeltaToScreen(
         betaDeltaDegrees: 30,
         gammaDeltaDegrees: 8,
         screenAngleDegrees: 0
     )
-    #expect(portrait == AppleSpatialInputAxes(pitch: 30, roll: 8))
+    #expect(portrait == ScreenOrientationAxes(pitchDegrees: 30, rollDegrees: 8))
 
-    let landscape = AppleSpatialInputFilter.mapToScreen(
+    let landscape = AppleSpatialInputFilter.mapDeviceOrientationDeltaToScreen(
         betaDeltaDegrees: 30,
         gammaDeltaDegrees: 8,
         screenAngleDegrees: 90
     )
-    #expect(abs(landscape.pitch - 8) < 0.000_000_001)
-    #expect(abs(landscape.roll + 30) < 0.000_000_001)
-    #expect(AppleSpatialInputFilter.shortestAngleDelta(359) == -1)
+    #expect(abs(landscape.pitchDegrees - 8) < 0.000_000_001)
+    #expect(abs(landscape.rollDegrees + 30) < 0.000_000_001)
+    #expect(AppleSpatialInputFilter.shortestAngleDeltaDegrees(359) == -1)
 
     var filter = AppleSpatialInputFilter()
     let calibrated = filter.project(

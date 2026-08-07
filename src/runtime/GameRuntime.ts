@@ -9,6 +9,10 @@ import {
   WebGLRenderer,
   type Group,
 } from 'three'
+import {
+  createFlightSimCameraProfile,
+  resolveFlightSimFollowTarget,
+} from '@knowgrph/apple-spatial-input/camera'
 import type { RuntimeTelemetry, SceneManifest } from '../config/types.ts'
 import { LocalDatabase, requestPersistentStorage, type StoredAssetMetadata } from '../storage/LocalDatabase.ts'
 import { AnimationController } from './AnimationController.ts'
@@ -71,10 +75,10 @@ export class GameRuntime extends EventTarget {
   private readonly resizeObserver: ResizeObserver
   private readonly desiredCameraPosition = new Vector3()
   private readonly desiredLookTarget = new Vector3()
-  private readonly cameraUp = new Vector3()
+  private readonly cameraUp = new Vector3(0, 1, 0)
   private readonly cameraMatrix = new Matrix4()
   private readonly desiredCameraRotation = new Quaternion()
-  private readonly forward = new Vector3(0, 0, -1)
+  private cameraSequence = 0
 
   constructor(
     private readonly canvas: HTMLCanvasElement,
@@ -441,16 +445,24 @@ export class GameRuntime extends EventTarget {
     }
 
     const cameraConfig = this.manifestValue.camera
-    this.desiredCameraPosition
-      .set(0, cameraConfig.chaseHeight, cameraConfig.chaseDistance)
-      .applyQuaternion(this.simulation.state.rotation)
-      .add(this.simulation.state.position)
-    this.desiredLookTarget
-      .copy(this.forward)
-      .applyQuaternion(this.simulation.state.rotation)
-      .multiplyScalar(cameraConfig.lookAhead)
-      .add(this.simulation.state.position)
-    this.cameraUp.set(0, 1, 0).applyQuaternion(this.simulation.state.rotation)
+    const followTarget = resolveFlightSimFollowTarget({
+      aircraft: this.simulation.canonicalAircraft,
+      runId: this.rebuildGeneration,
+      tick: this.cameraSequence++,
+    }, 1, 'chase', createFlightSimCameraProfile({
+      aircraftCollisionHalfSizeMeters: [0.1, 0.1, 0.1],
+      chaseMinimumDistanceMeters: cameraConfig.chaseDistance,
+      chaseTargetMinimumHeightMeters: Math.max(0.1, cameraConfig.lookAhead),
+      chaseHeightMeters: cameraConfig.chaseHeight,
+      chaseFovDegrees: cameraConfig.fieldOfView,
+      chaseWingHalfSpanClearance: 1,
+    }))
+    this.desiredCameraPosition.fromArray(followTarget.position)
+    this.desiredLookTarget.fromArray(followTarget.target)
+    if (this.camera.fov !== followTarget.fovDegrees) {
+      this.camera.fov = followTarget.fovDegrees
+      this.camera.updateProjectionMatrix()
+    }
     const blend = snapCamera ? 1 : 1 - Math.exp(-cameraConfig.damping * Math.max(deltaSeconds, 1 / 120))
     this.camera.position.lerp(this.desiredCameraPosition, blend)
     this.cameraMatrix.lookAt(this.camera.position, this.desiredLookTarget, this.cameraUp)

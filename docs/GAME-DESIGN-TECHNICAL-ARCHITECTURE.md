@@ -89,7 +89,7 @@ Safari permission is requested only inside the direct user-tap handler. Sensor l
 
 Raw samples, calibration, and filtered axes have no persistence or egress path: no IndexedDB record, scene/profile export, MCP result, fetch, beacon, socket, or analytics event contains them. Hosted `/gamexr/` responses must supply same-origin accelerometer/gyroscope `Permissions-Policy`; a parent document must also delegate those features when GameXR is embedded. Those headers expose capability only and never bypass the user grant.
 
-The implementation clean-room reuses architectural concepts observed in Knowgrph—explicit permission, listener-after-grant, intent/lifecycle cancellation, neutral calibration, dead-zone shaping, and time-based smoothing. Knowgrph has no root license and its device-sensor telemetry is independent from its camera/pose system, so GameXR copies neither source nor a nonexistent sensor-to-camera mapping.
+Knowgrph protected revision `1288749a170e1e5790fccd4130e8f76562370745` is the backend SSOT for explicit permission, listener-after-grant, lifecycle cancellation, neutral calibration, input shaping, deterministic flight, camera target projection, and RealityKit flight. GameXR owns only frontend visual projection and manifest-to-profile adapters.
 
 ## Asset pipeline
 

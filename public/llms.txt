@@ -1,0 +1,17 @@
+# GameXR
+
+GameXR is a browser-local configurable spatial flight runtime.
+
+Browser WebMCP tools:
+- gamexr.inspect_runtime: read-only local manifest, telemetry, animation, performance, and zero-spend evidence.
+- gamexr.control_runtime: bounded local transport, controls, animation, and validated manifest patching.
+
+Canonical invocation discovery:
+- /tool.catalog #tool-function @tool-function
+- /tool.call #bridge-tool #tool-routing #approval-gate @bridge-tool @tool-function @tool-policy @cost-log
+
+/flight.sim @canvas #flight remains owned by the Knowgrph Canvas runtime and is not an alias for GameXR.
+
+Device-orientation steering requires the visible direct-gesture Enable Motion control. MCP can tune the manifest preference, sensitivity, dead zone, and pitch inversion, but cannot grant Safari sensor permission or start a sensor listener.
+
+No GameXR browser tool grants network egress, filesystem access, model calls, paid calls, repository mutation, Production projection, or Cloudflare deployment.

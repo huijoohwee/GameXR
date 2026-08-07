@@ -1,0 +1,19 @@
+{
+  "name": "GameXR Spatial Flight",
+  "short_name": "GameXR",
+  "description": "Local-first configurable spatial flight runtime.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#050816",
+  "theme_color": "#050816",
+  "icons": [
+    {
+      "src": "./icons/gamexr.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "$schema": "./gamexr.scene.schema.json",
+  "schema": "gamexr-scene/v1",
+  "id": "deep-space-flight",
+  "name": "Deep Space Flight",
+  "scene": {
+    "environment": "deep-space",
+    "backgroundColor": "#030612",
+    "fogColor": "#071025",
+    "fogDensity": 0.0035,
+    "boundsRadius": 160,
+    "starCount": 900,
+    "asteroidCount": 32,
+    "asteroidFieldRadius": 82,
+    "planet": {
+      "enabled": true,
+      "radius": 13,
+      "position": [34, -12, -88],
+      "baseColor": "#315c9b",
+      "emissiveColor": "#102749",
+      "rotationSpeed": 0.025
+    },
+    "lighting": {
+      "ambientIntensity": 1.1,
+      "keyIntensity": 4.2,
+      "keyColor": "#d9edff",
+      "keyPosition": [22, 28, 18]
+    }
+  },
+  "ship": {
+    "asset": {
+      "kind": "procedural",
+      "localAssetId": null
+    },
+    "position": [0, 0, 0],
+    "rotation": [0, 0, 0],
+    "scale": 1,
+    "appearance": {
+      "hullColor": "#d8e7f2",
+      "accentColor": "#58dbcf",
+      "canopyColor": "#16315c",
+      "exhaustColor": "#ff9f43",
+      "metalness": 0.72,
+      "roughness": 0.3
+    },
+    "flight": {
+      "acceleration": 22,
+      "braking": 15,
+      "drag": 0.55,
+      "maxForwardSpeed": 38,
+      "maxReverseSpeed": 8,
+      "pitchRate": 1.45,
+      "yawRate": 1.65,
+      "rollRate": 2.1,
+      "bankAngle": 0.72,
+      "lateralAssist": 3.8
+    }
+  },
+  "camera": {
+    "fieldOfView": 62,
+    "near": 0.08,
+    "far": 600,
+    "chaseDistance": 10.5,
+    "chaseHeight": 3.1,
+    "lookAhead": 5.5,
+    "damping": 7.5
+  },
+  "motion": {
+    "keyboardEnabled": true,
+    "touchEnabled": true,
+    "deviceMotionEnabled": false,
+    "deviceOrientation": {
+      "schema": "airvio.apple-spatial-input/v1",
+      "controlRangeDegrees": 35,
+      "jitterThresholdDegrees": 0.75,
+      "settledAxisThreshold": 0.002,
+      "smoothingRatePerSecond": 12,
+      "calibrationTimeoutMilliseconds": 2500
+    },
+    "invertPitch": false,
+    "sensitivity": 1,
+    "deadZone": 0.06,
+    "hapticsEnabled": true
+  },
+  "animation": {
+    "playing": true,
+    "timeScale": 1,
+    "exhaustPulseSpeed": 7,
+    "exhaustPulseAmount": 0.18,
+    "wingFlexAmount": 0.035,
+    "asteroidDriftSpeed": 0.16,
+    "importedClip": null,
+    "importedClipLoop": true
+  },
+  "audio": {
+    "enabled": true,
+    "masterGain": 0.16,
+    "engineBaseFrequency": 58,
+    "engineThrottleRange": 112
+  },
+  "performance": {
+    "targetFramesPerSecond": 60,
+    "maxPixelRatio": 1.5,
+    "maxSimulationCatchUpSteps": 3,
+    "dynamicResolution": true
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "name": "gamexr",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Local-first, mobile-first configurable spatial flight runtime.",
+  "scripts": {
+    "dev": "vite --mode gamexr",
+    "dev:apex": "vite --mode apex",
+    "build": "tsc -b && vite build --mode gamexr",
+    "build:apex": "tsc -b && vite build --mode apex",
+    "check": "npm run typecheck && npm test && npm run build && npm run release:prepare && npm run release:check",
+    "check:apex": "npm run build:apex && npm run release:prepare -- --root=dist/apex --base=/ && npm run release:check -- --root=dist/apex --base=/",
+    "typecheck": "tsc -b",
+    "test": "node --test tests/*.test.ts",
+    "preview": "vite preview --mode gamexr",
+    "preview:apex": "vite preview --mode apex",
+    "native:check": "node scripts/check-native.mjs",
+    "release:prepare": "node scripts/prepare-release.mjs",
+    "release:check": "node scripts/check-release.mjs"
+  },
+  "dependencies": {
+    "three": "0.185.1"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.13",
+    "@types/three": "0.185.4",
+    "typescript": "7.0.2",
+    "vite": "8.2.1"
+  },
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
+  "license": "MIT"
+}

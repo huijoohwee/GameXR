@@ -1,0 +1,31 @@
+{
+  "schema": "gamexr-runtime-readiness/v1",
+  "application": "GameXR",
+  "status": "dev-build",
+  "runtime": "browser-local",
+  "basePaths": ["/", "/gamexr/"],
+  "offline": {
+    "localRuntime": true,
+    "precacheManifest": "precache-manifest.json",
+    "registeredBasePaths": ["/gamexr/"],
+    "disabledBasePaths": ["/"],
+    "apexReason": "The shared root scope requires an explicit production routing owner."
+  },
+  "webMcpTools": ["gamexr.inspect_runtime", "gamexr.control_runtime"],
+  "deviceOrientation": {
+    "status": "source-and-simulated-event-ready",
+    "permission": "visible-direct-user-gesture",
+    "calibration": "first-valid-sample-and-recenter",
+    "screenRotation": "portrait-landscape-remap-and-recenter",
+    "persistedOrTransmitted": false,
+    "physicalIPhoneSafariVerified": false
+  },
+  "sceneSchema": "gamexr-scene/v1",
+  "networkRequiredForPlay": {
+    "/gamexr/": "first-load-only",
+    "/": true
+  },
+  "modelCalls": 0,
+  "paidCalls": 0,
+  "productionVerified": false
+}

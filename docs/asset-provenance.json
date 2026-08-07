@@ -1,0 +1,26 @@
+{
+  "schema": "gamexr-asset-provenance/v1",
+  "assets": [
+    {
+      "id": "procedural-ship-and-world-v1",
+      "source": "owned",
+      "generatorIdentity": "GameXR source code 0.1.0",
+      "inputReference": "src/runtime/createProceduralShip.ts and src/runtime/createWorld.ts",
+      "licenseTerms": "MIT",
+      "usageScope": "unrestricted subject to repository license",
+      "humanReviewStatus": "unreviewed",
+      "safetyCheckResult": "source-and-build-validation-pass"
+    },
+    {
+      "id": "apple-spaceship-sample-reference",
+      "source": "reference-only",
+      "generatorIdentity": "n/a",
+      "inputReference": "CreatingASpaceshipGame architecture audit",
+      "licenseTerms": "Apple sample license; no code or asset bytes redistributed by GameXR",
+      "usageScope": "behavioral concepts only",
+      "humanReviewStatus": "unreviewed",
+      "safetyCheckResult": "no-source-byte-copy"
+    }
+  ],
+  "promotionRule": "Every non-owned or generated production asset requires reviewed-pass before mirror admission. User-local GLB assets are never production inputs."
+}

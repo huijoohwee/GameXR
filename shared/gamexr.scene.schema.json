@@ -1,0 +1,197 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://airvio.co/gamexr/schemas/gamexr.scene.schema.json",
+  "title": "GameXR scene manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "id", "name", "scene", "ship", "camera", "motion", "animation", "audio", "performance"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schema": { "const": "gamexr-scene/v1" },
+    "id": { "$ref": "#/$defs/id" },
+    "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+    "scene": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["environment", "backgroundColor", "fogColor", "fogDensity", "boundsRadius", "starCount", "asteroidCount", "asteroidFieldRadius", "planet", "lighting"],
+      "properties": {
+        "environment": { "enum": ["deep-space", "orbit", "hangar"] },
+        "backgroundColor": { "$ref": "#/$defs/color" },
+        "fogColor": { "$ref": "#/$defs/color" },
+        "fogDensity": { "type": "number", "minimum": 0, "maximum": 0.03 },
+        "boundsRadius": { "type": "number", "minimum": 20, "maximum": 1000 },
+        "starCount": { "type": "integer", "minimum": 0, "maximum": 4000 },
+        "asteroidCount": { "type": "integer", "minimum": 0, "maximum": 128 },
+        "asteroidFieldRadius": { "type": "number", "minimum": 10, "maximum": 400 },
+        "planet": { "$ref": "#/$defs/planet" },
+        "lighting": { "$ref": "#/$defs/lighting" }
+      }
+    },
+    "ship": { "$ref": "#/$defs/ship" },
+    "camera": { "$ref": "#/$defs/camera" },
+    "motion": { "$ref": "#/$defs/motion" },
+    "animation": { "$ref": "#/$defs/animation" },
+    "audio": { "$ref": "#/$defs/audio" },
+    "performance": { "$ref": "#/$defs/performance" }
+  },
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[a-z0-9]+(?:[._-][a-z0-9]+)*$", "maxLength": 64 },
+    "color": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+    "vector3": {
+      "type": "array",
+      "items": { "type": "number", "minimum": -1000, "maximum": 1000 },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "planet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled", "radius", "position", "baseColor", "emissiveColor", "rotationSpeed"],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "radius": { "type": "number", "minimum": 0.5, "maximum": 100 },
+        "position": { "$ref": "#/$defs/vector3" },
+        "baseColor": { "$ref": "#/$defs/color" },
+        "emissiveColor": { "$ref": "#/$defs/color" },
+        "rotationSpeed": { "type": "number", "minimum": -2, "maximum": 2 }
+      }
+    },
+    "lighting": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ambientIntensity", "keyIntensity", "keyColor", "keyPosition"],
+      "properties": {
+        "ambientIntensity": { "type": "number", "minimum": 0, "maximum": 10 },
+        "keyIntensity": { "type": "number", "minimum": 0, "maximum": 20 },
+        "keyColor": { "$ref": "#/$defs/color" },
+        "keyPosition": { "$ref": "#/$defs/vector3" }
+      }
+    },
+    "asset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "localAssetId"],
+      "properties": {
+        "kind": { "enum": ["procedural", "local-glb"] },
+        "localAssetId": { "oneOf": [{ "$ref": "#/$defs/id" }, { "type": "null" }] }
+      },
+      "allOf": [{
+        "if": {
+          "properties": { "kind": { "const": "procedural" } },
+          "required": ["kind"]
+        },
+        "then": { "properties": { "localAssetId": { "type": "null" } } },
+        "else": { "properties": { "localAssetId": { "$ref": "#/$defs/id" } } }
+      }]
+    },
+    "appearance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["hullColor", "accentColor", "canopyColor", "exhaustColor", "metalness", "roughness"],
+      "properties": {
+        "hullColor": { "$ref": "#/$defs/color" },
+        "accentColor": { "$ref": "#/$defs/color" },
+        "canopyColor": { "$ref": "#/$defs/color" },
+        "exhaustColor": { "$ref": "#/$defs/color" },
+        "metalness": { "type": "number", "minimum": 0, "maximum": 1 },
+        "roughness": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "flight": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["acceleration", "braking", "drag", "maxForwardSpeed", "maxReverseSpeed", "pitchRate", "yawRate", "rollRate", "bankAngle", "lateralAssist"],
+      "properties": {
+        "acceleration": { "type": "number", "minimum": 0, "maximum": 200 },
+        "braking": { "type": "number", "minimum": 0, "maximum": 200 },
+        "drag": { "type": "number", "minimum": 0, "maximum": 20 },
+        "maxForwardSpeed": { "type": "number", "minimum": 1, "maximum": 500 },
+        "maxReverseSpeed": { "type": "number", "minimum": 0, "maximum": 100 },
+        "pitchRate": { "type": "number", "minimum": 0, "maximum": 10 },
+        "yawRate": { "type": "number", "minimum": 0, "maximum": 10 },
+        "rollRate": { "type": "number", "minimum": 0, "maximum": 10 },
+        "bankAngle": { "type": "number", "minimum": 0, "maximum": 1.57 },
+        "lateralAssist": { "type": "number", "minimum": 0, "maximum": 30 }
+      }
+    },
+    "ship": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["asset", "position", "rotation", "scale", "appearance", "flight"],
+      "properties": {
+        "asset": { "$ref": "#/$defs/asset" },
+        "position": { "$ref": "#/$defs/vector3" },
+        "rotation": { "$ref": "#/$defs/vector3" },
+        "scale": { "type": "number", "minimum": 0.01, "maximum": 20 },
+        "appearance": { "$ref": "#/$defs/appearance" },
+        "flight": { "$ref": "#/$defs/flight" }
+      }
+    },
+    "camera": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fieldOfView", "near", "far", "chaseDistance", "chaseHeight", "lookAhead", "damping"],
+      "properties": {
+        "fieldOfView": { "type": "number", "minimum": 30, "maximum": 100 },
+        "near": { "type": "number", "minimum": 0.01, "maximum": 10 },
+        "far": { "type": "number", "minimum": 50, "maximum": 5000 },
+        "chaseDistance": { "type": "number", "minimum": 2, "maximum": 80 },
+        "chaseHeight": { "type": "number", "minimum": -20, "maximum": 40 },
+        "lookAhead": { "type": "number", "minimum": 0, "maximum": 100 },
+        "damping": { "type": "number", "minimum": 0.1, "maximum": 30 }
+      }
+    },
+    "motion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["keyboardEnabled", "touchEnabled", "deviceMotionEnabled", "deviceOrientation", "invertPitch", "sensitivity", "deadZone", "hapticsEnabled"],
+      "properties": {
+        "keyboardEnabled": { "type": "boolean" },
+        "touchEnabled": { "type": "boolean" },
+        "deviceMotionEnabled": { "type": "boolean" },
+        "deviceOrientation": { "$ref": "apple-spatial-input.schema.json" },
+        "invertPitch": { "type": "boolean" },
+        "sensitivity": { "type": "number", "minimum": 0.1, "maximum": 4 },
+        "deadZone": { "type": "number", "minimum": 0, "maximum": 0.5 },
+        "hapticsEnabled": { "type": "boolean" }
+      }
+    },
+    "animation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["playing", "timeScale", "exhaustPulseSpeed", "exhaustPulseAmount", "wingFlexAmount", "asteroidDriftSpeed", "importedClip", "importedClipLoop"],
+      "properties": {
+        "playing": { "type": "boolean" },
+        "timeScale": { "type": "number", "minimum": 0, "maximum": 4 },
+        "exhaustPulseSpeed": { "type": "number", "minimum": 0, "maximum": 30 },
+        "exhaustPulseAmount": { "type": "number", "minimum": 0, "maximum": 1 },
+        "wingFlexAmount": { "type": "number", "minimum": 0, "maximum": 0.5 },
+        "asteroidDriftSpeed": { "type": "number", "minimum": -3, "maximum": 3 },
+        "importedClip": { "type": ["string", "null"], "maxLength": 100 },
+        "importedClipLoop": { "type": "boolean" }
+      }
+    },
+    "audio": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled", "masterGain", "engineBaseFrequency", "engineThrottleRange"],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "masterGain": { "type": "number", "minimum": 0, "maximum": 1 },
+        "engineBaseFrequency": { "type": "number", "minimum": 20, "maximum": 300 },
+        "engineThrottleRange": { "type": "number", "minimum": 0, "maximum": 1000 }
+      }
+    },
+    "performance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["targetFramesPerSecond", "maxPixelRatio", "maxSimulationCatchUpSteps", "dynamicResolution"],
+      "properties": {
+        "targetFramesPerSecond": { "enum": [30, 60, 90, 120] },
+        "maxPixelRatio": { "type": "number", "minimum": 0.75, "maximum": 2 },
+        "maxSimulationCatchUpSteps": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "dynamicResolution": { "type": "boolean" }
+      }
+    }
+  }
+}

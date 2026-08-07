@@ -11,7 +11,8 @@
   ! X-Content-Type-Options
   X-Content-Type-Options: nosniff
 
-# Cloudflare documents `public, no-transform` as disabling automatic Web Analytics injection;
+# `public, no-transform` blocks zone-level response transformation; Pages Web Analytics must
+# also remain disabled because its project-level HTML injection precedes these response headers.
 # `no-store` remains authoritative and forbids HTTP-cache storage of mutable release bytes.
 /gamexr
   Cache-Control: public, no-store, no-cache, no-transform, must-revalidate, max-age=0

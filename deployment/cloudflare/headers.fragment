@@ -1,7 +1,7 @@
 # Merge at the protected Pages root owner; later path blocks override cache policy.
 /gamexr/*
   Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' blob: data:; media-src 'self' blob:; connect-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self'
-  Permissions-Policy: accelerometer=(self), autoplay=(self), camera=(), gyroscope=(self), xr-spatial-tracking=(self)
+  Permissions-Policy: accelerometer=(self), autoplay=(self), camera=(self), gyroscope=(self), xr-spatial-tracking=(self)
   Referrer-Policy: no-referrer
   X-Content-Type-Options: nosniff
 

@@ -17,6 +17,7 @@ test('mobile keeps explicit motion and recenter controls visible', () => {
 
 test('production header fragment delegates only same-origin motion sensors', () => {
   assert.match(headersSource, /Permissions-Policy:[^\n]*accelerometer=\(self\)/)
+  assert.match(headersSource, /Permissions-Policy:[^\n]*camera=\(self\)/)
   assert.match(headersSource, /Permissions-Policy:[^\n]*gyroscope=\(self\)/)
-  assert.doesNotMatch(headersSource, /(?:accelerometer|gyroscope)=\(\*\)/)
+  assert.doesNotMatch(headersSource, /(?:accelerometer|camera|gyroscope)=\(\*\)/)
 })

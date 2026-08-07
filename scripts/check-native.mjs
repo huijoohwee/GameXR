@@ -24,19 +24,25 @@ function capture(command, arguments_) {
   return result.stdout
 }
 
-function visionSimulatorId() {
+function simulatorId(runtimeName, preferredName, sdkVersion) {
   const simulatorList = JSON.parse(capture('xcrun', ['simctl', 'list', 'devices', 'available', '--json']))
+  const runtimeVersion = `${runtimeName}-${sdkVersion.replaceAll('.', '-')}`
   const runtimes = Object.entries(simulatorList.devices ?? {})
-    .filter(([runtime]) => runtime.includes('xrOS'))
-    .sort(([left], [right]) => right.localeCompare(left, undefined, { numeric: true }))
+    .filter(([runtime]) => runtime.includes(runtimeName))
+    .sort(([left], [right]) => {
+      const leftExact = left.includes(runtimeVersion)
+      const rightExact = right.includes(runtimeVersion)
+      if (leftExact !== rightExact) return leftExact ? -1 : 1
+      return right.localeCompare(left, undefined, { numeric: true })
+    })
 
   for (const [, devices] of runtimes) {
     if (!Array.isArray(devices)) continue
-    const preferred = devices.find((device) => device.isAvailable !== false && device.name?.includes('Apple Vision Pro'))
+    const preferred = devices.find((device) => device.isAvailable !== false && device.name?.includes(preferredName))
       ?? devices.find((device) => device.isAvailable !== false)
     if (preferred?.udid) return preferred.udid
   }
-  throw new Error('No available visionOS simulator was found. Install a stable visionOS simulator runtime in Xcode.')
+  throw new Error(`No available ${runtimeName} simulator was found. Install a stable simulator runtime in Xcode.`)
 }
 
 if (process.platform !== 'darwin') {
@@ -48,18 +54,18 @@ try {
   run('swift', ['test', '--package-path', 'native'])
   run('xcodebuild', [
     '-quiet', '-scheme', 'GameXRNative',
-    '-destination', 'generic/platform=iOS Simulator',
+    '-destination', `id=${simulatorId('iOS', 'iPhone', capture('xcrun', ['--sdk', 'iphonesimulator', '--show-sdk-version']).trim())}`,
     '-derivedDataPath', resolve(temporaryRoot, 'ios'),
-    'CODE_SIGNING_ALLOWED=NO', 'build',
+    'CODE_SIGNING_ALLOWED=NO', 'test',
   ], nativeRoot)
   run('xcodebuild', [
     '-quiet', '-scheme', 'GameXRNative',
     '-sdk', 'xrsimulator',
-    '-destination', `id=${visionSimulatorId()}`,
+    '-destination', `id=${simulatorId('xrOS', 'Apple Vision Pro', capture('xcrun', ['--sdk', 'xrsimulator', '--show-sdk-version']).trim())}`,
     '-derivedDataPath', resolve(temporaryRoot, 'visionos'),
-    'CODE_SIGNING_ALLOWED=NO', 'build',
+    'CODE_SIGNING_ALLOWED=NO', 'test',
   ], nativeRoot)
-  process.stdout.write('native check passed: Swift tests, iOS Simulator build, visionOS Simulator build\n')
+  process.stdout.write('native check passed: Swift tests, iOS Simulator tests, visionOS Simulator tests\n')
 } finally {
   await rm(temporaryRoot, { recursive: true, force: true })
 }

@@ -18,6 +18,8 @@ test('mobile keeps explicit motion and recenter controls visible', () => {
 test('production header fragment delegates only same-origin motion sensors', () => {
   assert.match(headersSource, /\/gamexr\/\*[\s\S]*?\n  ! X-Frame-Options\n  X-Frame-Options: SAMEORIGIN\n/)
   assert.match(headersSource, /\/gamexr\/\*[\s\S]*?\n  ! Permissions-Policy\n/)
+  assert.match(headersSource, /\/gamexr\/\*[\s\S]*?\n  ! Referrer-Policy\n  Referrer-Policy: no-referrer\n/)
+  assert.match(headersSource, /\/gamexr\/\*[\s\S]*?\n  ! X-Content-Type-Options\n  X-Content-Type-Options: nosniff\n/)
   assert.match(headersSource, /Permissions-Policy:[^\n]*accelerometer=\(self\)/)
   assert.match(headersSource, /Permissions-Policy:[^\n]*camera=\(self\)/)
   assert.match(headersSource, /Permissions-Policy:[^\n]*gyroscope=\(self\)/)
@@ -39,8 +41,10 @@ test('production header fragment preserves sealed bytes and a self-only applicat
     '/gamexr/manifest.webmanifest',
     '/gamexr/precache-manifest.json',
     '/gamexr/release-manifest.json',
+    '/gamexr/llms.txt',
     '/gamexr/.well-known/*',
     '/gamexr/schemas/*',
+    '/gamexr/icons/*',
   ]) {
     const escapedPath = path.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&')
     assert.match(headersSource, new RegExp(`${escapedPath}\\n  Cache-Control: [^\\n]*no-store[^\\n]*no-transform[^\\n]*must-revalidate`, 'u'))

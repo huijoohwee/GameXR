@@ -207,8 +207,10 @@ const headers = await readFile(resolve('deployment/cloudflare/headers.fragment')
 if (!headers.includes('/gamexr/*\n')
   || !headers.includes('  ! X-Frame-Options\n  X-Frame-Options: SAMEORIGIN\n')
   || !headers.includes('  ! Permissions-Policy\n')
+  || !headers.includes('  ! Referrer-Policy\n  Referrer-Policy: no-referrer\n')
+  || !headers.includes('  ! X-Content-Type-Options\n  X-Content-Type-Options: nosniff\n')
   || !/Permissions-Policy:[^\n]*accelerometer=\(self\)[^\n]*gyroscope=\(self\)[^\n]*microphone=\(\)[^\n]*xr-spatial-tracking=\(self\)/u.test(headers)) {
-  fail('Cloudflare header fragment does not replace inherited motion and XR policy')
+  fail('Cloudflare header fragment does not replace inherited GameXR policy')
 }
 for (const path of [
   '/gamexr',
@@ -218,10 +220,12 @@ for (const path of [
   '/gamexr/manifest.webmanifest',
   '/gamexr/precache-manifest.json',
   '/gamexr/release-manifest.json',
+  '/gamexr/llms.txt',
   '/gamexr/.well-known/*',
   '/gamexr/schemas/*',
+  '/gamexr/icons/*',
 ]) {
-  const block = `${path}\n  Cache-Control: no-store, no-cache, no-transform, must-revalidate, max-age=0`
+  const block = `${path}\n  Cache-Control: public, no-store, no-cache, no-transform, must-revalidate, max-age=0`
   if (!headers.includes(block)) fail(`Cloudflare header fragment does not preserve sealed metadata bytes for ${path}`)
 }
 if (!headers.includes('/gamexr/assets/*\n  Cache-Control: public, max-age=31536000, immutable, no-transform')) {

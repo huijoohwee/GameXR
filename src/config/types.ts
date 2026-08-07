@@ -1,6 +1,7 @@
 import type { AppleSpatialInputProfile } from '@knowgrph/apple-spatial-input/profile'
 
 export type Vector3Tuple = [number, number, number]
+export type QuaternionTuple = [number, number, number, number]
 export type EnvironmentId = 'deep-space' | 'orbit' | 'hangar'
 export type ShipAssetKind = 'procedural' | 'local-glb'
 
@@ -121,6 +122,13 @@ export interface RuntimeTelemetry {
   qualityScale: number
   position: Vector3Tuple
   rotation: Vector3Tuple
+  camera: {
+    mode: 'chase'
+    position: Vector3Tuple
+    quaternion: QuaternionTuple
+    lookTarget: Vector3Tuple
+    fieldOfViewDegrees: number
+  }
   activeAsset: string
   activeAnimation: string | null
 }

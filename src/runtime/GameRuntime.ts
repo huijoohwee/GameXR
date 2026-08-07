@@ -306,6 +306,18 @@ export class GameRuntime extends EventTarget {
       qualityScale: this.qualityScale,
       position: this.simulation.positionTuple,
       rotation: this.simulation.rotationTuple,
+      camera: {
+        mode: 'chase',
+        position: [this.camera.position.x, this.camera.position.y, this.camera.position.z],
+        quaternion: [
+          this.camera.quaternion.x,
+          this.camera.quaternion.y,
+          this.camera.quaternion.z,
+          this.camera.quaternion.w,
+        ],
+        lookTarget: [this.desiredLookTarget.x, this.desiredLookTarget.y, this.desiredLookTarget.z],
+        fieldOfViewDegrees: this.camera.fov,
+      },
       activeAsset: this.manifestValue.ship.asset.localAssetId ?? 'procedural',
       activeAnimation: this.animation.activeImportedClip,
     }

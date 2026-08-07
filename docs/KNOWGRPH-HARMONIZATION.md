@@ -13,7 +13,9 @@ Knowgrph is the backend SSOT for Apple spatial input, deterministic flight, and 
 
 Knowgrph owns permission-safe Safari sensor lifecycle, calibration/filter math, input normalization, deterministic flight integration, follow-camera target resolution, Swift spatial core, and RealityKit flight integration. GameXR adapters translate its user-configurable scene manifest into those canonical profiles and project results into Three.js, SwiftUI, and RealityView visuals.
 
-GameXR contains no duplicate Apple filter, browser sensor lifecycle, flight integrator, RealityKit flight system, or canonical schema source. The build copies the installed package schema into the release output; it does not maintain a downstream fork.
+GameXR's runtime/WebMCP inspection may report the actual Three.js chase-camera `position`, `quaternion`, `lookTarget`, and `fieldOfViewDegrees`. Those fields observe the frontend projection after Knowgrph resolves the follow target; they do not duplicate, patch, or supersede Knowgrph camera behavior.
+
+GameXR contains no duplicate Apple filter, browser sensor lifecycle, flight integrator, follow-camera resolver, RealityKit flight system, or canonical schema source. The build copies the installed package schema into the release output; it does not maintain a downstream fork.
 
 ## Update procedure
 

@@ -36,10 +36,11 @@ jobs:
       - name: Verify Swift, iOS, and visionOS adapters
         run: npm run native:check
       - name: Upload immutable candidate
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: gamexr-${{ github.sha }}
           path: dist/gamexr
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 7
 

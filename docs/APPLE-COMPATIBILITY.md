@@ -64,12 +64,23 @@ Knowgrph protected revision `1288749a170e1e5790fccd4130e8f76562370745` owns the 
 
 Repository checks with mocked browser events and native conformance vectors can prove permission ordering, calibration, screen-angle math, smoothing, cleanup, and no-egress boundaries. Simulator builds cannot prove WebKit's real prompt, Core Motion hardware behavior, physical sensor quality, orientation-change timing, thermal behavior, or installed-PWA behavior. Until named current iPhone/Safari and Apple Vision Pro/visionOS runs pass their platform matrices, physical compatibility remains a promotion gate rather than a completed claim.
 
+## Current automated evidence
+
+- Playwright WebKit 26.5 mobile profile: responsive canvas, recoverable denial, grant/calibration/recenter/rotation lifecycle, and installed cache-byte integrity while offline pass. Physical Safari offline navigation remains in the device matrix.
+- Swift 6.3.3 package tests: seven shared manifest and Apple spatial-input conformance tests pass at the exact Knowgrph pin.
+- iOS 26.5 Simulator: the `GameXRNative` test target builds and executes successfully.
+- visionOS Simulator: the same test target builds and executes successfully; the locally available simulator runtime is a canary lane and does not promote the stable deployment baseline.
+- Physical iPhone: detected but unavailable during this validation; real Safari permission, sensor quality, orientation timing, background/return, PWA installation, and thermal evidence remain pending.
+- Physical Apple Vision Pro: no paired device was available; comfort, tracking, performance, and immersive-lifecycle evidence remain pending.
+- Reality Composer Pro assets: none are admitted. The procedural `RealityView` adapter compiles and tests without a duplicate native asset resolver.
+
 ## Proof commands
 
 The repository-owned check selects an available visionOS simulator dynamically and keeps device identifiers out of source:
 
 ```sh
 npm run native:check
+npm run test:webkit
 ```
 
 Its component commands are:
@@ -78,13 +89,13 @@ Its component commands are:
 swift test --package-path native
 
 xcodebuild -scheme GameXRNative \
-  -destination 'generic/platform=iOS Simulator' \
-  CODE_SIGNING_ALLOWED=NO build
+  -destination '<available iPhone simulator id>' \
+  CODE_SIGNING_ALLOWED=NO test
 
 xcodebuild -scheme GameXRNative \
   -sdk xrsimulator \
   -destination '<available Apple Vision Pro simulator id>' \
-  CODE_SIGNING_ALLOWED=NO build
+  CODE_SIGNING_ALLOWED=NO test
 ```
 
 The final command uses an available simulator selected at runtime; no device identifier belongs in source.

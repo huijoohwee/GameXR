@@ -79,6 +79,7 @@ The immutable Knowgrph dependency and frontend/backend boundary are recorded in 
 ```sh
 npm run check
 npm run check:apex
+npm run test:webkit
 npm run native:check
 ```
 
@@ -88,6 +89,6 @@ The `/gamexr/` build registers a content-addressed service worker that precaches
 
 ## Release boundary
 
-Dev output is written to `dist/gamexr`. It is not a Production or Cloudflare authorization. The production mirror at `huijoohwee/content/gamexr` currently has no registered GameXR projection controller, so this repository does not write it directly and does not deploy `airvio.co`.
+Dev output is written to `dist/gamexr`. It is not a Production or Cloudflare authorization. The protected production mirror at `huijoohwee/content/gamexr` owns publication, and the Git-connected `joohwee` Pages project is the single forward-deployment owner. GameXR source never writes that mirror or deploys `airvio.co` directly.
 
-[`docs/RELEASE.md`](docs/RELEASE.md) records the required protected projection, routing, header, exact-revision, smoke, and rollback contract. Until that owner exists and an exact candidate is authorized, the honest delivered status is **Dev runtime-ready; Production deferred**.
+[`docs/RELEASE.md`](docs/RELEASE.md) records the protected projection, preview, exact authorization, Git deployment, smoke, and rollback contract. Production is live at `/gamexr`; physical iPhone and Vision Pro certification remains a separate promotion gate.

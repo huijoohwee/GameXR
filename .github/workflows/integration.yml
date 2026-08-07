@@ -29,6 +29,10 @@ jobs:
           cache: npm
       - name: Install locked dependencies
         run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Install WebKit runtime
+        run: npx playwright install webkit
+      - name: Verify mobile Safari-compatible runtime
+        run: npm run test:webkit
       - name: Verify browser and release contracts
         run: npm run check
       - name: Verify Apex contract

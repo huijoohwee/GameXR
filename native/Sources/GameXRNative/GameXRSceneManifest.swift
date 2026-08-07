@@ -1,4 +1,5 @@
 import Foundation
+import KnowgrphSpatialCore
 
 public struct GameXRSceneManifest: Codable, Equatable, Sendable {
     public let schemaURL: String?
@@ -67,10 +68,8 @@ public struct GameXRSceneManifest: Codable, Equatable, Sendable {
         validateNumber(ship.appearance.metalness, at: "ship.appearance.metalness", range: 0...1, issues: &issues)
         validateNumber(ship.appearance.roughness, at: "ship.appearance.roughness", range: 0...1, issues: &issues)
         validateNumber(ship.flight.acceleration, at: "ship.flight.acceleration", range: 0...200, issues: &issues)
-        validateNumber(ship.flight.braking, at: "ship.flight.braking", range: 0...200, issues: &issues)
         validateNumber(ship.flight.drag, at: "ship.flight.drag", range: 0...20, issues: &issues)
         validateNumber(ship.flight.maxForwardSpeed, at: "ship.flight.maxForwardSpeed", range: 1...500, issues: &issues)
-        validateNumber(ship.flight.maxReverseSpeed, at: "ship.flight.maxReverseSpeed", range: 0...100, issues: &issues)
         validateNumber(ship.flight.pitchRate, at: "ship.flight.pitchRate", range: 0...10, issues: &issues)
         validateNumber(ship.flight.yawRate, at: "ship.flight.yawRate", range: 0...10, issues: &issues)
         validateNumber(ship.flight.rollRate, at: "ship.flight.rollRate", range: 0...10, issues: &issues)
@@ -191,7 +190,7 @@ private enum ManifestJSONStructure {
         Rule("ship", ["asset", "position", "rotation", "scale", "appearance", "flight"]),
         Rule("ship.asset", ["kind", "localAssetId"]),
         Rule("ship.appearance", ["hullColor", "accentColor", "canopyColor", "exhaustColor", "metalness", "roughness"]),
-        Rule("ship.flight", ["acceleration", "braking", "drag", "maxForwardSpeed", "maxReverseSpeed", "pitchRate", "yawRate", "rollRate", "bankAngle", "lateralAssist"]),
+        Rule("ship.flight", ["acceleration", "drag", "maxForwardSpeed", "pitchRate", "yawRate", "rollRate", "bankAngle", "lateralAssist"]),
         Rule("camera", ["fieldOfView", "near", "far", "chaseDistance", "chaseHeight", "lookAhead", "damping"]),
         Rule("motion", ["keyboardEnabled", "touchEnabled", "deviceMotionEnabled", "deviceOrientation", "invertPitch", "sensitivity", "deadZone", "hapticsEnabled"]),
         Rule("motion.deviceOrientation", ["schema", "controlRangeDegrees", "jitterThresholdDegrees", "settledAxisThreshold", "smoothingRatePerSecond", "calibrationTimeoutMilliseconds"]),
@@ -298,10 +297,8 @@ public struct AppearanceConfiguration: Codable, Equatable, Sendable {
 
 public struct FlightConfiguration: Codable, Equatable, Sendable {
     public let acceleration: Double
-    public let braking: Double
     public let drag: Double
     public let maxForwardSpeed: Double
-    public let maxReverseSpeed: Double
     public let pitchRate: Double
     public let yawRate: Double
     public let rollRate: Double
@@ -328,17 +325,6 @@ public struct MotionConfiguration: Codable, Equatable, Sendable {
     public let sensitivity: Double
     public let deadZone: Double
     public let hapticsEnabled: Bool
-}
-
-public struct AppleSpatialInputProfile: Codable, Equatable, Sendable {
-    public static let schemaIdentifier = "airvio.apple-spatial-input/v1"
-
-    public let schema: String
-    public let controlRangeDegrees: Double
-    public let jitterThresholdDegrees: Double
-    public let settledAxisThreshold: Double
-    public let smoothingRatePerSecond: Double
-    public let calibrationTimeoutMilliseconds: Double
 }
 
 public struct AnimationConfiguration: Codable, Equatable, Sendable {

@@ -1,6 +1,7 @@
 #if canImport(CoreMotion) && canImport(Observation) && canImport(UIKit) && (os(iOS) || os(visionOS))
 import CoreMotion
 import Foundation
+import KnowgrphSpatialCore
 import Observation
 import UIKit
 

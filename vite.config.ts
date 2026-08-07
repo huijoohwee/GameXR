@@ -35,17 +35,21 @@ export default defineConfig(({ mode }) => {
       {
         name: 'gamexr-shared-contracts',
         generateBundle() {
-          for (const filename of [
-            'default-scene.json',
-            'gamexr.scene.schema.json',
-            'apple-spatial-input.schema.json',
-          ]) {
+          for (const filename of ['default-scene.json', 'gamexr.scene.schema.json']) {
             this.emitFile({
               type: 'asset',
               fileName: `schemas/${filename}`,
               source: readFileSync(resolve(import.meta.dirname, 'shared', filename), 'utf8'),
             })
           }
+          this.emitFile({
+            type: 'asset',
+            fileName: 'schemas/apple-spatial-input.schema.json',
+            source: readFileSync(resolve(
+              import.meta.dirname,
+              'node_modules/@knowgrph/apple-spatial-input/schema/apple-spatial-input-profile.v1.schema.json',
+            ), 'utf8'),
+          })
         },
       },
       {

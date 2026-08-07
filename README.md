@@ -4,7 +4,7 @@ GameXR is a browser-local spatial flight runtime rebuilt from the useful control
 
 The result is mobile-first, installable, offline-capable, user-configurable, and zero-spend at runtime. A Swift 6 / SwiftUI / RealityKit package consumes the same JSON contract for native iOS and visionOS integration.
 
-The versioned `airvio.apple-spatial-input/v1` contract makes calibration, screen-relative axis mapping, jitter suppression, and elapsed-time smoothing portable across the browser and Swift adapters. Its lifecycle borrows neutral design concepts from Knowgrph—explicit permission, delayed listener installation, bounded input, and complete teardown—but remains a clean-room GameXR implementation. Knowgrph has no root source license, so no Knowgrph source is copied or presented as FOSS lineage here.
+The versioned `airvio.apple-spatial-input/v1` contract makes calibration, screen-relative axis mapping, jitter suppression, and elapsed-time smoothing portable across browser and Swift frontends. Knowgrph is the shared backend SSOT: GameXR consumes its browser sensor, filter, flight, camera, Swift Core, and RealityKit flight products at protected revision `1288749a170e1e5790fccd4130e8f76562370745`.
 
 ## Run
 
@@ -23,15 +23,15 @@ npm run dev:apex
 
 Controls:
 
-- Touch or pointer: left joystick for pitch/roll/yaw, throttle rail for forward/reverse, Brake to decelerate.
-- Keyboard: `W/S` pitch, `A/D` roll, `Q/E` yaw, `Shift` forward, `X` reverse, `Space` brake.
+- Touch or pointer: left joystick for pitch/roll/yaw, throttle rail to add or reduce thrust, Brake to command idle thrust.
+- Keyboard: `W/S` pitch, `A/D` roll, `Q/E` yaw, `Shift` adds thrust, `X` reduces thrust, and `Space` commands idle thrust.
 - Motion: tap **Enable Motion** to request iOS permission from the required direct user gesture. **Recenter** makes the next valid sample the neutral pose; **Disable Motion** releases the listeners.
 
 Select **Tune** to edit high-value controls or the complete `gamexr-scene/v1` manifest. Scene profiles, configuration, and admitted GLB files stay in IndexedDB. JSON export is the portable recovery path.
 
 ### Phone orientation contract
 
-GameXR installs orientation listeners only after the explicit permission request succeeds. The first valid sample becomes the neutral pose; subsequent samples are remapped when the screen rotates, smoothed by elapsed time, and shaped by the user-configurable `motion.deviceOrientation` profile before they reach normalized flight/camera input. Recenter deliberately takes a new neutral sample instead of assuming one fixed holding angle. The portable profile is closed and range-validated by [`shared/apple-spatial-input.schema.json`](shared/apple-spatial-input.schema.json).
+GameXR installs orientation listeners only after the explicit permission request succeeds. The first valid sample becomes the neutral pose; subsequent samples are remapped when the screen rotates, smoothed by elapsed time, and shaped by the user-configurable `motion.deviceOrientation` profile before they reach normalized flight/camera input. Recenter deliberately takes a new neutral sample instead of assuming one fixed holding angle. The portable profile is closed and range-validated by the schema exported from `@knowgrph/apple-spatial-input`; builds project that canonical schema to `schemas/apple-spatial-input.schema.json`.
 
 Motion stops and clears its transient calibration on **Disable Motion**, hidden-page transition, `pagehide`, or runtime disposal. Raw orientation samples and calibration remain memory-only: they are not written to IndexedDB, included in scene export, returned through MCP, or sent over the network. A deployed origin must serve a same-origin `Permissions-Policy` for the required motion features, and every embedding iframe must delegate them explicitly.
 
@@ -72,7 +72,7 @@ npm run native:check
 
 A host app must provide a meaningful `NSMotionUsageDescription`; the adapter fails closed when that key or processed device motion is unavailable. A future native resolver can admit Reality Composer Pro content behind reviewed semantic IDs; the current native target is an explicitly bounded procedural adapter. Beta-only Reality Composer Pro 3 and OS 27 APIs are not production dependencies. See [`docs/APPLE-COMPATIBILITY.md`](docs/APPLE-COMPATIBILITY.md).
 
-The intended Knowgrph shared-package promotion and its current fail-closed ownership boundary are recorded in [`docs/KNOWGRPH-HARMONIZATION.md`](docs/KNOWGRPH-HARMONIZATION.md).
+The immutable Knowgrph dependency and frontend/backend boundary are recorded in [`docs/KNOWGRPH-HARMONIZATION.md`](docs/KNOWGRPH-HARMONIZATION.md).
 
 ## Verify
 

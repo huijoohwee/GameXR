@@ -1,4 +1,4 @@
-import type { AppleSpatialInputProfile } from '../../shared/apple-spatial-input.ts'
+import type { AppleSpatialInputProfile } from '@knowgrph/apple-spatial-input/profile'
 
 export type Vector3Tuple = [number, number, number]
 export type EnvironmentId = 'deep-space' | 'orbit' | 'hangar'
@@ -51,10 +51,8 @@ export interface SceneManifest {
     }
     flight: {
       acceleration: number
-      braking: number
       drag: number
       maxForwardSpeed: number
-      maxReverseSpeed: number
       pitchRate: number
       yawRate: number
       rollRate: number

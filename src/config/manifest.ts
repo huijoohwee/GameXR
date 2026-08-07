@@ -2,7 +2,7 @@ import defaultManifestJson from '../../shared/default-scene.json' with { type: '
 import {
   APPLE_SPATIAL_INPUT_PROFILE_LIMITS,
   APPLE_SPATIAL_INPUT_SCHEMA,
-} from '../../shared/apple-spatial-input.ts'
+} from '@knowgrph/apple-spatial-input/profile'
 import type {
   EnvironmentId,
   ManifestValidationResult,
@@ -155,7 +155,7 @@ export function validateSceneManifest(input: unknown): ManifestValidationResult 
     'hullColor', 'accentColor', 'canopyColor', 'exhaustColor', 'metalness', 'roughness',
   ], issues)
   const flight = readObject(ship.flight, 'manifest.ship.flight', [
-    'acceleration', 'braking', 'drag', 'maxForwardSpeed', 'maxReverseSpeed', 'pitchRate',
+    'acceleration', 'drag', 'maxForwardSpeed', 'pitchRate',
     'yawRate', 'rollRate', 'bankAngle', 'lateralAssist',
   ], issues)
   const camera = readObject(root.camera, 'manifest.camera', [
@@ -239,10 +239,8 @@ export function validateSceneManifest(input: unknown): ManifestValidationResult 
       },
       flight: {
         acceleration: readNumber(flight.acceleration, 'manifest.ship.flight.acceleration', issues, 0, 200),
-        braking: readNumber(flight.braking, 'manifest.ship.flight.braking', issues, 0, 200),
         drag: readNumber(flight.drag, 'manifest.ship.flight.drag', issues, 0, 20),
         maxForwardSpeed: readNumber(flight.maxForwardSpeed, 'manifest.ship.flight.maxForwardSpeed', issues, 1, 500),
-        maxReverseSpeed: readNumber(flight.maxReverseSpeed, 'manifest.ship.flight.maxReverseSpeed', issues, 0, 100),
         pitchRate: readNumber(flight.pitchRate, 'manifest.ship.flight.pitchRate', issues, 0, 10),
         yawRate: readNumber(flight.yawRate, 'manifest.ship.flight.yawRate', issues, 0, 10),
         rollRate: readNumber(flight.rollRate, 'manifest.ship.flight.rollRate', issues, 0, 10),

@@ -20,12 +20,12 @@ test('fixed-step throttle accelerates deterministically along ship forward', () 
   assert(first.speed <= manifest.ship.flight.maxForwardSpeed)
 })
 
-test('braking reduces velocity without reversing it', () => {
+test('idle command drives canonical throttle toward zero', () => {
   const simulation = new FlightSimulation(getDefaultSceneManifest())
   for (let tick = 0; tick < 60; tick += 1) simulation.step(1 / 60, { ...neutral, throttle: 1 })
-  const before = simulation.speed
+  const beforeThrottle = simulation.canonicalAircraft.throttle
   for (let tick = 0; tick < 30; tick += 1) simulation.step(1 / 60, { ...neutral, brake: 1 })
-  assert(simulation.speed < before)
+  assert(simulation.canonicalAircraft.throttle < beforeThrottle)
   assert(simulation.speed >= 0)
 })
 

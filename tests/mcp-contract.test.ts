@@ -21,6 +21,13 @@ class RuntimeStub implements GameRuntimeControlSurface {
       qualityScale: 1,
       position: [0, 0, 0],
       rotation: [0, 0, 0],
+      camera: {
+        mode: 'chase',
+        position: [0, 4, 12],
+        quaternion: [0, 0, 0, 1],
+        lookTarget: [0, 0, -8],
+        fieldOfViewDegrees: 58,
+      },
       activeAsset: 'procedural',
       activeAnimation: null,
     }
@@ -45,6 +52,21 @@ test('WebMCP exposes exactly one inspection and one bounded control tool', () =>
   assert.deepEqual(tools.map((tool) => tool.name), [GAME_XR_WEB_MCP_TOOLS.inspect, GAME_XR_WEB_MCP_TOOLS.control])
   assert.equal(tools[0]?.annotations.readOnlyHint, true)
   assert.equal(tools[1]?.annotations.openWorldHint, false)
+})
+
+test('inspection exposes the projected chase-camera pose without sensor samples', async () => {
+  const inspect = createWebMcpTools(new RuntimeStub())[0]
+  assert(inspect)
+  const result = await inspect.execute({}) as {
+    runtime: RuntimeTelemetry
+  }
+  assert.deepEqual(result.runtime.camera, {
+    mode: 'chase',
+    position: [0, 4, 12],
+    quaternion: [0, 0, 0, 1],
+    lookTarget: [0, 0, -8],
+    fieldOfViewDegrees: 58,
+  })
 })
 
 test('control tool applies local input with explicit zero-spend evidence', async () => {

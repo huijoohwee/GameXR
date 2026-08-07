@@ -7,6 +7,12 @@
   "offline": {
     "localRuntime": true,
     "precacheManifest": "precache-manifest.json",
+    "cacheIdentity": "full-build-digest",
+    "cacheAdmission": "manifest-aggregate-byte-count-and-sha256",
+    "readyMarker": "gamexr-cache-marker/v1",
+    "workerRevision": "exact-precache-build-digest",
+    "navigationFallback": "sealed-index-without-network-cache-mutation",
+    "automatedVerification": ["cache-entry-byte-and-sha256", "offline-navigation-and-reload"],
     "registeredBasePaths": ["/gamexr/"],
     "disabledBasePaths": ["/"],
     "apexReason": "The shared root scope requires an explicit production routing owner."
@@ -19,6 +25,19 @@
     "screenRotation": "portrait-landscape-remap-and-recenter",
     "persistedOrTransmitted": false,
     "physicalIPhoneSafariVerified": false
+  },
+  "chaseCamera": {
+    "owner": "Knowgrph follow-camera target with GameXR visual projection",
+    "inspection": ["position", "quaternion", "lookTarget", "fieldOfViewDegrees"],
+    "automatedBrowserVerification": "local-and-exact-production-targetable",
+    "physicalAppleDeviceVerified": false
+  },
+  "verification": {
+    "exactProductionTargetEnvironmentVariable": "GAME_XR_E2E_URL",
+    "expectedSourceRevisionEnvironmentVariable": "GAME_XR_EXPECTED_SOURCE_REVISION",
+    "expectedArtifactDigestEnvironmentVariable": "GAME_XR_EXPECTED_ARTIFACT_DIGEST",
+    "automatedScope": ["artifact-hashes", "WebMCP-camera-telemetry", "service-worker-convergence", "offline-navigation-reload"],
+    "physicalScopeVerified": false
   },
   "sceneSchema": "gamexr-scene/v1",
   "networkRequiredForPlay": {

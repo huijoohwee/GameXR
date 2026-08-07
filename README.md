@@ -51,7 +51,7 @@ Local GLB admission is fail-closed: one self-contained GLB, at most 15 MB, 1,500
 
 The page exposes:
 
-- `gamexr.inspect_runtime` — read-only manifest, telemetry, performance, and zero-cost evidence.
+- `gamexr.inspect_runtime` — read-only manifest, flight/performance telemetry, projected chase-camera pose/FOV, and zero-cost evidence.
 - `gamexr.control_runtime` — bounded transport, control, animation, and validated manifest-patch operations.
 
 These tools register with `navigator.modelContext` when a host provides it and remain scanner-readable locally when it does not. Agentic Canvas OS already owns `/flight.sim @canvas #flight`, so GameXR does not alias that Knowgrph route. Generic centralized discovery and execution use `/tool.catalog` and `/tool.call`; see [`docs/MCP.md`](docs/MCP.md).
@@ -85,7 +85,18 @@ npm run native:check
 
 `npm run check` type-checks, runs focused tests, creates the `/gamexr/` production bundle, seals a deterministic local artifact manifest, and enforces chunk, initial-payload, schema, offline-shell, and zero-spend contracts.
 
-The `/gamexr/` build registers a content-addressed service worker that precaches every emitted JavaScript, CSS, and dynamic chunk. Apex mode deliberately disables service-worker registration because `/` is shared production scope; `npm run dev:apex` remains useful for local route parity, but it is not an offline-install claim.
+The `/gamexr/` build registers a full-build-digest-addressed service worker. The emitted worker binds that exact digest, so an assets-only release still produces a discoverable worker revision without placing the worker inside its own circular precache hash. Before a cache becomes ready, the worker validates the precache aggregate, exact cache inventory, and every declared response's byte count and SHA-256. The sealed cache is never overwritten by an unverified navigation or runtime fetch. Local Playwright WebKit uses a disposable origin to verify cache hashes and genuine origin-outage navigation/reload. Exact external runs verify shipped bytes and online service-worker/cache convergence without disrupting the deployed origin. Neither automated browser proof is physical-device certification. Apex mode deliberately disables service-worker registration because `/` is shared production scope; `npm run dev:apex` remains useful for local route parity, but it is not an offline-install claim.
+
+After a protected candidate is projected to a preview or Production origin, target that exact deployment without starting localhost:
+
+```sh
+GAME_XR_E2E_URL=https://airvio.co/gamexr/ \
+GAME_XR_EXPECTED_SOURCE_REVISION=<protected-merge-sha> \
+GAME_XR_EXPECTED_ARTIFACT_DIGEST=<sealed-artifact-digest> \
+npm run test:webkit
+```
+
+This verifies shipped bytes, online service-worker/cache convergence, browser WebMCP, and chase-camera telemetry. Genuine origin-outage navigation/reload is proven by the local disposable-origin test; an external run intentionally does not take a preview or Production origin offline. Neither command grants release authority or replaces physical iPhone and Vision Pro testing.
 
 ## Release boundary
 

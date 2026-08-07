@@ -2,7 +2,7 @@
 
 ## Browser tools
 
-`gamexr.inspect_runtime` is read-only. It accepts an empty object and returns `gamexr-runtime-result/v1` with telemetry, manifest, animation clips, local owner, and zero network/model/paid-call cost.
+`gamexr.inspect_runtime` is read-only. It accepts an empty object and returns `gamexr-runtime-result/v1` with flight/performance telemetry, the projected chase camera, manifest, animation clips, local owner, and zero network/model/paid-call cost. `runtime.camera` reports the frontend projection's `position`, `quaternion`, `lookTarget`, and `fieldOfViewDegrees`; it does not create a second follow-camera solver.
 
 `gamexr.control_runtime` accepts one operation:
 
@@ -32,6 +32,7 @@ The host binds `@tool-function` to one exact `gamexr.*` schema and preserves its
 
 ```js
 window.gameXR.inspect()
+window.gameXR.inspect().runtime.camera
 await window.gameXR.control({ operation: 'set-controls', throttle: 0.75, roll: 0.2 })
 await window.gameXR.control({
   operation: 'apply-manifest-patch',
@@ -39,7 +40,7 @@ await window.gameXR.control({
 })
 ```
 
-This API is a browser-local projection. It grants no filesystem, repository, Production, or Cloudflare authority.
+This API is a browser-local projection. Knowgrph remains the follow-target and flight SSOT; GameXR exposes the resulting Three.js camera pose so local or production-targeted verification can prove the visible chase camera follows the aircraft. The API grants no filesystem, repository, Production, or Cloudflare authority.
 
 ## Device-motion permission boundary
 

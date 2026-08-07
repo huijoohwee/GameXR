@@ -168,7 +168,25 @@ const outputSchema = {
     schema: { const: 'gamexr-runtime-result/v1' },
     status: { enum: ['ok', 'applied', 'blocked'] },
     detail: { type: 'string' },
-    runtime: { type: 'object' },
+    runtime: {
+      type: 'object',
+      additionalProperties: true,
+      required: ['phase', 'position', 'rotation', 'camera'],
+      properties: {
+        camera: {
+          type: 'object',
+          additionalProperties: false,
+          required: ['mode', 'position', 'quaternion', 'lookTarget', 'fieldOfViewDegrees'],
+          properties: {
+            mode: { const: 'chase' },
+            position: { type: 'array', minItems: 3, maxItems: 3, items: { type: 'number' } },
+            quaternion: { type: 'array', minItems: 4, maxItems: 4, items: { type: 'number' } },
+            lookTarget: { type: 'array', minItems: 3, maxItems: 3, items: { type: 'number' } },
+            fieldOfViewDegrees: { type: 'number', minimum: 30, maximum: 100 },
+          },
+        },
+      },
+    },
     cost: { type: 'object' },
     authority: { type: 'object' },
   },

@@ -8,6 +8,8 @@ import { LocalDatabase } from './storage/LocalDatabase.ts'
 import { AppController } from './ui/AppController.ts'
 import { renderShell } from './ui/shell.ts'
 
+const SERVICE_WORKER_READY_TIMEOUT_MILLISECONDS = 15_000
+
 async function loadInitialManifest(database: LocalDatabase): Promise<{ manifest: SceneManifest; warning?: string }> {
   const activeSceneId = await database.getActiveSceneId()
   if (activeSceneId) {
@@ -43,6 +45,20 @@ async function registerOfflineShell(): Promise<void> {
   if (!import.meta.env.PROD || !('serviceWorker' in navigator)) return
   try {
     await navigator.serviceWorker.register(`${__GAME_XR_BASE_PATH__}sw.js`, { scope: __GAME_XR_BASE_PATH__ })
+    let timeout = 0
+    try {
+      await Promise.race([
+        navigator.serviceWorker.ready,
+        new Promise<never>((_, reject) => {
+          timeout = window.setTimeout(
+            () => reject(new Error('The verified offline cache did not become ready in time.')),
+            SERVICE_WORKER_READY_TIMEOUT_MILLISECONDS,
+          )
+        }),
+      ])
+    } finally {
+      window.clearTimeout(timeout)
+    }
     if (output) output.textContent = 'Offline shell ready'
   } catch (error) {
     if (output) output.textContent = error instanceof Error ? `Offline shell blocked: ${error.message}` : 'Offline shell blocked'

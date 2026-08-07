@@ -4,12 +4,12 @@ import { readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 
 const GAME_BASE_PATH = '/gamexr/'
+const SERVICE_WORKER_BUILD_DIGEST_PLACEHOLDER = '__GAME_XR_PRECACHE_BUILD_DIGEST__'
 const PRECACHE_STATIC_FILES = [
   ['manifest.webmanifest', 'manifest'],
   ['icons/gamexr.svg', 'icon'],
   ['.well-known/runtime-readiness.json', 'readiness'],
   ['llms.txt', 'agent-discovery'],
-  ['sw.js', 'service-worker'],
   ['schemas/default-scene.json', 'contract'],
   ['schemas/gamexr.scene.schema.json', 'contract'],
   ['schemas/apple-spatial-input.schema.json', 'contract'],
@@ -94,6 +94,16 @@ export default defineConfig(({ mode }) => {
             writeFileSync(
               resolve(outputDirectory, 'precache-manifest.json'),
               `${JSON.stringify(manifest, null, 2)}\n`,
+            )
+
+            const serviceWorkerPath = resolve(outputDirectory, 'sw.js')
+            const serviceWorkerSource = readFileSync(serviceWorkerPath, 'utf8')
+            if (serviceWorkerSource.split(SERVICE_WORKER_BUILD_DIGEST_PLACEHOLDER).length !== 2) {
+              throw new Error('GameXR service worker must contain exactly one build-digest placeholder.')
+            }
+            writeFileSync(
+              serviceWorkerPath,
+              serviceWorkerSource.replace(SERVICE_WORKER_BUILD_DIGEST_PLACEHOLDER, manifest.buildDigest),
             )
           },
         },

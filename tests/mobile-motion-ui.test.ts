@@ -16,8 +16,34 @@ test('mobile keeps explicit motion and recenter controls visible', () => {
 })
 
 test('production header fragment delegates only same-origin motion sensors', () => {
+  assert.match(headersSource, /\/gamexr\/\*[\s\S]*?\n  ! X-Frame-Options\n  X-Frame-Options: SAMEORIGIN\n/)
+  assert.match(headersSource, /\/gamexr\/\*[\s\S]*?\n  ! Permissions-Policy\n/)
   assert.match(headersSource, /Permissions-Policy:[^\n]*accelerometer=\(self\)/)
   assert.match(headersSource, /Permissions-Policy:[^\n]*camera=\(self\)/)
   assert.match(headersSource, /Permissions-Policy:[^\n]*gyroscope=\(self\)/)
+  assert.match(headersSource, /Permissions-Policy:[^\n]*xr-spatial-tracking=\(self\)/)
+  assert.match(headersSource, /Permissions-Policy:[^\n]*microphone=\(\)/)
   assert.doesNotMatch(headersSource, /(?:accelerometer|camera|gyroscope)=\(\*\)/)
+})
+
+test('production header fragment preserves sealed bytes and a self-only application policy', () => {
+  assert.match(headersSource, /Content-Security-Policy:[^\n]*script-src 'self'; script-src-attr 'none'/)
+  assert.match(headersSource, /Content-Security-Policy:[^\n]*style-src 'self' 'unsafe-inline'/)
+  assert.doesNotMatch(headersSource, /Content-Security-Policy:[^\n]*script-src[^;]*(?:unsafe-inline|unsafe-eval|https:)/)
+
+  for (const path of [
+    '/gamexr',
+    '/gamexr/',
+    '/gamexr/index.html',
+    '/gamexr/sw.js',
+    '/gamexr/manifest.webmanifest',
+    '/gamexr/precache-manifest.json',
+    '/gamexr/release-manifest.json',
+    '/gamexr/.well-known/*',
+    '/gamexr/schemas/*',
+  ]) {
+    const escapedPath = path.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&')
+    assert.match(headersSource, new RegExp(`${escapedPath}\\n  Cache-Control: [^\\n]*no-store[^\\n]*no-transform[^\\n]*must-revalidate`, 'u'))
+  }
+  assert.match(headersSource, /\/gamexr\/assets\/\*\n  Cache-Control: public, max-age=31536000, immutable, no-transform\n/)
 })

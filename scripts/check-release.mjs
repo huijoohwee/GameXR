@@ -145,11 +145,31 @@ if (precache.schema !== 'gamexr-precache/v1' || !Array.isArray(precache.entries)
   if (JSON.stringify(runtimeFiles) !== JSON.stringify(precachedRuntimeFiles)) {
     fail('precache manifest does not exactly cover every emitted runtime JavaScript and CSS file')
   }
+  if (seenPrecachePaths.has('sw.js')) fail('service worker must not participate in its own precache digest')
 }
 
 const serviceWorker = await readFile(resolve(root, 'sw.js'), 'utf8')
 if (!serviceWorker.includes('precache-manifest.json') || !serviceWorker.includes('manifest.entries')) {
   fail('service worker does not consume the generated precache manifest')
+}
+for (const contract of [
+  "crypto.subtle.digest('SHA-256'",
+  'entry.bytes',
+  'entry.sha256',
+  "schema: 'gamexr-cache-marker/v1'",
+  'CACHE_READY_MARKER_PATH',
+  'PRECACHE_BUILD_DIGEST',
+  'verifyCache(cacheName, manifest)',
+]) {
+  if (!serviceWorker.includes(contract)) fail(`service worker is missing integrity contract ${contract}`)
+}
+if (/cache\.put\(\s*(?:fallback|request)\b/u.test(serviceWorker)) {
+  fail('service worker must not overwrite its sealed cache from an unverified runtime response')
+}
+const boundWorkerDigest = serviceWorker.match(/const PRECACHE_BUILD_DIGEST = '([a-f0-9]{64})'/u)?.[1]
+if (boundWorkerDigest !== precache.buildDigest
+  || serviceWorker.includes('__GAME_XR_PRECACHE_BUILD_DIGEST__')) {
+  fail('service worker revision is not bound to the exact precache build digest')
 }
 
 const readiness = JSON.parse(await readFile(resolve(root, '.well-known/runtime-readiness.json'), 'utf8'))
@@ -164,6 +184,48 @@ if (!readiness.offline
 if (readiness.networkRequiredForPlay?.['/gamexr/'] !== 'first-load-only'
   || readiness.networkRequiredForPlay?.['/'] !== true) {
   fail('runtime readiness does not scope the network requirement by base path')
+}
+if (readiness.offline.cacheIdentity !== 'full-build-digest'
+  || readiness.offline.cacheAdmission !== 'manifest-aggregate-byte-count-and-sha256'
+  || readiness.offline.readyMarker !== 'gamexr-cache-marker/v1'
+  || readiness.offline.workerRevision !== 'exact-precache-build-digest'
+  || readiness.offline.navigationFallback !== 'sealed-index-without-network-cache-mutation'
+  || !readiness.offline.automatedVerification?.includes('cache-entry-byte-and-sha256')
+  || !readiness.offline.automatedVerification?.includes('offline-navigation-and-reload')) {
+  fail('runtime readiness does not describe byte-exact offline cache convergence')
+}
+if (readiness.chaseCamera?.automatedBrowserVerification !== 'local-and-exact-production-targetable'
+  || readiness.chaseCamera?.physicalAppleDeviceVerified !== false
+  || readiness.verification?.exactProductionTargetEnvironmentVariable !== 'GAME_XR_E2E_URL'
+  || readiness.verification?.expectedSourceRevisionEnvironmentVariable !== 'GAME_XR_EXPECTED_SOURCE_REVISION'
+  || readiness.verification?.expectedArtifactDigestEnvironmentVariable !== 'GAME_XR_EXPECTED_ARTIFACT_DIGEST'
+  || readiness.verification?.physicalScopeVerified !== false) {
+  fail('runtime readiness does not preserve automated-versus-physical verification boundaries')
+}
+
+const headers = await readFile(resolve('deployment/cloudflare/headers.fragment'), 'utf8')
+if (!headers.includes('/gamexr/*\n')
+  || !headers.includes('  ! X-Frame-Options\n  X-Frame-Options: SAMEORIGIN\n')
+  || !headers.includes('  ! Permissions-Policy\n')
+  || !/Permissions-Policy:[^\n]*accelerometer=\(self\)[^\n]*gyroscope=\(self\)[^\n]*microphone=\(\)[^\n]*xr-spatial-tracking=\(self\)/u.test(headers)) {
+  fail('Cloudflare header fragment does not replace inherited motion and XR policy')
+}
+for (const path of [
+  '/gamexr',
+  '/gamexr/',
+  '/gamexr/index.html',
+  '/gamexr/sw.js',
+  '/gamexr/manifest.webmanifest',
+  '/gamexr/precache-manifest.json',
+  '/gamexr/release-manifest.json',
+  '/gamexr/.well-known/*',
+  '/gamexr/schemas/*',
+]) {
+  const block = `${path}\n  Cache-Control: no-store, no-cache, no-transform, must-revalidate, max-age=0`
+  if (!headers.includes(block)) fail(`Cloudflare header fragment does not preserve sealed metadata bytes for ${path}`)
+}
+if (!headers.includes('/gamexr/assets/*\n  Cache-Control: public, max-age=31536000, immutable, no-transform')) {
+  fail('Cloudflare header fragment does not preserve immutable asset bytes')
 }
 
 const defaultScene = JSON.parse(await readFile(resolve(root, 'schemas/default-scene.json'), 'utf8'))

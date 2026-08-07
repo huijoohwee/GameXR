@@ -66,22 +66,24 @@ Repository checks with mocked browser events and native conformance vectors can 
 
 ## Current automated evidence
 
-- Playwright WebKit 26.5 mobile profile: responsive canvas, recoverable denial, grant/calibration/recenter/rotation lifecycle, and installed cache-byte integrity while offline pass. Physical Safari offline navigation remains in the device matrix.
+- Playwright mobile WebKit profile: responsive canvas, recoverable denial, grant/calibration/recenter/rotation lifecycle, exact cached byte/SHA-256 integrity, and a genuinely offline navigation/reload pass against a disposable local origin. The same suite can target an exact deployed URL and expected source/artifact identity for shipped-byte and online cache-convergence proof; it does not disrupt the external origin. This remains automated browser evidence, not a physical Safari, Core Motion, haptics, audio-routing, or installed-PWA certification.
 - Swift 6.3.3 package tests: seven shared manifest and Apple spatial-input conformance tests pass at the exact Knowgrph pin.
 - iOS 26.5 Simulator: the `GameXRNative` test target builds and executes successfully.
-- visionOS Simulator: the same test target builds and executes successfully; the locally available simulator runtime is a canary lane and does not promote the stable deployment baseline.
-- Physical iPhone: detected but unavailable during this validation; real Safari permission, sensor quality, orientation timing, background/return, PWA installation, and thermal evidence remain pending.
+- visionOS xrsimulator: the native package cross-compiles successfully for `arm64-apple-xros2.0-simulator`. Native Vision Pro test execution was unavailable because Xcode exposed only a Designed-for-iPad/iPhone compatibility destination; the check records that distinction instead of treating compatibility execution as native visionOS evidence.
+- Physical iPhone: no attached device was available during this validation; real Safari permission, sensor quality, orientation timing, background/return, PWA installation, and thermal evidence remain pending.
 - Physical Apple Vision Pro: no paired device was available; comfort, tracking, performance, and immersive-lifecycle evidence remain pending.
 - Reality Composer Pro assets: none are admitted. The procedural `RealityView` adapter compiles and tests without a duplicate native asset resolver.
 
 ## Proof commands
 
-The repository-owned check selects an available visionOS simulator dynamically and keeps device identifiers out of source:
+The repository-owned check always runs Swift tests, an available iOS Simulator test destination, and the native visionOS cross-compile gate. It runs Vision Pro simulator tests only when Xcode and `simctl` expose a true native visionOS destination; compatibility-only Designed-for-iPad/iPhone destinations are rejected:
 
 ```sh
 npm run native:check
 npm run test:webkit
 ```
+
+An exact deployed browser run uses `GAME_XR_E2E_URL`, with `GAME_XR_EXPECTED_SOURCE_REVISION` and `GAME_XR_EXPECTED_ARTIFACT_DIGEST` binding the expected candidate. Passing it proves the deployed browser artifact and chase-camera/WebMCP projection; physical iPhone and Apple Vision Pro matrices remain separate.
 
 Its component commands are:
 
@@ -92,10 +94,14 @@ xcodebuild -scheme GameXRNative \
   -destination '<available iPhone simulator id>' \
   CODE_SIGNING_ALLOWED=NO test
 
+swift build --package-path native \
+  --triple arm64-apple-xros2.0-simulator \
+  --sdk '<installed xrsimulator SDK path>'
+
+# Conditional: only when a true native Vision Pro destination is available.
 xcodebuild -scheme GameXRNative \
-  -sdk xrsimulator \
-  -destination '<available Apple Vision Pro simulator id>' \
+  -destination '<native Apple Vision Pro simulator id>' \
   CODE_SIGNING_ALLOWED=NO test
 ```
 
-The final command uses an available simulator selected at runtime; no device identifier belongs in source.
+The conditional final command uses a native destination selected at runtime; no device identifier belongs in source.

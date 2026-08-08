@@ -12,6 +12,19 @@ import Testing
     #expect(try GameXRSceneManifest.decode(manifest.encoded()) == manifest)
 }
 
+#if canImport(RealityKit) && (os(iOS) || os(visionOS))
+@Test @MainActor func coordinatorExcludesPausedShipFromCanonicalFlightSystem() throws {
+    let manifest = try GameXRSceneManifest.decode(defaultManifestData())
+    let coordinator = GameXRNativeCoordinator(manifest: manifest, presentation: .planarWindow)
+
+    #expect(coordinator.isFlightSystemActive == false)
+    coordinator.play()
+    #expect(coordinator.isFlightSystemActive == true)
+    coordinator.pause()
+    #expect(coordinator.isFlightSystemActive == false)
+}
+#endif
+
 @Test func decoderRejectsUnknownAndMissingObjectFields() throws {
     let fixture = try defaultManifestObject()
     let unknownField = try setting(true, at: ["scene", "unsupported"], in: fixture)
@@ -32,6 +45,12 @@ import Testing
 
     let outOfRange = try setting(500, at: ["scene", "asteroidCount"], in: fixture)
     expectManifestError(try JSONSerialization.data(withJSONObject: outOfRange), containing: "scene.asteroidCount must be from 0 through 128")
+
+    let unsupportedChaseHeight = try setting(0, at: ["camera", "chaseHeight"], in: fixture)
+    expectManifestError(
+        try JSONSerialization.data(withJSONObject: unsupportedChaseHeight),
+        containing: "camera.chaseHeight must be a finite number from 0.1 through 40.0"
+    )
 }
 
 @Test func decoderRejectsAssetKindRelationshipMismatch() throws {

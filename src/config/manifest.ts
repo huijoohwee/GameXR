@@ -253,7 +253,7 @@ export function validateSceneManifest(input: unknown): ManifestValidationResult 
       near,
       far,
       chaseDistance: readNumber(camera.chaseDistance, 'manifest.camera.chaseDistance', issues, 2, 80),
-      chaseHeight: readNumber(camera.chaseHeight, 'manifest.camera.chaseHeight', issues, -20, 40),
+      chaseHeight: readNumber(camera.chaseHeight, 'manifest.camera.chaseHeight', issues, 0.1, 40),
       lookAhead: readNumber(camera.lookAhead, 'manifest.camera.lookAhead', issues, 0, 100),
       damping: readNumber(camera.damping, 'manifest.camera.damping', issues, 0.1, 30),
     },

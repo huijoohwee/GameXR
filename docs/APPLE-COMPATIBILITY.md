@@ -3,10 +3,10 @@
 ## Stable production baseline
 
 - Xcode 26.6, Swift 6.3, iOS/visionOS 26.5 SDKs.
-- Runtime target: current iOS, iPadOS, visionOS, and Safari 26.6.
+- Automated native baseline: iOS 26.5 Simulator and Apple Vision Pro / visionOS 26.5 Simulator; Safari 26.6 remains the browser baseline.
 - Deployment floor retained from the original Apple sample: iOS/iPadOS 18 and visionOS 2.
 
-Xcode 27, Swift 6.4, OS/Safari 27, and Reality Composer Pro 3 are beta/canary lanes only. They are not required for GameXR Dev readiness or a future Production candidate.
+visionOS 27 runtime execution is an out-of-baseline canary. Xcode 27, Swift 6.4, OS/Safari 27, and Reality Composer Pro 3 remain canary lanes and are not required for GameXR Dev readiness or a Production candidate.
 
 Authoritative references: [Xcode 26.6 release notes](https://developer.apple.com/documentation/xcode-release-notes/xcode-26_6-release-notes), [Swift 6.3](https://www.swift.org/blog/swift-6.3-released/), [Apple Creating a Spaceship game](https://developer.apple.com/documentation/realitykit/creating-a-spaceship-game), and [Reality Composer Pro release notes](https://developer.apple.com/documentation/realitycomposerpro/reality-composer-pro-release-notes).
 
@@ -16,23 +16,24 @@ The browser runtime and native adapter share domain data, not renderer objects:
 
 - Browser: Three.js WebGL2, progressive WebGPU opportunity, IndexedDB, service worker, Pointer Events, permission-gated Device Orientation.
 - Native adapter: strict `Codable` manifest decoding, an `@Observable` coordinator, a procedural `RealityView` ship, value-type RealityKit flight components, a registered flight `System`, and an on-device Core Motion producer.
+- Native host: the source-owned `native/App` `WindowGroup` consumes local `GameXRNative`, embeds the root-owned `shared/default-scene.json`, and owns only app lifecycle, bundle metadata, fail-closed resource loading, planar-window presentation, and UI-test wiring.
 - Asset intent: GLB is the implemented browser import format. A future native resolver may project validated USD/USDC/USDZ or `.reality` variants from stable semantic IDs and hashes, but no native imported-asset resolver exists in this repository today.
 
 The native adapter performs no imported-asset loading, so it makes no runtime claim about USD, Reality Composer Pro, or `AnimationPlaybackController` integration. Any future resolver must load asynchronously by stable ID, validate provenance and budgets before admission, and give one system ownership of each mutable transform. Shared scene assembly stays within `Entity` APIs available to both RealityKit content variants; iOS camera-content-only behavior and visionOS spatial-content-only behavior must remain isolated at their platform adapter boundaries.
 
 ## Native parity boundary
 
-The native target is build-compatible procedural RealityKit proof, not full gameplay parity with the browser runtime. It currently projects manifest decode/encode, procedural hull colors and scale, initial ship transform, touch and processed-device-motion flight controls, pause/reset, and basic acceleration/drag/rate limits.
+The native package and windowed visionOS host are bounded procedural RealityKit proof, not full browser-gameplay parity or an `ImmersiveSpace` implementation. They currently project manifest decode/encode, procedural unlit hull/accent/exhaust colors and scale, initial ship transform, touch and processed-device-motion flight controls, pause/reset, and basic acceleration/drag/rate limits. The explicit planar-window presentation scales and tilts its own container and uses planar material ordering; the coordinator's simulation root remains host-placeable and unchanged.
 
 The following manifest domains are validated but not yet projected into native rendering or behavior:
 
-- environment, fog, stars, asteroids, planet, lighting, and chase-camera configuration;
+- environment, fog, stars, asteroids, planet, lighting, and dynamic chase-camera projection;
 - local GLB lookup or any USD/USDC/USDZ/Reality Composer Pro asset resolver;
 - canopy/accent/exhaust material parity beyond the small procedural adapter;
 - bank angle, lateral assist, haptics, idle-thrust input, and the browser-wide sensitivity/dead-zone layer beyond the portable device-orientation profile;
 - animation timelines/imported clips, procedural animation parameters, audio, dynamic resolution, frame targeting, and native offline asset persistence.
 
-Native runtime readiness therefore means the package and conditional RealityKit/Core Motion sources compile for the stated Apple SDK baseline and the shared manifest contract is rejected safely when malformed. It does not prove physical sensor quality or mean every browser feature has a native projection.
+Native runtime readiness means the package sources compile and pass their contract tests and, on the stable native simulator lane, the source-owned app installs, launches, loads the canonical manifest successfully, exposes working Fly/Pause and Reset controls, and holds the procedural ship stationary while paused. It does not prove physical sensors, full visual parity, tracking, comfort, performance, or immersive lifecycle.
 
 ## Safari behavior
 
@@ -64,19 +65,21 @@ Knowgrph protected revision `1288749a170e1e5790fccd4130e8f76562370745` owns the 
 
 Repository checks with mocked browser events and native conformance vectors can prove permission ordering, calibration, screen-angle math, smoothing, cleanup, and no-egress boundaries. Simulator builds cannot prove WebKit's real prompt, Core Motion hardware behavior, physical sensor quality, orientation-change timing, thermal behavior, or installed-PWA behavior. Until named current iPhone/Safari and Apple Vision Pro/visionOS runs pass their platform matrices, physical compatibility remains a promotion gate rather than a completed claim.
 
-## Current automated evidence
+## Current validation evidence
 
 - Playwright mobile WebKit profile: responsive canvas, recoverable denial, grant/calibration/recenter/rotation lifecycle, exact cached byte/SHA-256 integrity, and a genuinely offline navigation/reload pass against a disposable local origin. The same suite can target an exact deployed URL and expected source/artifact identity for shipped-byte and online cache-convergence proof; it does not disrupt the external origin. This remains automated browser evidence, not a physical Safari, Core Motion, haptics, audio-routing, or installed-PWA certification.
-- Swift 6.3.3 package tests: seven shared manifest and Apple spatial-input conformance tests pass at the exact Knowgrph pin.
+- Swift 6.3 package tests: shared manifest, canonical camera-admission, paused-flight lifecycle, and Apple spatial-input conformance checks run at the exact Knowgrph pin.
 - iOS 26.5 Simulator: the `GameXRNative` test target builds and executes successfully.
-- visionOS xrsimulator: the native package cross-compiles successfully for `arm64-apple-xros2.0-simulator`. Native Vision Pro test execution was unavailable because Xcode exposed only a Designed-for-iPad/iPhone compatibility destination; the check records that distinction instead of treating compatibility execution as native visionOS evidence.
+- visionOS xrsimulator compile: `GameXRNative` cross-compiles for `arm64-apple-xros2.0-simulator`.
+- Apple Vision Pro / visionOS 26.5 Simulator: `GameXRVisionAppUITests` launches the source-owned windowed app, waits for `gamexr-native-runtime`, verifies the fail-closed load-error marker is absent, checks the canonical manifest identity and RealityView host, exercises Fly, Reset while running, Pause, and a stationary paused hold. A separate live framebuffer capture shows the procedural hull, wings, and exhaust after an eight-second paused hold. The UI assertions prove host/resource/control wiring; the framebuffer is simulator visual evidence, not pixel-regression, physical-device, or immersive proof.
+- Apple Vision Pro / visionOS 27 Simulator: manual launch is an optional forward-compatibility canary and does not substitute for the stable 26.5 `xcodebuild test` lane.
 - Physical iPhone: no attached device was available during this validation; real Safari permission, sensor quality, orientation timing, background/return, PWA installation, and thermal evidence remain pending.
-- Physical Apple Vision Pro: no paired device was available; comfort, tracking, performance, and immersive-lifecycle evidence remain pending.
+- Physical Apple Vision Pro: no paired device was available; window comfort, tracking, control quality, and performance remain pending. The current host declares a `WindowGroup`, not an `ImmersiveSpace`.
 - Reality Composer Pro assets: none are admitted. The procedural `RealityView` adapter compiles and tests without a duplicate native asset resolver.
 
 ## Proof commands
 
-The repository-owned check always runs Swift tests, an available iOS Simulator test destination, and the native visionOS cross-compile gate. It runs Vision Pro simulator tests only when Xcode and `simctl` expose a true native visionOS destination; compatibility-only Designed-for-iPad/iPhone destinations are rejected:
+The repository-owned check always runs Swift tests, an available iOS Simulator test destination, the native visionOS cross-compile gate, and the source-owned app UI suite on an exact-SDK native Apple Vision Pro destination. Compatibility-only Designed-for-iPad/iPhone destinations are rejected:
 
 ```sh
 npm run native:check
@@ -98,10 +101,12 @@ swift build --package-path native \
   --triple arm64-apple-xros2.0-simulator \
   --sdk '<installed xrsimulator SDK path>'
 
-# Conditional: only when a true native Vision Pro destination is available.
-xcodebuild -scheme GameXRNative \
-  -destination '<native Apple Vision Pro simulator id>' \
-  CODE_SIGNING_ALLOWED=NO test
+xcodebuild \
+  -project native/App/GameXRVisionApp.xcodeproj \
+  -scheme GameXRVisionApp \
+  -sdk xrsimulator \
+  -destination 'id=<native Apple Vision Pro / visionOS 26.5 simulator id>' \
+  test
 ```
 
-The conditional final command uses a native destination selected at runtime; no device identifier belongs in source.
+The final command uses a native destination selected at runtime; no device identifier belongs in source. It intentionally retains simulator signing because the UI-test app must install and launch.

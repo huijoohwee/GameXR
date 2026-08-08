@@ -58,7 +58,7 @@ These tools register with `navigator.modelContext` when a host provides it and r
 
 ## Apple adapter
 
-[`native/Package.swift`](native/Package.swift) provides `GameXRNative`, a Swift 6 library with:
+[`native/Package.swift`](native/Package.swift) provides `GameXRNative`, a Swift 6 library for iOS and visionOS with:
 
 - the same `Codable` scene manifest;
 - the same `airvio.apple-spatial-input/v1` calibration and filtering semantics as Safari;
@@ -66,11 +66,15 @@ These tools register with `navigator.modelContext` when a host provides it and r
 - a SwiftUI `RealityView` with touch and Core Motion controls;
 - iOS 18 and visionOS 2 deployment floors, compiled with stable Xcode 26.6 / SDK 26.5.
 
+[`native/App/GameXRVisionApp.xcodeproj`](native/App/GameXRVisionApp.xcodeproj) is the repository-owned windowed visionOS host. Its only backend package product is local `GameXRNative`; it embeds the canonical [`shared/default-scene.json`](shared/default-scene.json) source as an application resource and fails closed if that resource is missing or invalid. Its planar presentation wrapper owns only window scale, preview orientation, and planar material ordering, leaving the canonical simulation root untouched. The shared scheme includes an XCUITest for app launch, manifest success/error routing, the RealityView host, Fly/Pause, Reset, and a stationary paused hold.
+
 ```sh
 npm run native:check
 ```
 
-A host app must provide a meaningful `NSMotionUsageDescription`; the adapter fails closed when that key or processed device motion is unavailable. A future native resolver can admit Reality Composer Pro content behind reviewed semantic IDs; the current native target is an explicitly bounded procedural adapter. Beta-only Reality Composer Pro 3 and OS 27 APIs are not production dependencies. See [`docs/APPLE-COMPATIBILITY.md`](docs/APPLE-COMPATIBILITY.md).
+On a matching Apple Vision Pro / visionOS 26.5 Simulator, this check runs the source-owned app UI suite. A visionOS 27 launch is forward-compatibility canary evidence only; neither simulator lane is physical Apple Vision Pro certification or immersive-space proof.
+
+The repository host supplies a meaningful `NSMotionUsageDescription`; any additional host must do the same. The adapter fails closed when that key or processed device motion is unavailable. A future native resolver can admit Reality Composer Pro content behind reviewed semantic IDs; the current native target is an explicitly bounded procedural adapter. Out-of-baseline Reality Composer Pro 3 and OS 27 APIs are not Production dependencies. See [`docs/APPLE-COMPATIBILITY.md`](docs/APPLE-COMPATIBILITY.md).
 
 The immutable Knowgrph dependency and frontend/backend boundary are recorded in [`docs/KNOWGRPH-HARMONIZATION.md`](docs/KNOWGRPH-HARMONIZATION.md).
 

@@ -81,7 +81,7 @@ public struct GameXRSceneManifest: Codable, Equatable, Sendable {
         validateNumber(camera.far, at: "camera.far", range: 50...5000, issues: &issues)
         if camera.far <= camera.near { issues.append("camera.far must be greater than camera.near") }
         validateNumber(camera.chaseDistance, at: "camera.chaseDistance", range: 2...80, issues: &issues)
-        validateNumber(camera.chaseHeight, at: "camera.chaseHeight", range: -20...40, issues: &issues)
+        validateNumber(camera.chaseHeight, at: "camera.chaseHeight", range: 0.1...40, issues: &issues)
         validateNumber(camera.lookAhead, at: "camera.lookAhead", range: 0...100, issues: &issues)
         validateNumber(camera.damping, at: "camera.damping", range: 0.1...30, issues: &issues)
 

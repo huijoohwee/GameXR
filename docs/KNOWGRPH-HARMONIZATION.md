@@ -17,6 +17,8 @@ GameXR's runtime/WebMCP inspection may report the actual Three.js chase-camera `
 
 GameXR contains no duplicate Apple filter, browser sensor lifecycle, flight integrator, follow-camera resolver, RealityKit flight system, or canonical schema source. The build copies the installed package schema into the release output; it does not maintain a downstream fork.
 
+The source-owned windowed visionOS host owns `WindowGroup` lifecycle, `Info.plist`, canonical-manifest resource bundling, an explicit planar presentation container, and UI-test wiring only. Its backend dependency is local `GameXRNative`, whose workspace resolution retains the same immutable Knowgrph revision. The host introduces no second manifest, asset resolver, spatial-input implementation, flight model, camera resolver, or RealityKit flight system. Pause removes the control component from Knowgrph's system query instead of adding a downstream integrator; Fly restores that canonical-system admission.
+
 ## Update procedure
 
 Admit a new protected Knowgrph revision first, regenerate the npm tarball, verify its digest, update both npm and SwiftPM pins together, then run `npm run check`, `npm run check:apex`, and `npm run native:check`. Do not float either dependency or add compatibility aliases.

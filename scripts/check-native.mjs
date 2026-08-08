@@ -5,6 +5,9 @@ import { spawnSync } from 'node:child_process'
 
 const projectRoot = resolve(import.meta.dirname, '..')
 const nativeRoot = resolve(projectRoot, 'native')
+const visionHostProjectRelativePath = 'native/App/GameXRVisionApp.xcodeproj'
+const visionHostProject = resolve(projectRoot, visionHostProjectRelativePath)
+const visionHostScheme = 'GameXRVisionApp'
 const visionSimulatorTriple = 'arm64-apple-xros2.0-simulator'
 const proof = {
   schema: 'gamexr.native-check/v1',
@@ -70,32 +73,40 @@ function simulatorId(runtimeName, preferredName, sdkVersion) {
   throw new Error(`No available ${runtimeName} simulator was found. Install a stable simulator runtime in Xcode.`)
 }
 
-function nativeVisionSimulatorDestination() {
+function visionHostSimulatorDestination() {
+  const sdkVersion = capture('xcrun', ['--sdk', 'xrsimulator', '--show-sdk-version']).trim()
   const destinations = capture('xcodebuild', [
-    '-scheme', 'GameXRNative',
+    '-project', visionHostProject,
+    '-scheme', visionHostScheme,
     '-sdk', 'xrsimulator',
     '-showdestinations',
-  ], nativeRoot)
-  const candidates = destinations.split('\n').filter((line) => (
+  ])
+  const availableDestinations = destinations.split(/\n\s*Ineligible destinations for the [^:]+:\s*\n/i)[0]
+  const candidates = availableDestinations.split('\n').filter((line) => (
     line.includes('platform:visionOS Simulator')
     && line.includes('name:Apple Vision Pro')
     && !line.includes('error:')
+    && !/variant:\s*Designed for/i.test(line)
   ))
-  const nativeCandidate = candidates.find((line) => !/variant:\s*Designed for/i.test(line))
-  const destinationId = nativeCandidate?.match(/\bid:([^,}]+)/)?.[1]?.trim()
+  const exactSdkCandidate = candidates.find((line) => (
+    line.match(/\bOS:([^,}]+)/)?.[1]?.trim() === sdkVersion
+  ))
+  const destinationId = exactSdkCandidate?.match(/\bid:([^,}]+)/)?.[1]?.trim()
 
   if (!destinationId || destinationId.includes('placeholder')) {
     return {
       availability: 'unavailable',
-      reason: candidates.some((line) => /variant:\s*Designed for/i.test(line))
-        ? 'only-designed-for-ipad-iphone-destinations'
-        : 'no-native-apple-vision-pro-destination',
+      reason: candidates.length > 0
+        ? 'no-eligible-apple-vision-pro-destination-for-xrsimulator-sdk'
+        : 'no-eligible-apple-vision-pro-destination',
+      sdkVersion,
     }
   }
 
   const simulatorList = JSON.parse(capture('xcrun', ['simctl', 'list', 'devices', 'available', '--json']))
+  const exactRuntime = `xrOS-${sdkVersion.replaceAll('.', '-')}`
   const isAvailableNativeDevice = Object.entries(simulatorList.devices ?? {}).some(([runtime, devices]) => (
-    runtime.includes('xrOS-')
+    runtime.includes(exactRuntime)
     && Array.isArray(devices)
     && devices.some((device) => (
       device.udid === destinationId
@@ -107,11 +118,12 @@ function nativeVisionSimulatorDestination() {
   if (!isAvailableNativeDevice) {
     return {
       availability: 'unavailable',
-      reason: 'native-destination-not-available-in-simctl',
+      reason: 'eligible-destination-not-available-in-simctl',
+      sdkVersion,
     }
   }
 
-  return { availability: 'available', destinationId }
+  return { availability: 'available', destinationId, sdkVersion }
 }
 
 function writeProof() {
@@ -193,42 +205,74 @@ try {
     '--sdk', capture('xcrun', ['--sdk', 'xrsimulator', '--show-sdk-path']).trim(),
   ])
 
-  const visionSimulator = nativeVisionSimulatorDestination()
-  if (visionSimulator.availability === 'available') {
-    recordCheck({
-      id: 'visionos-native-simulator-tests',
-      platform: 'visionOS',
-      destinationKind: 'native-simulator',
-      destinationId: visionSimulator.destinationId,
-      availability: 'available',
-      compilation: 'passed',
-      execution: 'passed',
-      outcome: 'executed',
-    }, {
-      compilation: 'unknown',
-      execution: 'unknown',
-    }, 'xcodebuild', [
-      '-quiet', '-scheme', 'GameXRNative',
-      '-sdk', 'xrsimulator',
-      '-destination', `id=${visionSimulator.destinationId}`,
-      '-derivedDataPath', resolve(temporaryRoot, 'visionos-tests'),
-      'CODE_SIGNING_ALLOWED=NO', 'test',
-    ], nativeRoot)
-  } else {
+  let visionHostSimulator
+  try {
+    visionHostSimulator = visionHostSimulatorDestination()
+  } catch (error) {
     proof.checks.push({
-      id: 'visionos-native-simulator-tests',
+      id: 'visionos-host-ui-tests',
       platform: 'visionOS',
-      destinationKind: 'native-simulator',
+      destinationKind: 'application-host-simulator',
+      project: visionHostProjectRelativePath,
+      scheme: visionHostScheme,
+      availability: 'unknown',
+      compilation: 'not-run',
+      execution: 'not-run',
+      outcome: 'failed',
+      reason: 'destination-discovery-failed',
+    })
+    throw error
+  }
+
+  if (visionHostSimulator.availability !== 'available') {
+    proof.checks.push({
+      id: 'visionos-host-ui-tests',
+      platform: 'visionOS',
+      destinationKind: 'application-host-simulator',
+      project: visionHostProjectRelativePath,
+      scheme: visionHostScheme,
+      sdkVersion: visionHostSimulator.sdkVersion,
       availability: 'unavailable',
       compilation: 'not-run',
       execution: 'not-run',
-      outcome: 'unavailable',
-      reason: visionSimulator.reason,
+      outcome: 'failed',
+      reason: visionHostSimulator.reason,
     })
+    throw new Error(
+      `No eligible Apple Vision Pro destination is available for xrsimulator SDK ${visionHostSimulator.sdkVersion}.`,
+    )
   }
 
+  recordCheck({
+    id: 'visionos-host-ui-tests',
+    platform: 'visionOS',
+    destinationKind: 'application-host-simulator',
+    project: visionHostProjectRelativePath,
+    scheme: visionHostScheme,
+    sdkVersion: visionHostSimulator.sdkVersion,
+    destinationId: visionHostSimulator.destinationId,
+    availability: 'available',
+    compilation: 'passed',
+    execution: 'passed',
+    outcome: 'executed',
+  }, {
+    compilation: 'unknown',
+    execution: 'unknown',
+  }, 'xcodebuild', [
+    '-quiet',
+    '-project', visionHostProject,
+    '-scheme', visionHostScheme,
+    '-sdk', 'xrsimulator',
+    '-destination', `id=${visionHostSimulator.destinationId}`,
+    '-derivedDataPath', resolve(temporaryRoot, 'visionos-host-ui-tests'),
+    '-only-testing:GameXRVisionAppUITests',
+    'test',
+  ])
+
   proof.result = 'passed'
-  process.stdout.write('native check passed: Swift and iOS Simulator tests; visionOS xrsimulator compile gate\n')
+  process.stdout.write(
+    'native check passed: Swift and iOS Simulator tests; visionOS xrsimulator compile and host UI-test gates\n',
+  )
 } catch (error) {
   proof.result = 'failed'
   proof.error = error instanceof Error ? error.message : String(error)

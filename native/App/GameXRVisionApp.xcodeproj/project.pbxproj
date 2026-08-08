@@ -1,0 +1,402 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		000000000000000000000401 /* GameXRVisionApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000301 /* GameXRVisionApp.swift */; };
+		000000000000000000000402 /* GameXRHostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000302 /* GameXRHostView.swift */; };
+		000000000000000000000403 /* default-scene.json in Resources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000304 /* default-scene.json */; };
+		000000000000000000000404 /* GameXRNative in Frameworks */ = {isa = PBXBuildFile; productRef = 000000000000000000000601 /* GameXRNative */; };
+		000000000000000000000405 /* GameXRVisionAppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000306 /* GameXRVisionAppUITests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		000000000000000000000701 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 000000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 000000000000000000000010;
+			remoteInfo = GameXRVisionApp;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		000000000000000000000301 /* GameXRVisionApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameXRVisionApp.swift; sourceTree = "<group>"; };
+		000000000000000000000302 /* GameXRHostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameXRHostView.swift; sourceTree = "<group>"; };
+		000000000000000000000303 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		000000000000000000000304 /* default-scene.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = default-scene.json; path = ../../shared/default-scene.json; sourceTree = "<group>"; };
+		000000000000000000000305 /* GameXRVisionApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GameXRVisionApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		000000000000000000000306 /* GameXRVisionAppUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameXRVisionAppUITests.swift; sourceTree = "<group>"; };
+		000000000000000000000307 /* GameXRVisionAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GameXRVisionAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		000000000000000000000502 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				000000000000000000000404 /* GameXRNative in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		000000000000000000000512 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		000000000000000000000200 = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000000201 /* Sources */,
+				000000000000000000000202 /* UITests */,
+				000000000000000000000303 /* Info.plist */,
+				000000000000000000000304 /* default-scene.json */,
+				000000000000000000000203 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		000000000000000000000201 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000000301 /* GameXRVisionApp.swift */,
+				000000000000000000000302 /* GameXRHostView.swift */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		000000000000000000000202 /* UITests */ = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000000306 /* GameXRVisionAppUITests.swift */,
+			);
+			path = UITests;
+			sourceTree = "<group>";
+		};
+		000000000000000000000203 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000000305 /* GameXRVisionApp.app */,
+				000000000000000000000307 /* GameXRVisionAppUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		000000000000000000000010 /* GameXRVisionApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 000000000000000000000112 /* Build configuration list for PBXNativeTarget "GameXRVisionApp" */;
+			buildPhases = (
+				000000000000000000000501 /* Sources */,
+				000000000000000000000502 /* Frameworks */,
+				000000000000000000000503 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = GameXRVisionApp;
+			packageProductDependencies = (
+				000000000000000000000601 /* GameXRNative */,
+			);
+			productName = GameXRVisionApp;
+			productReference = 000000000000000000000305 /* GameXRVisionApp.app */;
+			productType = "com.apple.product-type.application";
+		};
+		000000000000000000000011 /* GameXRVisionAppUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 000000000000000000000122 /* Build configuration list for PBXNativeTarget "GameXRVisionAppUITests" */;
+			buildPhases = (
+				000000000000000000000511 /* Sources */,
+				000000000000000000000512 /* Frameworks */,
+				000000000000000000000513 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				000000000000000000000700 /* PBXTargetDependency */,
+			);
+			name = GameXRVisionAppUITests;
+			packageProductDependencies = (
+			);
+			productName = GameXRVisionAppUITests;
+			productReference = 000000000000000000000307 /* GameXRVisionAppUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		000000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2660;
+				LastUpgradeCheck = 2660;
+				TargetAttributes = {
+					000000000000000000000010 = {
+						CreatedOnToolsVersion = 26.6;
+					};
+					000000000000000000000011 = {
+						CreatedOnToolsVersion = 26.6;
+						TestTargetID = 000000000000000000000010;
+					};
+				};
+			};
+			buildConfigurationList = 000000000000000000000102 /* Build configuration list for PBXProject "GameXRVisionApp" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 000000000000000000000200;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				000000000000000000000600 /* XCLocalSwiftPackageReference ".." */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 000000000000000000000203 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				000000000000000000000010 /* GameXRVisionApp */,
+				000000000000000000000011 /* GameXRVisionAppUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		000000000000000000000503 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				000000000000000000000403 /* default-scene.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		000000000000000000000513 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		000000000000000000000501 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				000000000000000000000401 /* GameXRVisionApp.swift in Sources */,
+				000000000000000000000402 /* GameXRHostView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		000000000000000000000511 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				000000000000000000000405 /* GameXRVisionAppUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		000000000000000000000700 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 000000000000000000000010 /* GameXRVisionApp */;
+			targetProxy = 000000000000000000000701 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		000000000000000000000100 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = xros;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		000000000000000000000101 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = xros;
+				SWIFT_COMPILATION_MODE = wholemodule;
+		};
+			name = Release;
+		};
+		000000000000000000000110 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = co.airvio.gamexr.visionos;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "xros xrsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 7;
+				XROS_DEPLOYMENT_TARGET = 2.0;
+			};
+			name = Debug;
+		};
+		000000000000000000000111 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				INFOPLIST_FILE = Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = co.airvio.gamexr.visionos;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "xros xrsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 7;
+				XROS_DEPLOYMENT_TARGET = 2.0;
+			};
+			name = Release;
+		};
+		000000000000000000000120 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = co.airvio.gamexr.visionos.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "xros xrsimulator";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 7;
+				TEST_TARGET_NAME = GameXRVisionApp;
+				XROS_DEPLOYMENT_TARGET = 2.0;
+			};
+			name = Debug;
+		};
+		000000000000000000000121 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = co.airvio.gamexr.visionos.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "xros xrsimulator";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 7;
+				TEST_TARGET_NAME = GameXRVisionApp;
+				XROS_DEPLOYMENT_TARGET = 2.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		000000000000000000000102 /* Build configuration list for PBXProject "GameXRVisionApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				000000000000000000000100 /* Debug */,
+				000000000000000000000101 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		000000000000000000000112 /* Build configuration list for PBXNativeTarget "GameXRVisionApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				000000000000000000000110 /* Debug */,
+				000000000000000000000111 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		000000000000000000000122 /* Build configuration list for PBXNativeTarget "GameXRVisionAppUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				000000000000000000000120 /* Debug */,
+				000000000000000000000121 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		000000000000000000000600 /* XCLocalSwiftPackageReference ".." */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ..;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		000000000000000000000601 /* GameXRNative */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = GameXRNative;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 000000000000000000000001 /* Project object */;
+}

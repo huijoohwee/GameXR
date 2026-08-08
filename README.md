@@ -64,15 +64,17 @@ These tools register with `navigator.modelContext` when a host provides it and r
 - the same `airvio.apple-spatial-input/v1` calibration and filtering semantics as Safari;
 - RealityKit components and a fixed-step `System`;
 - a SwiftUI `RealityView` with touch and Core Motion controls;
-- iOS 18 and visionOS 2 deployment floors, compiled with stable Xcode 26.6 / SDK 26.5.
+- iOS 18 and visionOS 2 deployment floors, retained across stable Xcode 26.6 / SDK 26.5 and Xcode 27.0 beta 4 / SDK 27.0.
 
-[`native/App/GameXRVisionApp.xcodeproj`](native/App/GameXRVisionApp.xcodeproj) is the repository-owned windowed visionOS host. Its only backend package product is local `GameXRNative`; it embeds the canonical [`shared/default-scene.json`](shared/default-scene.json) source as an application resource and fails closed if that resource is missing or invalid. Its planar presentation wrapper owns only window scale, preview orientation, and planar material ordering, leaving the canonical simulation root untouched. The shared scheme includes an XCUITest for app launch, manifest success/error routing, the RealityView host, Fly/Pause, Reset, and a stationary paused hold.
+[`native/App/GameXRVisionApp.xcodeproj`](native/App/GameXRVisionApp.xcodeproj) is the repository-owned visionOS host. Its information property list selects `UISceneSessionRoleImmersiveSpaceApplication` as the preferred default scene role and `UIImmersionStyleFull` as the initial style, so a cold app launch enters the first SwiftUI `.full` `ImmersiveSpace` directly without an entry window or **Enter Full Scene** gate. A suppressed-by-role `WindowGroup` exists only as recovery UI after the person exits or the system dismisses the space. The host embeds the canonical [`shared/default-scene.json`](shared/default-scene.json), fails closed if it is missing or invalid, and projects one deterministic world root containing the configured background, 900-star field, 32-asteroid field, planet, light, and one Knowgrph-driven ship. The cross-runtime fixture fixes the complete default placement stream at digest `14237543821781407139` and verifies the ship, Knowgrph flight trace, procedural animation, and engine-audio target contracts in both TypeScript and Swift. The host contains no WebView, browser wrapper, second flight integrator, chase camera, or asset resolver.
 
 ```sh
 npm run native:check
 ```
 
-On a matching Apple Vision Pro / visionOS 26.5 Simulator, this check runs the source-owned app UI suite. A visionOS 27 launch is forward-compatibility canary evidence only; neither simulator lane is physical Apple Vision Pro certification or immersive-space proof.
+On a matching native Apple Vision Pro simulator, this check runs seven gates: the immersive source contract, host Swift package tests, iOS Simulator tests, visionOS cross-build, visionOS Simulator package tests, host XCUITest, and built/installed bundle verification. Both exact matrices pass all seven gates: stable Xcode 26.6 build `17F113` with visionOS SDK/runtime builds `23O469`/`23O470`, and Xcode 27.0 beta 4 build `27A5228h` with visionOS SDK/runtime builds `24M5326e`/`24M5326f`. The built and installed `Info.plist` hashes match within each lane: `3cc93a0d29d8e7061c5b61f8b70b485cec20bf2494fd1b5de363bfe54c715b12` on stable and `aa6864c39e08d8c2b43a2e4734730f10cd8a5d72b0911845dbaea4db188be85d` on beta.
+
+This is 100% coverage of the defined default-scene source contract, not pixel or framebuffer identity. Three.js points, exponential fog, physical-material transmission, Web Audio, its monoscopic camera, and its WebGL renderer do not have sample-identical RealityKit, AVFAudio, stereo head-tracked camera, or visionOS compositor outputs. See [`docs/APPLE-COMPATIBILITY.md`](docs/APPLE-COMPATIBILITY.md) for the explicit fidelity boundary.
 
 The repository host supplies a meaningful `NSMotionUsageDescription`; any additional host must do the same. The adapter fails closed when that key or processed device motion is unavailable. A future native resolver can admit Reality Composer Pro content behind reviewed semantic IDs; the current native target is an explicitly bounded procedural adapter. Out-of-baseline Reality Composer Pro 3 and OS 27 APIs are not Production dependencies. See [`docs/APPLE-COMPATIBILITY.md`](docs/APPLE-COMPATIBILITY.md).
 
@@ -87,7 +89,7 @@ npm run test:webkit
 npm run native:check
 ```
 
-`npm run check` type-checks, runs focused tests, creates the `/gamexr/` production bundle, seals a deterministic local artifact manifest, and enforces chunk, initial-payload, schema, offline-shell, and zero-spend contracts.
+The current source candidate passes all 40 focused tests, all eight local WebKit checks, and both `/gamexr/` and Apex release checks. `npm run check` type-checks, runs the focused tests, creates the `/gamexr/` production bundle, seals a deterministic local artifact manifest, and enforces chunk, initial-payload, schema, offline-shell, and zero-spend contracts.
 
 The `/gamexr/` build registers a full-build-digest-addressed service worker. The emitted worker binds that exact digest, so an assets-only release still produces a discoverable worker revision without placing the worker inside its own circular precache hash. Before a cache becomes ready, the worker validates the precache aggregate, exact cache inventory, and every declared response's byte count and SHA-256. The sealed cache is never overwritten by an unverified navigation or runtime fetch. Local Playwright WebKit uses a disposable origin to verify cache hashes and genuine origin-outage navigation/reload. Exact external runs verify shipped bytes and online service-worker/cache convergence without disrupting the deployed origin. Neither automated browser proof is physical-device certification. Apex mode deliberately disables service-worker registration because `/` is shared production scope; `npm run dev:apex` remains useful for local route parity, but it is not an offline-install claim.
 
@@ -106,4 +108,4 @@ This verifies shipped bytes, online service-worker/cache convergence, browser We
 
 Dev output is written to `dist/gamexr`. It is not a Production or Cloudflare authorization. The protected production mirror at `huijoohwee/content/gamexr` owns publication, and the Git-connected `joohwee` Pages project is the single forward-deployment owner. GameXR source never writes that mirror or deploys `airvio.co` directly.
 
-[`docs/RELEASE.md`](docs/RELEASE.md) records the protected projection, preview, exact authorization, Git deployment, smoke, and rollback contract. Production is live at `/gamexr`; physical iPhone and Vision Pro certification remains a separate promotion gate.
+[`docs/RELEASE.md`](docs/RELEASE.md) records the protected projection, preview, exact authorization, Git deployment, smoke, and rollback contract. A historical deployment is live at `/gamexr`, but this current candidate is neither release-authorized nor exact-candidate live-verified. Physical iPhone and Vision Pro certification remains a separate promotion gate.

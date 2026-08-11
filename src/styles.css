@@ -26,6 +26,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 
 .app-shell { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; height: 100dvh; min-height: 36rem; background: radial-gradient(circle at 70% 20%, #122449 0, #030612 42%); }
 .topbar { z-index: 10; display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 0.75rem; padding: calc(0.65rem + var(--safe-top)) 0.9rem 0.65rem; border-bottom: 1px solid var(--line); background: rgba(3, 6, 18, 0.82); backdrop-filter: blur(18px); }
+.topbar[data-persistent-strategy="true"] { grid-template-columns: 1fr auto auto auto; }
 .brand { display: flex; align-items: center; gap: 0.62rem; width: max-content; color: var(--ink); text-decoration: none; }
 .brand img { border-radius: 0.65rem; box-shadow: 0 0 20px rgba(88, 219, 207, 0.18); }
 .brand span { display: grid; line-height: 1.05; }
@@ -61,6 +62,33 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .transport button[data-state="requesting-permission"], .transport button[data-state="calibrating"] { border-color: rgba(255, 179, 90, 0.65); color: var(--amber); }
 .transport button[data-state="running"] { border-color: rgba(88, 219, 207, 0.72); color: var(--mint); }
 .transport button[data-state="denied"], .transport button[data-state="error"] { border-color: rgba(255, 114, 136, 0.55); color: #ff93a5; }
+.strategy-panel { position: absolute; z-index: 7; top: 0.75rem; bottom: 0.75rem; left: 0.75rem; width: min(26rem, calc(100vw - 1.5rem)); padding: 1rem; overflow: auto; overscroll-behavior: contain; border: 1px solid rgba(158,190,218,0.28); border-radius: 1.2rem; background: linear-gradient(155deg, rgba(7, 16, 34, 0.97), rgba(4, 9, 21, 0.93)); box-shadow: 0 24px 70px rgba(0, 0, 0, 0.52); backdrop-filter: blur(22px); }
+.strategy-panel[hidden], .strategy-live[hidden] { display: none; }
+.strategy-panel > header { display: flex; align-items: start; justify-content: space-between; gap: 0.8rem; padding-bottom: 0.8rem; border-bottom: 1px solid var(--line); }
+.strategy-panel h2 { margin: 0; font-size: 1.45rem; letter-spacing: -0.04em; }
+.strategy-panel .eyebrow { margin-bottom: 0.35rem; }
+.strategy-visuals { margin-top: 0.85rem; border-top: 1px solid var(--line); padding-top: 0.75rem; }
+.strategy-reset { margin-top: 0.8rem; }
+.strategy-visuals summary { cursor: pointer; color: var(--muted); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.strategy-visual-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.65rem; margin-top: 0.7rem; }
+.strategy-visual-grid label { display: grid; gap: 0.3rem; color: var(--muted); font-size: 0.72rem; }
+.strategy-visual-grid input[type="color"] { width: 100%; min-height: 2rem; padding: 0.1rem; }
+.strategy-faction-colors { display: grid; grid-column: 1 / -1; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.65rem; }
+.strategy-bootstrap, .strategy-orders { display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; margin-top: 0.9rem; }
+.strategy-bootstrap label, .strategy-orders label { display: grid; gap: 0.32rem; color: var(--muted); font-size: 0.68rem; }
+.strategy-bootstrap button { grid-column: 1 / -1; }
+.strategy-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.45rem; margin-top: 0.9rem; }
+.strategy-metrics span { display: grid; min-width: 0; padding: 0.62rem; border: 1px solid var(--line); border-radius: 0.75rem; background: rgba(4, 10, 24, 0.64); }
+.strategy-metrics small { color: var(--muted); font: 700 0.52rem/1 ui-monospace, monospace; letter-spacing: 0.1em; }
+.strategy-metrics strong { margin-top: 0.28rem; overflow: hidden; color: var(--mint); font: 750 0.8rem/1 ui-monospace, monospace; text-overflow: ellipsis; }
+.strategy-orders button { padding-inline: 0.55rem; }
+.strategy-territories { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.38rem; margin-top: 0.8rem; }
+.strategy-territory { min-width: 0; padding: 0.52rem; border: 1px solid var(--line); border-radius: 0.7rem; background: rgba(255,255,255,0.025); }
+.strategy-territory strong, .strategy-territory small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.strategy-territory strong { font: 700 0.62rem/1.2 ui-monospace, monospace; }
+.strategy-territory small { margin-top: 0.3rem; color: var(--muted); font-size: 0.58rem; }
+.strategy-actions { display: flex; gap: 0.5rem; margin-top: 0.8rem; }
+.strategy-actions button { flex: 1; }
 .touch-controls { position: absolute; z-index: 4; right: 0; bottom: 0; left: 0; display: flex; align-items: end; justify-content: space-between; padding: 1rem 1rem calc(1rem + var(--safe-bottom)); pointer-events: none; }
 .joystick-wrap, .throttle-wrap { pointer-events: auto; }
 .joystick-wrap { display: grid; justify-items: center; gap: 0.35rem; }
@@ -123,6 +151,7 @@ select, input { min-height: 2.5rem; padding: 0.5rem 0.65rem; }
   .app-shell { min-height: 31rem; }
   .runtime-badge { display: none; }
   .topbar { grid-template-columns: 1fr auto; }
+  .topbar[data-persistent-strategy="true"] { grid-template-columns: 1fr auto auto; }
   .telemetry span { min-width: 3rem; padding-inline: 0.4rem; }
   .telemetry span:nth-child(3) { display: none; }
   .launch-card { top: 47%; }
@@ -134,6 +163,8 @@ select, input { min-height: 2.5rem; padding: 0.5rem 0.65rem; }
   .throttle-wrap { width: 46vw; }
   .stage-status { bottom: calc(8.4rem + var(--safe-bottom)); display: block; max-width: min(72vw, 22rem); padding: 0.38rem 0.55rem; border: 1px solid var(--line); border-radius: 0.65rem; background: rgba(4, 10, 24, 0.72); backdrop-filter: blur(10px); }
   .runtime-footer span:last-child { display: none; }
+  .strategy-panel { top: 0; right: 0; bottom: 0; left: 0; width: 100%; border: 0; border-radius: 0; }
+  .strategy-visual-grid, .strategy-faction-colors { grid-template-columns: 1fr; }
   .config-dialog { width: 100vw; height: 100dvh; max-height: none; border: 0; border-radius: 0; }
   .control-grid { grid-template-columns: 1fr; }
   .wide-button { grid-column: auto; }

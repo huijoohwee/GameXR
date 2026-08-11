@@ -1,4 +1,5 @@
 import './styles.css'
+import { GameOsModeRegistry } from 'grph-shared/game-os/index'
 import { getDefaultSceneManifest, validateSceneManifest } from './config/manifest.ts'
 import type { SceneManifest } from './config/types.ts'
 import { installWebMcpBridge } from './mcp/WebMcpBridge.ts'
@@ -6,9 +7,13 @@ import { GAME_XR_WEB_MCP_TOOLS } from './mcp/contracts.ts'
 import { GameRuntime } from './runtime/GameRuntime.ts'
 import { LocalDatabase } from './storage/LocalDatabase.ts'
 import { AppController } from './ui/AppController.ts'
-import { renderShell } from './ui/shell.ts'
+import { PersistentStrategyController } from './ui/PersistentStrategyController.ts'
+import { createGameXrPageHideCleanup, renderShell } from './ui/shell.ts'
 
 const SERVICE_WORKER_READY_TIMEOUT_MILLISECONDS = 15_000
+const PERSISTENT_STRATEGY_ENABLED = import.meta.env.VITE_GAME_XR_PERSISTENT_STRATEGY_ENABLED !== '0'
+export const GAME_XR_FLIGHT_MODE_IDENTITY = 'gamexr-flight' as const
+export const GAME_XR_FLIGHT_WORLD_SCHEMA = 'gamexr.flight-runtime/v1' as const
 
 async function loadInitialManifest(database: LocalDatabase): Promise<{ manifest: SceneManifest; warning?: string }> {
   const activeSceneId = await database.getActiveSceneId()
@@ -68,14 +73,39 @@ async function registerOfflineShell(): Promise<void> {
 async function boot(): Promise<void> {
   const root = document.getElementById('app')
   if (!root) throw new Error('GameXR application root is missing.')
-  const canvas = renderShell(root)
+  const canvas = renderShell(root, {
+    persistentStrategyEnabled: PERSISTENT_STRATEGY_ENABLED,
+    basePath: __GAME_XR_BASE_PATH__,
+  })
   const database = new LocalDatabase()
   const { manifest, warning } = await loadInitialManifest(database)
-  const runtime = new GameRuntime(canvas, manifest, database)
+  const modeRegistry = PERSISTENT_STRATEGY_ENABLED ? new GameOsModeRegistry() : null
+  const claimFlightSurface = () => {
+    if (modeRegistry?.inspectSurface()?.identity !== GAME_XR_FLIGHT_MODE_IDENTITY) {
+      modeRegistry?.activate(GAME_XR_FLIGHT_MODE_IDENTITY, null)
+    }
+  }
+  const runtime = new GameRuntime(canvas, manifest, database, claimFlightSurface)
+  const unregisterFlightMode = modeRegistry?.registerMode({
+    identity: GAME_XR_FLIGHT_MODE_IDENTITY,
+    worldSchema: GAME_XR_FLIGHT_WORLD_SCHEMA,
+    persistence: { continuity: 'none', lease: 'none' },
+    surface: { overlayKind: 'gameplay' },
+    adaptInput: () => ({}),
+    createOverlay: () => ({ overlayId: 'gamexr:flight', overlayKind: 'gameplay' }),
+    exit: () => runtime.pause(),
+  }) ?? null
   await runtime.initialize()
+  const strategy = modeRegistry
+    ? await PersistentStrategyController.create(runtime, modeRegistry)
+    : null
+  document.documentElement.dataset.gamexrPersistentStrategy = strategy ? 'enabled' : 'disabled'
+  strategy?.initialize()
   const controller = new AppController(runtime, database)
   await controller.initialize()
-  const bridge = installWebMcpBridge(runtime)
+  const bridge = installWebMcpBridge(runtime, strategy?.tools ?? [], {
+    persistentStrategyEnabled: Boolean(strategy),
+  })
   const controlTool = bridge.tools.find((tool) => tool.name === GAME_XR_WEB_MCP_TOOLS.control)
   if (!controlTool) throw new Error('GameXR control tool was not installed.')
 
@@ -87,18 +117,24 @@ async function boot(): Promise<void> {
     control: (input) => controlTool.execute(input),
   }
   document.documentElement.dataset.gamexrVersion = __GAME_XR_VERSION__
+  const toolOutput = document.getElementById('webmcp-tools')
+  if (toolOutput) toolOutput.textContent = bridge.tools.map((tool) => tool.name).join(' · ')
   if (warning) {
     const status = document.getElementById('stage-status')
     if (status) status.textContent = warning
   }
   await registerOfflineShell()
 
-  window.addEventListener('pagehide', (event) => {
-    if (event.persisted) return
-    controller.dispose()
-    bridge.dispose()
-    void runtime.dispose()
-  }, { once: true })
+  window.addEventListener('pagehide', createGameXrPageHideCleanup({
+    disposeController: () => controller.dispose(),
+    disposeBridge: () => bridge.dispose(),
+    disposeStrategy: () => strategy?.dispose() ?? Promise.resolve(),
+    disposeRuntime: () => {
+      unregisterFlightMode?.()
+      return runtime.dispose()
+    },
+    reportFailure: (error: unknown) => console.error('[GameXR] shutdown failed:', error),
+  }))
 }
 
 void boot().catch((error: unknown) => {

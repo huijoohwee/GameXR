@@ -18,7 +18,7 @@ jobs:
   build-candidate:
     name: Build candidate
     runs-on: macos-26
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - name: Check out exact revision
         uses: actions/checkout@v6

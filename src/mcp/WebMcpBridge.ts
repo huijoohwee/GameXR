@@ -29,8 +29,15 @@ function createFallbackModelContext(tools: WebMcpTool[]): ModelContextLike {
   }
 }
 
-export function installWebMcpBridge(runtime: GameRuntimeControlSurface): { tools: WebMcpTool[]; dispose: () => void } {
-  const tools = createWebMcpTools(runtime)
+export function installWebMcpBridge(
+  runtime: GameRuntimeControlSurface,
+  additionalTools: readonly WebMcpTool[] = [],
+  options: { persistentStrategyEnabled?: boolean } = {},
+): { tools: WebMcpTool[]; dispose: () => void } {
+  const tools = [...createWebMcpTools(runtime, options), ...additionalTools]
+  if (new Set(tools.map((tool) => tool.name)).size !== tools.length) {
+    throw new Error('GameXR WebMCP tool identities must be unique.')
+  }
   const navigatorObject = navigator as NavigatorWithModelContext
   const documentObject = document as DocumentWithModelContext
   const controllers: AbortController[] = []

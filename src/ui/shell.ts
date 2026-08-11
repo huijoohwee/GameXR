@@ -1,14 +1,119 @@
-export function renderShell(root: HTMLElement): HTMLCanvasElement {
+export type PersistentStrategySurfaceExitActions = Readonly<{
+  shouldDisposeController: () => boolean
+  clearProjection: () => void
+  stopRenewal: () => void
+  clearControllerState: () => void
+  disposeController: () => Promise<void>
+  reportCleanupFailure: (error: unknown) => void
+}>
+
+export function createPersistentStrategySurfaceExit(
+  actions: PersistentStrategySurfaceExitActions,
+): () => void {
+  let cleanupPending = false
+  return () => {
+    const shouldDispose = actions.shouldDisposeController()
+    actions.clearProjection()
+    actions.stopRenewal()
+    actions.clearControllerState()
+    if (!shouldDispose || cleanupPending) return
+    cleanupPending = true
+    void actions.disposeController()
+      .catch(actions.reportCleanupFailure)
+      .finally(() => { cleanupPending = false })
+  }
+}
+
+export type GameXrPageHideCleanupActions = Readonly<{
+  disposeController: () => void
+  disposeBridge: () => void
+  disposeStrategy: () => Promise<void>
+  disposeRuntime: () => void | Promise<void>
+  reportFailure: (error: unknown) => void
+}>
+
+export function createGameXrPageHideCleanup(
+  actions: GameXrPageHideCleanupActions,
+): (event: Pick<PageTransitionEvent, 'persisted'>) => void {
+  let cleanupStarted = false
+  return (event) => {
+    if (event.persisted || cleanupStarted) return
+    cleanupStarted = true
+    actions.disposeController()
+    actions.disposeBridge()
+    void actions.disposeStrategy()
+      .finally(actions.disposeRuntime)
+      .catch(actions.reportFailure)
+  }
+}
+
+export type GameXrShellOptions = Readonly<{
+  persistentStrategyEnabled?: boolean
+  basePath?: string
+}>
+
+export function renderShell(
+  root: HTMLElement,
+  options: GameXrShellOptions = {},
+): HTMLCanvasElement {
+  const basePath = options.basePath ?? '/'
+  const strategyMarkup = options.persistentStrategyEnabled === true ? `
+        <button class="icon-button" id="open-strategy" type="button" aria-controls="strategy-panel" aria-expanded="false">World</button>
+  ` : ''
+  const strategyPanelMarkup = options.persistentStrategyEnabled === true ? `
+        <aside class="strategy-panel" id="strategy-panel" aria-labelledby="strategy-title" hidden>
+          <header>
+            <div><p class="eyebrow">PERSISTENT STRATEGY WORLD</p><h2 id="strategy-title">Your local frontier</h2></div>
+            <button class="icon-button" id="close-strategy-panel" type="button" aria-label="Hide strategy world">Hide</button>
+          </header>
+          <div class="strategy-bootstrap" id="strategy-bootstrap">
+            <label>World ID<input id="strategy-world-id" value="local-frontier" maxlength="64" /></label>
+            <label>Seed<input id="strategy-seed" value="gamexr-offline" maxlength="80" /></label>
+            <button class="primary-button" id="strategy-open" type="button">Open or resume</button>
+          </div>
+          <div class="strategy-live" id="strategy-live" hidden>
+            <div class="strategy-metrics" aria-label="Persistent world status">
+              <span><small>TICK</small><strong id="strategy-tick">0</strong></span>
+              <span><small id="strategy-supply-label">TOTAL</small><strong id="strategy-supply">0</strong></span>
+              <span><small>DIGEST</small><strong id="strategy-digest">—</strong></span>
+            </div>
+            <div class="strategy-orders">
+              <label>Unit<select id="strategy-unit"></select></label>
+              <label>Target<select id="strategy-target"></select></label>
+              <button id="strategy-move" type="button">Move + commit</button>
+              <button id="strategy-claim" type="button">Claim + commit</button>
+            </div>
+            <div class="strategy-territories" id="strategy-territories" aria-label="Territory ownership"></div>
+            <div class="strategy-actions">
+              <button class="danger-button" id="strategy-close" type="button">Close world</button>
+            </div>
+          </div>
+          <button class="danger-button strategy-reset" id="strategy-reset" type="button">Reset local world</button>
+          <details class="strategy-visuals">
+            <summary>Visual controls</summary>
+            <div class="strategy-visual-grid">
+              <label>Layout radius<input id="strategy-layout-radius" type="range" min="2" max="10" step="0.25" value="4.2" /></label>
+              <label>Height variation<input id="strategy-height-variation" type="range" min="0" max="2" step="0.05" value="0.18" /></label>
+              <label>Territory size<input id="strategy-territory-size" type="range" min="0.2" max="1.5" step="0.05" value="0.58" /></label>
+              <label>Unit scale<input id="strategy-unit-scale" type="range" min="0.4" max="2.5" step="0.05" value="1" /></label>
+              <div class="strategy-faction-colors" id="strategy-faction-colors"></div>
+              <label>Neutral color<input id="strategy-neutral-color" type="color" value="#667085" /></label>
+            </div>
+          </details>
+          <p class="inline-status" id="strategy-status" role="status">Device-local journal ready. No network or model call is required.</p>
+        </aside>
+  ` : ''
   root.innerHTML = `
     <div class="app-shell">
-      <header class="topbar">
-        <a class="brand" href="${__GAME_XR_BASE_PATH__}" aria-label="GameXR home">
-          <img src="${__GAME_XR_BASE_PATH__}icons/gamexr.svg" alt="" width="32" height="32" />
+      <header class="topbar" data-persistent-strategy="${options.persistentStrategyEnabled === true}">
+        <a class="brand" href="${basePath}" aria-label="GameXR home">
+          <img src="${basePath}icons/gamexr.svg" alt="" width="32" height="32" />
           <span><strong>GameXR</strong><small>Spatial flight lab</small></span>
         </a>
         <div class="runtime-badge" id="runtime-badge" data-phase="idle">
           <span class="status-light"></span><span id="runtime-phase">BOOTING</span>
         </div>
+        ${strategyMarkup}
         <button class="icon-button" id="open-config" type="button" aria-label="Open configuration">Tune</button>
       </header>
 
@@ -43,6 +148,8 @@ export function renderShell(root: HTMLElement): HTMLCanvasElement {
           <button id="motion-recenter" type="button" hidden>Recenter</button>
         </section>
 
+        ${strategyPanelMarkup}
+
         <section class="touch-controls" aria-label="Touch flight controls">
           <div class="joystick-wrap">
             <div class="joystick" id="joystick" role="slider" aria-label="Pitch and roll" aria-valuemin="-1" aria-valuemax="1" tabindex="0">
@@ -61,7 +168,7 @@ export function renderShell(root: HTMLElement): HTMLCanvasElement {
       </section>
 
       <footer class="runtime-footer">
-        <span><b>WEBMCP</b> <code>gamexr.inspect_runtime</code> · <code>gamexr.control_runtime</code></span>
+        <span><b>WEBMCP</b> <code id="webmcp-tools">Loading local tools…</code></span>
         <span id="offline-status">Installable after production build</span>
       </footer>
     </div>
@@ -143,7 +250,7 @@ export function renderShell(root: HTMLElement): HTMLCanvasElement {
           </div>
           <div class="mcp-card">
             <code>/tool.catalog #tool-function @tool-function</code>
-            <p>Discover the two browser-local GameXR tools through the centralized Agentic Canvas OS vocabulary. Direct <code>/flight.sim</code> remains owned by Knowgrph and is not aliased here.</p>
+            <p>Discover the browser-local runtime and Game OS tools through the centralized Agentic Canvas OS vocabulary. Direct <code>/flight.sim</code> remains owned by Knowgrph and is not aliased here.</p>
           </div>
         </section>
       </div>

@@ -1,5 +1,13 @@
 import { applyManifestPatch } from '../config/manifest.ts'
 import type { RuntimeTelemetry, SceneManifest } from '../config/types.ts'
+import { GAME_OS_MAX_FACTION_COUNT } from 'grph-shared/game-os/index'
+import {
+  PERSISTENT_STRATEGY_FACTION_ID_MAX_LENGTH,
+  PERSISTENT_STRATEGY_FACTION_ID_PATTERN,
+  normalizePersistentStrategyFactionColors,
+  persistentStrategyRgbColor,
+  type PersistentStrategyVisualConfig,
+} from '../runtime/PersistentStrategyProjection.ts'
 
 export const GAME_XR_WEB_MCP_TOOLS = {
   inspect: 'gamexr.inspect_runtime',
@@ -36,6 +44,9 @@ export interface GameRuntimeControlSurface {
   scrubAnimation: (normalizedTime: number) => void
   selectAnimationClip: (name: string | null) => Promise<void>
   setAnimationTimeScale: (value: number) => Promise<void>
+  configurePersistentStrategyVisuals: (
+    input: Partial<PersistentStrategyVisualConfig>,
+  ) => PersistentStrategyVisualConfig
   applyManifest: (manifest: SceneManifest) => Promise<void>
 }
 
@@ -50,6 +61,11 @@ interface ControlInput {
   timeScale?: number
   clipName?: string | null
   patch?: unknown
+  strategyVisuals?: Partial<PersistentStrategyVisualConfig>
+}
+
+type MutableStrategyVisualPatch = {
+  -readonly [Key in keyof PersistentStrategyVisualConfig]?: PersistentStrategyVisualConfig[Key]
 }
 
 function record(value: unknown): Record<string, unknown> | null {
@@ -63,19 +79,74 @@ function finiteNumber(value: unknown, name: string, minimum: number, maximum: nu
   return value
 }
 
-function parseControlInput(value: unknown): ControlInput {
+function parseStrategyVisuals(value: unknown): Partial<PersistentStrategyVisualConfig> {
+  const input = record(value)
+  if (!input) throw new Error('strategyVisuals must be an object.')
+  const allowedKeys = new Set([
+    'layoutRadius', 'verticalVariation', 'territorySize', 'unitScale', 'factionColors', 'neutralColor',
+  ])
+  const unknownKey = Object.keys(input).find(key => !allowedKeys.has(key))
+  if (unknownKey) throw new Error(`Unsupported strategy visual field: ${unknownKey}.`)
+  const visuals: MutableStrategyVisualPatch = {}
+  if (Object.hasOwn(input, 'layoutRadius')) {
+    visuals.layoutRadius = finiteNumber(input.layoutRadius, 'layoutRadius', 2, 10)
+  }
+  if (Object.hasOwn(input, 'verticalVariation')) {
+    visuals.verticalVariation = finiteNumber(input.verticalVariation, 'verticalVariation', 0, 2)
+  }
+  if (Object.hasOwn(input, 'territorySize')) {
+    visuals.territorySize = finiteNumber(input.territorySize, 'territorySize', 0.2, 1.5)
+  }
+  if (Object.hasOwn(input, 'unitScale')) {
+    visuals.unitScale = finiteNumber(input.unitScale, 'unitScale', 0.4, 2.5)
+  }
+  if (Object.hasOwn(input, 'factionColors')) {
+    visuals.factionColors = normalizePersistentStrategyFactionColors(input.factionColors)
+  }
+  if (Object.hasOwn(input, 'neutralColor')) {
+    visuals.neutralColor = persistentStrategyRgbColor(input.neutralColor, 'neutralColor')
+  }
+  return visuals
+}
+
+function parseControlInput(value: unknown, persistentStrategyEnabled: boolean): ControlInput {
   const input = record(value)
   if (!input || typeof input.operation !== 'string') throw new Error('operation is required.')
   const allowedKeys = new Set([
     'operation', 'throttle', 'brake', 'pitch', 'roll', 'yaw', 'normalizedTime', 'timeScale', 'clipName', 'patch',
+    ...(persistentStrategyEnabled ? ['strategyVisuals'] : []),
   ])
   for (const key of Object.keys(input)) {
     if (!allowedKeys.has(key)) throw new Error(`Unsupported control field: ${key}.`)
   }
+  const operationKeys: Readonly<Record<string, readonly string[]>> = {
+    start: [], pause: [], reset: [], 'clear-controls': [], 'animation-play': [], 'animation-pause': [],
+    'set-controls': ['throttle', 'brake', 'pitch', 'roll', 'yaw'],
+    'animation-scrub': ['normalizedTime'],
+    'animation-clip': ['clipName'],
+    'animation-time-scale': ['timeScale'],
+    'apply-manifest-patch': ['patch'],
+    ...(persistentStrategyEnabled ? { 'strategy-visuals': ['strategyVisuals'] } : {}),
+  }
+  const admittedKeys = operationKeys[input.operation]
+  const irrelevantKey = admittedKeys && Object.keys(input)
+    .find(key => key !== 'operation' && !admittedKeys.includes(key))
+  if (irrelevantKey) throw new Error(`${input.operation} does not accept ${irrelevantKey}.`)
   if (input.clipName !== undefined && input.clipName !== null && typeof input.clipName !== 'string') {
     throw new Error('clipName must be a string or null.')
   }
-  return input as unknown as ControlInput
+  if (input.strategyVisuals !== undefined) {
+    if (input.operation !== 'strategy-visuals') {
+      throw new Error('strategyVisuals is accepted only by the strategy-visuals operation.')
+    }
+  }
+  if (input.operation === 'strategy-visuals' && input.strategyVisuals === undefined) {
+    throw new Error('strategyVisuals is required by the strategy-visuals operation.')
+  }
+  return {
+    ...input,
+    ...(input.strategyVisuals === undefined ? {} : { strategyVisuals: parseStrategyVisuals(input.strategyVisuals) }),
+  } as unknown as ControlInput
 }
 
 function runtimeEnvelope(runtime: GameRuntimeControlSurface, status: 'ok' | 'applied' | 'blocked', detail?: string) {
@@ -100,9 +171,13 @@ function runtimeEnvelope(runtime: GameRuntimeControlSurface, status: 'ok' | 'app
   }
 }
 
-async function executeControl(runtime: GameRuntimeControlSurface, rawInput: unknown): Promise<unknown> {
+async function executeControl(
+  runtime: GameRuntimeControlSurface,
+  rawInput: unknown,
+  persistentStrategyEnabled: boolean,
+): Promise<unknown> {
   try {
-    const input = parseControlInput(rawInput)
+    const input = parseControlInput(rawInput, persistentStrategyEnabled)
     switch (input.operation) {
       case 'start':
         await runtime.start()
@@ -144,6 +219,10 @@ async function executeControl(runtime: GameRuntimeControlSurface, rawInput: unkn
       case 'animation-time-scale':
         await runtime.setAnimationTimeScale(finiteNumber(input.timeScale, 'timeScale', 0, 4))
         break
+      case 'strategy-visuals': {
+        runtime.configurePersistentStrategyVisuals(input.strategyVisuals ?? {})
+        break
+      }
       case 'apply-manifest-patch': {
         const validation = applyManifestPatch(runtime.manifest, input.patch)
         if (!validation.ok) throw new Error(validation.issues.join(' '))
@@ -192,7 +271,79 @@ const outputSchema = {
   },
 } as const
 
-export function createWebMcpTools(runtime: GameRuntimeControlSurface): WebMcpTool[] {
+const exactOperationSchema = (
+  operation: string,
+  properties: Record<string, unknown> = {},
+  required: readonly string[] = [],
+) => ({
+  type: 'object',
+  additionalProperties: false,
+  required: ['operation', ...required],
+  properties: { operation: { const: operation }, ...properties },
+})
+
+const strategyVisualsSchema = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    layoutRadius: { type: 'number', minimum: 2, maximum: 10 },
+    verticalVariation: { type: 'number', minimum: 0, maximum: 2 },
+    territorySize: { type: 'number', minimum: 0.2, maximum: 1.5 },
+    unitScale: { type: 'number', minimum: 0.4, maximum: 2.5 },
+    factionColors: {
+      type: 'object',
+      maxProperties: GAME_OS_MAX_FACTION_COUNT,
+      propertyNames: {
+        type: 'string',
+        minLength: 1,
+        maxLength: PERSISTENT_STRATEGY_FACTION_ID_MAX_LENGTH,
+        pattern: PERSISTENT_STRATEGY_FACTION_ID_PATTERN,
+      },
+      additionalProperties: { type: 'integer', minimum: 0, maximum: 16777215 },
+    },
+    neutralColor: { type: 'integer', minimum: 0, maximum: 16777215 },
+  },
+} as const
+
+function controlInputSchema(persistentStrategyEnabled: boolean): Record<string, unknown> {
+  const branches = [
+    exactOperationSchema('start'),
+    exactOperationSchema('pause'),
+    exactOperationSchema('reset'),
+    exactOperationSchema('set-controls', {
+      throttle: { type: 'number', minimum: -1, maximum: 1 },
+      brake: { type: 'number', minimum: 0, maximum: 1 },
+      pitch: { type: 'number', minimum: -1, maximum: 1 },
+      roll: { type: 'number', minimum: -1, maximum: 1 },
+      yaw: { type: 'number', minimum: -1, maximum: 1 },
+    }),
+    exactOperationSchema('clear-controls'),
+    exactOperationSchema('animation-play'),
+    exactOperationSchema('animation-pause'),
+    exactOperationSchema('animation-scrub', {
+      normalizedTime: { type: 'number', minimum: 0, maximum: 1 },
+    }, ['normalizedTime']),
+    exactOperationSchema('animation-clip', { clipName: { type: ['string', 'null'] } }),
+    exactOperationSchema('animation-time-scale', {
+      timeScale: { type: 'number', minimum: 0, maximum: 4 },
+    }, ['timeScale']),
+    exactOperationSchema('apply-manifest-patch', { patch: { type: 'object' } }, ['patch']),
+  ]
+  if (persistentStrategyEnabled) {
+    branches.push(exactOperationSchema(
+      'strategy-visuals',
+      { strategyVisuals: strategyVisualsSchema },
+      ['strategyVisuals'],
+    ))
+  }
+  return { type: 'object', oneOf: branches }
+}
+
+export function createWebMcpTools(
+  runtime: GameRuntimeControlSurface,
+  options: { persistentStrategyEnabled?: boolean } = {},
+): WebMcpTool[] {
+  const persistentStrategyEnabled = options.persistentStrategyEnabled === true
   return [
     {
       name: GAME_XR_WEB_MCP_TOOLS.inspect,
@@ -205,31 +356,10 @@ export function createWebMcpTools(runtime: GameRuntimeControlSurface): WebMcpToo
     {
       name: GAME_XR_WEB_MCP_TOOLS.control,
       description: 'Apply a bounded local GameXR transport, input, animation, or validated manifest-patch operation.',
-      inputSchema: {
-        type: 'object',
-        additionalProperties: false,
-        required: ['operation'],
-        properties: {
-          operation: {
-            enum: [
-              'start', 'pause', 'reset', 'set-controls', 'clear-controls', 'animation-play',
-              'animation-pause', 'animation-scrub', 'animation-clip', 'animation-time-scale', 'apply-manifest-patch',
-            ],
-          },
-          throttle: { type: 'number', minimum: -1, maximum: 1 },
-          brake: { type: 'number', minimum: 0, maximum: 1 },
-          pitch: { type: 'number', minimum: -1, maximum: 1 },
-          roll: { type: 'number', minimum: -1, maximum: 1 },
-          yaw: { type: 'number', minimum: -1, maximum: 1 },
-          normalizedTime: { type: 'number', minimum: 0, maximum: 1 },
-          timeScale: { type: 'number', minimum: 0, maximum: 4 },
-          clipName: { type: ['string', 'null'] },
-          patch: { type: 'object' },
-        },
-      },
+      inputSchema: controlInputSchema(persistentStrategyEnabled),
       outputSchema,
-      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
-      execute: (input) => executeControl(runtime, input),
+      annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: false },
+      execute: (input) => executeControl(runtime, input, persistentStrategyEnabled),
     },
   ]
 }

@@ -13,6 +13,7 @@ import {
   createFlightSimCameraProfile,
   resolveFlightSimFollowTarget,
 } from '@knowgrph/apple-spatial-input/camera'
+import type { GameOsWorldState } from 'grph-shared/game-os/index'
 import type { RuntimeTelemetry, SceneManifest } from '../config/types.ts'
 import { LocalDatabase, requestPersistentStorage, type StoredAssetMetadata } from '../storage/LocalDatabase.ts'
 import { AnimationController } from './AnimationController.ts'
@@ -21,6 +22,7 @@ import { AudioEngine } from './AudioEngine.ts'
 import type { DeviceOrientationSnapshot } from './DeviceOrientationController.ts'
 import { FlightSimulation } from './FlightSimulation.ts'
 import { InputController } from './InputController.ts'
+import { PERSISTENT_STRATEGY_VISUAL_CONFIG_EVENT, PersistentStrategyProjection, type PersistentStrategyVisualConfig } from './PersistentStrategyProjection.ts'
 import { createProceduralShip } from './createProceduralShip.ts'
 import { projectProceduralWorldAnimationDelta } from './proceduralAnimationProjection.ts'
 import { createWorld, type WorldResources } from './createWorld.ts'
@@ -58,6 +60,7 @@ export class GameRuntime extends EventTarget {
   private readonly simulation: FlightSimulation
   private readonly audio: AudioEngine
   private readonly assetManager: AssetManager
+  private persistentStrategyProjection: PersistentStrategyProjection | null = null
   private animation: AnimationController
   private world: WorldResources | null = null
   private shipRoot: Group | null = null
@@ -85,6 +88,7 @@ export class GameRuntime extends EventTarget {
     private readonly canvas: HTMLCanvasElement,
     manifest: SceneManifest,
     private readonly database: LocalDatabase,
+    private readonly claimFlightSurface: () => void = () => undefined,
   ) {
     super()
     this.manifestValue = structuredClone(manifest)
@@ -121,11 +125,9 @@ export class GameRuntime extends EventTarget {
   get manifest(): SceneManifest {
     return structuredClone(this.manifestValue)
   }
-
   get animationClips(): string[] {
     return this.animation.availableImportedClips
   }
-
   get error(): string | null {
     return this.lastError
   }
@@ -149,6 +151,7 @@ export class GameRuntime extends EventTarget {
   async start(): Promise<void> {
     this.assertUsable()
     if (this.phase === 'blocked') throw new Error(this.lastError ?? 'The runtime is blocked.')
+    this.claimFlightSurface()
     let silentMode = false
     if (this.manifestValue.audio.enabled) {
       try {
@@ -179,48 +182,40 @@ export class GameRuntime extends EventTarget {
 
   reset(): void {
     this.assertUsable()
+    this.claimFlightSurface()
     this.simulation.reset(this.manifestValue)
     this.animation.reset()
     this.accumulator = 0
     this.renderSingleFrame(true)
     this.dispatchStatus('Flight state reset to the active manifest.')
   }
-
   setThrottle(value: number): void {
     this.input.setThrottle(value)
   }
-
   setBrake(value: number): void {
     this.input.setBrake(value)
   }
-
   setTouchSteering(pitch: number, roll: number, yaw?: number): void {
     this.input.setTouchSteering(pitch, roll, yaw)
   }
-
   clearTouchSteering(): void {
     this.input.clearTouchSteering()
   }
-
   async enableDeviceMotion(): Promise<'granted' | 'denied' | 'unavailable'> {
     const snapshot = await this.input.enableDeviceOrientation()
     if (snapshot.phase === 'running' && snapshot.permission === 'granted') return 'granted'
     if (snapshot.permission === 'denied') return 'denied'
     return 'unavailable'
   }
-
   disableDeviceMotion(): DeviceOrientationSnapshot {
     return this.input.disableDeviceOrientation()
   }
-
   recenterDeviceMotion(): DeviceOrientationSnapshot {
     return this.input.recenterDeviceOrientation()
   }
-
   inspectDeviceMotion(): DeviceOrientationSnapshot {
     return this.input.inspectDeviceOrientation()
   }
-
   async setDeviceMotionEnabled(enabled: boolean): Promise<void> {
     this.assertUsable()
     await this.enqueueConfiguration(async () => {
@@ -231,17 +226,14 @@ export class GameRuntime extends EventTarget {
       this.input.configure(this.manifestValue)
     })
   }
-
   playAnimations(): void {
     this.animation.play()
     this.manifestValue.animation.playing = true
   }
-
   pauseAnimations(): void {
     this.animation.pause()
     this.manifestValue.animation.playing = false
   }
-
   scrubAnimation(normalizedTime: number): void {
     this.animation.scrub(normalizedTime)
     this.renderSingleFrame()
@@ -294,6 +286,25 @@ export class GameRuntime extends EventTarget {
     return requestPersistentStorage()
   }
 
+  projectPersistentStrategyWorld(state: Readonly<GameOsWorldState> | null): void {
+    this.assertUsable()
+    const projection = this.requirePersistentStrategyProjection()
+    projection.update(state)
+    this.canvas.dataset.gamexrPersistentStrategy = state ? 'visible' : 'hidden'
+    this.canvas.dataset.gamexrPersistentStrategyAnchor =
+      projection.group.parent === this.camera ? 'camera' : 'detached'
+    this.renderSingleFrame(true)
+  }
+
+  configurePersistentStrategyVisuals(input: Partial<PersistentStrategyVisualConfig>): PersistentStrategyVisualConfig {
+    this.assertUsable()
+    const config = this.requirePersistentStrategyProjection().configure(input)
+    this.canvas.dataset.gamexrPersistentStrategyLayoutRadius = String(config.layoutRadius)
+    this.dispatchEvent(new CustomEvent(PERSISTENT_STRATEGY_VISUAL_CONFIG_EVENT, { detail: config }))
+    this.renderSingleFrame(true)
+    return config
+  }
+
   inspect(): RuntimeTelemetry {
     const frameTime = this.averageFrameTime
     const controls = this.input.snapshot()
@@ -333,6 +344,10 @@ export class GameRuntime extends EventTarget {
     this.canvas.removeEventListener('webglcontextrestored', this.handleContextRestored)
     this.input.dispose()
     this.unsubscribeDeviceMotionLifecycle()
+    this.persistentStrategyProjection?.dispose()
+    delete this.canvas.dataset.gamexrPersistentStrategy
+    delete this.canvas.dataset.gamexrPersistentStrategyAnchor
+    delete this.canvas.dataset.gamexrPersistentStrategyLayoutRadius
     this.disposeSceneResources()
     await this.audio.dispose()
     this.renderer.dispose()
@@ -356,6 +371,10 @@ export class GameRuntime extends EventTarget {
 
     this.disposeSceneResources()
     this.scene = prepared.scene
+    if (this.persistentStrategyProjection) {
+      this.camera.add(this.persistentStrategyProjection.group)
+      this.scene.add(this.camera)
+    }
     this.world = prepared.world
     this.shipRoot = prepared.shipRoot
     this.animation = prepared.animation
@@ -533,6 +552,15 @@ export class GameRuntime extends EventTarget {
     this.camera.aspect = width / height
     this.camera.updateProjectionMatrix()
     if (this.phase !== 'running') this.renderSingleFrame()
+  }
+
+  private requirePersistentStrategyProjection(): PersistentStrategyProjection {
+    if (!this.persistentStrategyProjection) {
+      this.persistentStrategyProjection = new PersistentStrategyProjection()
+      this.camera.add(this.persistentStrategyProjection.group)
+      this.scene.add(this.camera)
+    }
+    return this.persistentStrategyProjection
   }
 
   private disposeSceneResources(): void {

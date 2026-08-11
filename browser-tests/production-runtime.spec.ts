@@ -214,7 +214,7 @@ test('service worker admits exactly the current verified content-addressed cache
     ...manifest.entries.map((entry) => new URL(entry.path, page.url()).href),
     new URL('.gamexr-cache-ready', page.url()).href,
     new URL('.gamexr-cache-active', page.url()).href,
-  ].sort()
+  ].sort((left, right) => left.localeCompare(right))
   expect(proof.keys).toEqual(expectedCacheUrls.map((url) => ({ method: 'GET', url })))
   for (const entry of manifest.entries) {
     const cached = proof.entries.find((candidate) => candidate.path === entry.path)

@@ -1,4 +1,5 @@
 import type { SceneManifest } from '../config/types.ts'
+import { projectEngineAudioTargets } from './engineAudioProjection.ts'
 
 export class AudioEngine {
   private manifest: SceneManifest
@@ -29,13 +30,10 @@ export class AudioEngine {
   update(throttle: number, speed: number): void {
     if (!this.context || !this.oscillator || !this.gain || !this.filter) return
     const now = this.context.currentTime
-    const normalizedThrottle = Math.max(0, Math.min(1, throttle))
-    const audio = this.manifest.audio
-    const targetFrequency = audio.engineBaseFrequency + normalizedThrottle * audio.engineThrottleRange + Math.min(speed, 60) * 0.8
-    const targetGain = audio.enabled ? audio.masterGain * (0.3 + normalizedThrottle * 0.7) : 0
-    this.oscillator.frequency.setTargetAtTime(targetFrequency, now, 0.04)
-    this.filter.frequency.setTargetAtTime(180 + targetFrequency * 3.4, now, 0.08)
-    this.gain.gain.setTargetAtTime(targetGain, now, 0.06)
+    const targets = projectEngineAudioTargets(this.manifest.audio, throttle, speed)
+    this.oscillator.frequency.setTargetAtTime(targets.frequency, now, 0.04)
+    this.filter.frequency.setTargetAtTime(targets.lowPassFrequency, now, 0.08)
+    this.gain.gain.setTargetAtTime(targets.gain, now, 0.06)
   }
 
   async suspend(): Promise<void> {
@@ -56,10 +54,10 @@ export class AudioEngine {
 
   private createGraph(context: AudioContext): void {
     const oscillator = context.createOscillator()
-    oscillator.type = 'sawtooth'
+    oscillator.type = projectEngineAudioTargets(this.manifest.audio, 0, 0).waveform
     const filter = context.createBiquadFilter()
     filter.type = 'lowpass'
-    filter.Q.value = 1.4
+    filter.Q.value = projectEngineAudioTargets(this.manifest.audio, 0, 0).filterQ
     const gain = context.createGain()
     gain.gain.value = 0
     oscillator.connect(filter).connect(gain).connect(context.destination)

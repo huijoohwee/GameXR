@@ -55,6 +55,14 @@ test('validator rejects unknown and out-of-budget fields', () => {
   }
 })
 
+test('camera contract rejects chase heights that canonical Knowgrph cannot resolve', () => {
+  const manifest = getDefaultSceneManifest()
+  manifest.camera.chaseHeight = 0
+  const validation = validateSceneManifest(manifest)
+  assert.equal(validation.ok, false)
+  if (!validation.ok) assert(validation.issues.some((issue) => issue.includes('chaseHeight')))
+})
+
 test('manifest patch is deep, closed, and preserves unrelated values', () => {
   const manifest = getDefaultSceneManifest()
   const validation = applyManifestPatch(manifest, {

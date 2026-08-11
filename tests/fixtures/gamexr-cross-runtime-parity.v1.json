@@ -1,0 +1,225 @@
+{
+  "schema": "gamexr-cross-runtime-parity/v1",
+  "manifestId": "deep-space-flight",
+  "world": {
+    "nativeBackgroundName": "gamexr-background",
+    "backgroundColor": "#030612",
+    "fogColor": "#071025",
+    "fogDensity": 0.0035,
+    "boundsRadius": 160,
+    "stars": {
+      "nativeName": "gamexr-stars",
+      "count": 900,
+      "browserGeometry": "BufferGeometry",
+      "browserVertexCount": 900,
+      "color": "#d7e9ff",
+      "diameter": 0.12
+    },
+    "asteroids": {
+      "nativeFieldName": "gamexr-asteroid-field",
+      "nativeNamePrefix": "gamexr-asteroid-",
+      "count": 32,
+      "browserGeometry": "IcosahedronGeometry",
+      "triangleCornerCount": 240,
+      "radius": 1,
+      "detail": 1,
+      "color": "#596273",
+      "roughness": 0.94,
+      "metalness": 0.06,
+      "samples": [
+        {
+          "index": 0,
+          "position": [-26.89533805847168, -2.107914447784424, 32.653724670410156],
+          "quaternion": [0.24157114777917948, 0.10094090304288462, 0.9333141571273216, -0.2457213841521162],
+          "scale": [2.0294216669240646, 2.408652767042831, 1.3847028264364687]
+        },
+        {
+          "index": 15,
+          "position": [-42.0008544921875, -5.654108047485352, 11.959315299987793],
+          "quaternion": [0.5526022645588254, 0.3449424349695159, 0.6307675454866412, 0.42163700712348834],
+          "scale": [0.7469528676463918, 0.8738286980987688, 0.7357790196832541]
+        },
+        {
+          "index": 31,
+          "position": [-20.916221618652344, -11.186043739318848, -63.095611572265625],
+          "quaternion": [-0.6741929647715545, 0.15777534031721213, -0.37219124395374725, 0.6180974497744893],
+          "scale": [1.1316671240640723, 0.9948367916547065, 1.3111059365783315]
+        }
+      ]
+    },
+    "planet": {
+      "nativeName": "gamexr-planet",
+      "radius": 13,
+      "position": [34, -12, -88],
+      "browserGeometry": "SphereGeometry",
+      "browserVertexCount": 693,
+      "browserIndexCount": 3648,
+      "widthSegments": 32,
+      "heightSegments": 20,
+      "baseColor": "#315c9b",
+      "emissiveColor": "#102749",
+      "emissiveIntensity": 0.8,
+      "roughness": 0.84,
+      "metalness": 0
+    },
+    "ambientLight": {
+      "nativeName": "gamexr-ambient-light",
+      "color": "#b9d4ff",
+      "intensity": 1.1
+    },
+    "keyLight": {
+      "nativeName": "gamexr-key-light",
+      "kind": "directional",
+      "color": "#d9edff",
+      "intensity": 4.2,
+      "nativeIntensityLux": 2145.7078,
+      "position": [22, 28, 18]
+    },
+    "placementDigest": "14237543821781407139"
+  },
+  "ship": {
+    "nativeRootName": "gamexr-ship",
+    "scale": 1,
+    "parts": [
+      {
+        "id": "hull",
+        "browserRole": "hull",
+        "nativeName": "gamexr-hull",
+        "geometry": "cone",
+        "dimensions": [0.62, 4.2, 16],
+        "position": [0, 0, 0],
+        "eulerXYZ": [-1.5707963267948966, 0, 0],
+        "scale": [1, 1, 1],
+        "material": { "kind": "pbr", "color": "#d8e7f2", "roughness": 0.3, "metalness": 0.72 }
+      },
+      {
+        "id": "canopy",
+        "browserRole": "canopy",
+        "nativeName": "gamexr-canopy",
+        "geometry": "sphere",
+        "dimensions": [0.48, 20, 12],
+        "position": [0, 0.34, -0.45],
+        "eulerXYZ": [0, 0, 0],
+        "scale": [0.78, 0.42, 1.45],
+        "material": { "kind": "physical", "color": "#16315c", "roughness": 0.12, "metalness": 0.15, "opacity": 0.88, "transmission": 0.18 }
+      },
+      {
+        "id": "left-wing",
+        "browserRole": "left-wing",
+        "nativeName": "gamexr-left-wing",
+        "geometry": "box",
+        "dimensions": [2.3, 0.09, 1.18],
+        "position": [-1.22, -0.05, 0.42],
+        "eulerXYZ": [0, -0.12, 0],
+        "scale": [1, 1, 1],
+        "material": { "kind": "pbr", "color": "#58dbcf", "roughness": 0.3, "metalness": 0.72 }
+      },
+      {
+        "id": "right-wing",
+        "browserRole": "right-wing",
+        "nativeName": "gamexr-right-wing",
+        "geometry": "box",
+        "dimensions": [2.3, 0.09, 1.18],
+        "position": [1.22, -0.05, 0.42],
+        "eulerXYZ": [0, 0.12, 0],
+        "scale": [1, 1, 1],
+        "material": { "kind": "pbr", "color": "#58dbcf", "roughness": 0.3, "metalness": 0.72 }
+      },
+      {
+        "id": "left-engine",
+        "browserRole": "engine",
+        "nativeName": "gamexr-left-engine",
+        "geometry": "box",
+        "dimensions": [0.38, 0.38, 1.25],
+        "position": [-0.48, -0.12, 1.45],
+        "eulerXYZ": [0, 0, 0],
+        "scale": [1, 1, 1],
+        "material": { "kind": "pbr", "color": "#d8e7f2", "roughness": 0.3, "metalness": 0.72 }
+      },
+      {
+        "id": "right-engine",
+        "browserRole": "engine",
+        "nativeName": "gamexr-right-engine",
+        "geometry": "box",
+        "dimensions": [0.38, 0.38, 1.25],
+        "position": [0.48, -0.12, 1.45],
+        "eulerXYZ": [0, 0, 0],
+        "scale": [1, 1, 1],
+        "material": { "kind": "pbr", "color": "#d8e7f2", "roughness": 0.3, "metalness": 0.72 }
+      },
+      {
+        "id": "left-exhaust",
+        "browserRole": "exhaust",
+        "nativeName": "gamexr-left-exhaust",
+        "geometry": "cone",
+        "dimensions": [0.18, 1.35, 12],
+        "position": [-0.48, -0.12, 2.65],
+        "eulerXYZ": [1.5707963267948966, 0, 0],
+        "scale": [1, 1, 1],
+        "material": { "kind": "emissive", "color": "#ff9f43", "roughness": 1, "metalness": 0, "opacity": 0.92, "emissiveColor": "#ff9f43", "emissiveIntensity": 3.5 }
+      },
+      {
+        "id": "right-exhaust",
+        "browserRole": "exhaust",
+        "nativeName": "gamexr-right-exhaust",
+        "geometry": "cone",
+        "dimensions": [0.18, 1.35, 12],
+        "position": [0.48, -0.12, 2.65],
+        "eulerXYZ": [1.5707963267948966, 0, 0],
+        "scale": [1, 1, 1],
+        "material": { "kind": "emissive", "color": "#ff9f43", "roughness": 1, "metalness": 0, "opacity": 0.92, "emissiveColor": "#ff9f43", "emissiveIntensity": 3.5 }
+      }
+    ],
+    "engineLight": {
+      "nativeName": "gamexr-engine-light",
+      "kind": "point",
+      "color": "#ff9f43",
+      "intensity": 2.2,
+      "nativeIntensityLumens": 27.646015351590183,
+      "distance": 8,
+      "decay": 2,
+      "position": [0, -0.1, 2.7]
+    },
+    "animation": {
+      "deltaSeconds": 0.25,
+      "throttle": 0.7,
+      "exhaustScale": 1.5655662356816202,
+      "leftWingFlex": 0.012805837108801153,
+      "rightWingFlex": -0.012805837108801153,
+      "planetRotationDelta": 0.00625,
+      "asteroidRotationDelta": 0.002
+    }
+  },
+  "flight": {
+    "fixedStepSeconds": 0.016666666666666666,
+    "segments": [
+      {
+        "ticks": 30,
+        "input": { "throttle": 1, "pitch": 0, "yaw": 0, "roll": 0, "brake": 0 },
+        "expected": { "position": [0, -1.1559479131418673, -0.23262791441101346], "velocity": [0, -4.283630203891744, -1.2511077965282953], "pitch": -0.1322065991465245, "yaw": 0, "roll": 0, "throttle": 0.21413098727512908 }
+      },
+      {
+        "ticks": 45,
+        "input": { "throttle": 1, "pitch": 0.2, "yaw": -0.3, "roll": 0.4, "brake": 0 },
+        "expected": { "position": [0.20197538959861944, -6.040328843397772, -2.7899993656728967], "velocity": [0.8921322599479753, -7.9995932427889525, -5.75284540235994], "pitch": 0.00016957521923049047, "yaw": -0.32111119236789776, "roll": 0.4562192502377487, "throttle": 0.45251098274167034 }
+      },
+      {
+        "ticks": 20,
+        "input": { "throttle": 0, "pitch": -0.15, "yaw": 0.25, "roll": -0.3, "brake": 1 },
+        "expected": { "position": [0.6336925564679342, -8.79381169500463, -5.046065317681755], "velocity": [1.5711650361911336, -8.379590318546969, -7.565479053790123], "pitch": -0.06678294305400181, "yaw": -0.23892840365876467, "roll": 0.2622878179980412, "throttle": 0.3853563922112493 }
+      },
+      {
+        "ticks": 25,
+        "input": { "throttle": 0, "pitch": 0, "yaw": 0, "roll": 0, "brake": 0 },
+        "expected": { "position": [1.3914504008342718, -12.232146748011631, -8.508600821297623], "velocity": [2.0247117097540595, -8.032539402203643, -8.83808462849113], "pitch": -0.05942892363668746, "yaw": -0.27932776995045216, "roll": 0.21296101258515235, "throttle": 0.3152494744395431 }
+      }
+    ]
+  },
+  "audio": {
+    "samples": [
+      { "throttle": 0, "speed": 0, "waveform": "sawtooth", "frequency": 58, "gain": 0.048, "lowPassFrequency": 377.2, "filterQ": 1.4 },
+      { "throttle": 0.7, "speed": 12.5, "waveform": "sawtooth", "frequency": 146.4, "gain": 0.1264, "lowPassFrequency": 677.76, "filterQ": 1.4 },
+      { "throttle": 2, "speed": 80, "waveform": "sawtooth", "frequency": 218, "gain": 0.16, "lowPassFrequency": 921.2, "filterQ": 1.4 }
+    ]
+  }
+}

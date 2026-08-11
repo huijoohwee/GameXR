@@ -4,5 +4,8 @@ test-results/
 coverage/
 .DS_Store
 *.xcresult
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/
+**/*.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 .swiftpm/
 native/.build/

@@ -24,6 +24,7 @@ import { FlightSimulation } from './FlightSimulation.ts'
 import { InputController } from './InputController.ts'
 import { PERSISTENT_STRATEGY_VISUAL_CONFIG_EVENT, PersistentStrategyProjection, type PersistentStrategyVisualConfig } from './PersistentStrategyProjection.ts'
 import { createProceduralShip } from './createProceduralShip.ts'
+import { projectProceduralWorldAnimationDelta } from './proceduralAnimationProjection.ts'
 import { createWorld, type WorldResources } from './createWorld.ts'
 import { disposeObject3D } from './resources.ts'
 
@@ -467,12 +468,16 @@ export class GameRuntime extends EventTarget {
     if (!this.shipRoot) return
     this.shipRoot.position.copy(this.simulation.state.position)
     this.shipRoot.quaternion.copy(this.simulation.state.rotation)
-    const animationScale = this.manifestValue.animation.playing ? this.manifestValue.animation.timeScale : 0
+    const worldAnimation = projectProceduralWorldAnimationDelta(
+      this.manifestValue.scene,
+      this.manifestValue.animation,
+      deltaSeconds,
+    )
     if (this.world?.planet) {
-      this.world.planet.rotation.y += this.manifestValue.scene.planet.rotationSpeed * deltaSeconds * animationScale
+      this.world.planet.rotation.y += worldAnimation.planetYaw
     }
     if (this.world) {
-      this.world.asteroidField.rotation.y += this.manifestValue.animation.asteroidDriftSpeed * deltaSeconds * animationScale * 0.05
+      this.world.asteroidField.rotation.y += worldAnimation.asteroidFieldYaw
     }
 
     const cameraConfig = this.manifestValue.camera

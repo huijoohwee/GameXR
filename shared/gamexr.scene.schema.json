@@ -134,7 +134,7 @@
         "near": { "type": "number", "minimum": 0.01, "maximum": 10 },
         "far": { "type": "number", "minimum": 50, "maximum": 5000 },
         "chaseDistance": { "type": "number", "minimum": 2, "maximum": 80 },
-        "chaseHeight": { "type": "number", "minimum": -20, "maximum": 40 },
+        "chaseHeight": { "type": "number", "minimum": 0.1, "maximum": 40 },
         "lookAhead": { "type": "number", "minimum": 0, "maximum": 100 },
         "damping": { "type": "number", "minimum": 0.1, "maximum": 30 }
       }

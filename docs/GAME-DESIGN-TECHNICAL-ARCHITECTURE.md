@@ -49,7 +49,7 @@ gamexr-scene/v1 manifest
         │        ├── AnimationMixer + procedural animation transport
         │        └── WebMCP inspection and bounded control
         │
-        └── Apple adapter ── Swift Codable + Core Motion + RealityKit ECS + SwiftUI RealityView
+        └── Apple adapter ── Swift Codable + Core Motion + RealityKit ECS + AVFAudio + SwiftUI RealityView
 ```
 
 The manifest is persistent state. Renderer objects and RealityKit entities are disposable projections. No adapter may write a second scene truth.
@@ -148,11 +148,14 @@ The only runtime infrastructure is the static application origin. Local assets a
 
 | Surface | Status | Evidence |
 |---|---|---|
-| Manifest and headless core | Runtime-ready in Dev | TypeScript checks and focused tests |
-| `/gamexr/` and Apex bundles | Runtime-ready in Dev | deterministic release check and browser smoke |
+| Manifest and headless core | Runtime-ready in Dev | all 40 focused source tests pass, including the cross-runtime default-scene contract |
+| `/gamexr/` and Apex bundles | Runtime-ready in Dev | GameXR and Apex release checks plus all eight local WebKit checks pass |
 | Portable Apple spatial-input contract | Conformance-tested in Dev | closed JSON Schema plus matching TypeScript/Swift rotation and smoothing vectors |
 | Safari orientation adapter | Source/simulated-event ready in Dev | permission, calibration, rotation, cleanup, and no-egress checks; named physical iPhone proof still required |
 | iOS RealityKit/Core Motion package | Build-verified | Xcode 26.6 / iOS Simulator SDK 26.5; physical sensor proof still required |
-| visionOS RealityKit/Core Motion package | Build-verified | Xcode 26.6 / xrsimulator SDK 26.5; physical headset proof still required |
-| Production mirror | Deferred | no protected GameXR projection owner |
-| Cloudflare routes | Deferred | no exact-candidate authorization or live verification |
+| Cross-runtime default scene | Source-contract parity in Dev | complete 900-star/32-asteroid placement digest `14237543821781407139`; planet, ship, Knowgrph flight, procedural animation, and engine-audio target gates pass in TypeScript and Swift; native camera projection retains the upstream Knowgrph resolver |
+| visionOS default deep-space RealityKit scene | Simulator-verified in Dev | direct full-immersive launch, no entry gate, recovery-only window, and all seven native gates pass on Xcode 26.6 (`17F113`) / SDK-runtime `23O469`-`23O470` and Xcode 27 beta 4 (`27A5228h`) / `24M5326e`-`24M5326f`; physical-headset and pixel-identity claims remain excluded |
+| Production mirror | Current candidate deferred | historical deployment exists; this candidate has no protected projection or release authorization |
+| Cloudflare routes | Historical origin audited; current candidate deferred | the older deployed route remains unverified and deployment is unauthorized; local WebKit 8/8 does not establish exact-candidate live parity |
+
+The native projection is contract-equivalent, not renderer-identical. Three.js points, `FogExp2`, clear-color background, physical canopy transmission, Web Audio DSP, and monoscopic camera projection cannot be reproduced sample-for-sample by RealityKit proxy meshes, image-based lighting/background geometry, AVFAudio, or the stereo head-tracked visionOS compositor.

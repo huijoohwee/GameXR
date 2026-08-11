@@ -8,6 +8,7 @@ import {
 } from 'three'
 import type { SceneManifest } from '../config/types.ts'
 import type { ShipVisualReferences } from './createProceduralShip.ts'
+import { projectProceduralShipAnimation } from './proceduralAnimationProjection.ts'
 
 export class AnimationController {
   private manifest: SceneManifest
@@ -81,12 +82,10 @@ export class AnimationController {
     this.mixer?.update(scaledDelta)
 
     if (!this.procedural) return
-    const pulse = 1 + Math.sin(this.elapsedSeconds * animation.exhaustPulseSpeed) * animation.exhaustPulseAmount
-    const exhaustScale = Math.max(0.18, 0.35 + Math.max(0, throttle) * 1.4) * pulse
-    for (const exhaust of this.procedural.exhausts) exhaust.scale.set(1, exhaustScale, 1)
-    const wingFlex = Math.sin(this.elapsedSeconds * 2.2) * animation.wingFlexAmount * Math.max(0.2, Math.abs(throttle))
-    this.procedural.leftWing.rotation.z = wingFlex
-    this.procedural.rightWing.rotation.z = -wingFlex
+    const targets = projectProceduralShipAnimation(animation, this.elapsedSeconds, throttle)
+    for (const exhaust of this.procedural.exhausts) exhaust.scale.set(1, targets.exhaustScaleY, 1)
+    this.procedural.leftWing.rotation.z = targets.leftWingRotationZ
+    this.procedural.rightWing.rotation.z = targets.rightWingRotationZ
   }
 
   dispose(): void {

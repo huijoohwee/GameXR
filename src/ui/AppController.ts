@@ -6,7 +6,6 @@ import {
   validateSceneManifest,
 } from '../config/manifest.ts'
 import type { RuntimeTelemetry, SceneManifest } from '../config/types.ts'
-import { GAME_XR_WEB_MCP_TOOLS } from '../mcp/contracts.ts'
 import type { DeviceOrientationSnapshot } from '../runtime/DeviceOrientationController.ts'
 import {
   RUNTIME_DEVICE_MOTION_EVENT,
@@ -184,7 +183,7 @@ export class AppController {
           schema: 'gamexr-runtime-inspection/v1',
           runtime: this.runtime.inspect(),
           manifest: this.runtime.manifest,
-          tools: Object.values(GAME_XR_WEB_MCP_TOOLS),
+          tools: document.documentElement.dataset.gamexrWebmcpTools?.split(',').filter(Boolean) ?? [],
           cost: { modelCalls: 0, networkCalls: 0, paidCalls: 0, estimatedCostUsd: 0 },
         }
         await navigator.clipboard.writeText(JSON.stringify(inspection, null, 2))

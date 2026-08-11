@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@knowgrph/apple-spatial-input": "file:vendor/knowgrph-apple-spatial-input-0.1.0.tgz",
+    "grph-shared": "file:vendor/grph-shared-0.0.0.tgz",
     "three": "0.185.1"
   },
   "devDependencies": {

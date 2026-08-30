@@ -8,7 +8,7 @@ import {
   projectAppleSpatialInput,
   resetAppleSpatialInputState,
   shortestAngleDeltaDegrees,
-} from '@knowgrph/apple-spatial-input'
+} from '@agenticgraph/apple-spatial-input'
 
 function assertClose(actual: number, expected: number, tolerance = 1e-9): void {
   assert.ok(Math.abs(actual - expected) <= tolerance, `expected ${actual} to be within ${tolerance} of ${expected}`)

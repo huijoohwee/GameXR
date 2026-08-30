@@ -17,7 +17,7 @@ When a browser supplies `navigator.modelContext`, GameXR registers the tools the
 
 ## Central invocation boundary
 
-Agentic Canvas OS documents are the only `/`, `@`, and `#` authority. Existing `/flight.sim @canvas #flight` and `/xr.*` commands name Knowgrph's Canvas/WebMCP owners. GameXR must not impersonate those owners through an alias.
+Agentic Canvas OS documents are the only `/`, `@`, and `#` authority. Existing `/flight.sim @canvas #flight` and `/xr.*` commands name AgenticGraph's Canvas/WebMCP owners. GameXR must not impersonate those owners through an alias.
 
 GameXR participates through the existing generic tool vocabulary:
 
@@ -40,7 +40,7 @@ await window.gameXR.control({
 })
 ```
 
-This API is a browser-local projection. Knowgrph remains the follow-target and flight SSOT; GameXR exposes the resulting Three.js camera pose so local or production-targeted verification can prove the visible chase camera follows the aircraft. The API grants no filesystem, repository, Production, or Cloudflare authority.
+This API is a browser-local projection. AgenticGraph remains the follow-target and flight SSOT; GameXR exposes the resulting Three.js camera pose so local or production-targeted verification can prove the visible chase camera follows the aircraft. The API grants no filesystem, repository, Production, or Cloudflare authority.
 
 ## Device-motion permission boundary
 

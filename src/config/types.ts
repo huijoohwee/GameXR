@@ -1,4 +1,4 @@
-import type { AppleSpatialInputProfile } from '@knowgrph/apple-spatial-input/profile'
+import type { AppleSpatialInputProfile } from '@agenticgraph/apple-spatial-input/profile'
 
 export type Vector3Tuple = [number, number, number]
 export type QuaternionTuple = [number, number, number, number]

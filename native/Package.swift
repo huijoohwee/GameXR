@@ -15,22 +15,22 @@ let package = Package(
     dependencies: [
         .package(
             url: "https://github.com/huijoohwee/knowgrph.git",
-            revision: "1288749a170e1e5790fccd4130e8f76562370745"
+            revision: "19f9da8bc537b782e23ae7669c4a919d94171529"
         )
     ],
     targets: [
         .target(
             name: "GameXRNative",
             dependencies: [
-                .product(name: "KnowgrphSpatialCore", package: "knowgrph"),
-                .product(name: "KnowgrphRealityKitFlight", package: "knowgrph")
+                .product(name: "AgenticGraphSpatialCore", package: "knowgrph"),
+                .product(name: "AgenticGraphRealityKitFlight", package: "knowgrph")
             ]
         ),
         .testTarget(
             name: "GameXRNativeTests",
             dependencies: [
                 "GameXRNative",
-                .product(name: "KnowgrphSpatialCore", package: "knowgrph")
+                .product(name: "AgenticGraphSpatialCore", package: "knowgrph")
             ]
         )
     ],

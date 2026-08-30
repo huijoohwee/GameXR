@@ -1,5 +1,5 @@
 import Foundation
-import KnowgrphSpatialCore
+import AgenticGraphSpatialCore
 import Testing
 @testable import GameXRNative
 #if canImport(RealityKit)

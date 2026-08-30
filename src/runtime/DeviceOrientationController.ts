@@ -5,7 +5,7 @@ import {
   createAppleSpatialInputProfile,
   type AppleSensorSnapshot,
   type AppleSpatialInputProfile,
-} from '@knowgrph/apple-spatial-input'
+} from '@agenticgraph/apple-spatial-input'
 
 export const DEVICE_ORIENTATION_SCHEMA = 'gamexr.device-orientation/v2' as const
 

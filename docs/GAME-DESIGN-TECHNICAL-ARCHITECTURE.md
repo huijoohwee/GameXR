@@ -89,7 +89,7 @@ Safari permission is requested only inside the direct user-tap handler. Sensor l
 
 Raw samples, calibration, and filtered axes have no persistence or egress path: no IndexedDB record, scene/profile export, MCP result, fetch, beacon, socket, or analytics event contains them. Hosted `/gamexr/` responses must supply same-origin accelerometer/gyroscope `Permissions-Policy`; a parent document must also delegate those features when GameXR is embedded. Those headers expose capability only and never bypass the user grant.
 
-Knowgrph protected revision `1288749a170e1e5790fccd4130e8f76562370745` is the backend SSOT for explicit permission, listener-after-grant, lifecycle cancellation, neutral calibration, input shaping, deterministic flight, camera target projection, and RealityKit flight. GameXR owns only frontend visual projection and manifest-to-profile adapters.
+AgenticGraph protected revision `19f9da8bc537b782e23ae7669c4a919d94171529` is the backend SSOT for explicit permission, listener-after-grant, lifecycle cancellation, neutral calibration, input shaping, deterministic flight, camera target projection, and RealityKit flight. GameXR owns only frontend visual projection and manifest-to-profile adapters.
 
 ## Asset pipeline
 
@@ -153,7 +153,7 @@ The only runtime infrastructure is the static application origin. Local assets a
 | Portable Apple spatial-input contract | Conformance-tested in Dev | closed JSON Schema plus matching TypeScript/Swift rotation and smoothing vectors |
 | Safari orientation adapter | Source/simulated-event ready in Dev | permission, calibration, rotation, cleanup, and no-egress checks; named physical iPhone proof still required |
 | iOS RealityKit/Core Motion package | Build-verified | Xcode 26.6 / iOS Simulator SDK 26.5; physical sensor proof still required |
-| Cross-runtime default scene | Source-contract parity in Dev | complete 900-star/32-asteroid placement digest `14237543821781407139`; planet, ship, Knowgrph flight, procedural animation, and engine-audio target gates pass in TypeScript and Swift; native camera projection retains the upstream Knowgrph resolver |
+| Cross-runtime default scene | Source-contract parity in Dev | complete 900-star/32-asteroid placement digest `14237543821781407139`; planet, ship, AgenticGraph flight, procedural animation, and engine-audio target gates pass in TypeScript and Swift; native camera projection retains the upstream AgenticGraph resolver |
 | visionOS default deep-space RealityKit scene | Simulator-verified in Dev | direct full-immersive launch, no entry gate, recovery-only window, and all seven native gates pass on Xcode 26.6 (`17F113`) / SDK-runtime `23O469`-`23O470` and Xcode 27 beta 4 (`27A5228h`) / `24M5326e`-`24M5326f`; physical-headset and pixel-identity claims remain excluded |
 | Production mirror | Current candidate deferred | historical deployment exists; this candidate has no protected projection or release authorization |
 | Cloudflare routes | Historical origin audited; current candidate deferred | the older deployed route remains unverified and deployment is unauthorized; local WebKit 8/8 does not establish exact-candidate live parity |

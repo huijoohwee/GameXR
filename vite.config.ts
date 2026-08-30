@@ -47,7 +47,7 @@ export default defineConfig(({ mode }) => {
             fileName: 'schemas/apple-spatial-input.schema.json',
             source: readFileSync(resolve(
               import.meta.dirname,
-              'node_modules/@knowgrph/apple-spatial-input/schema/apple-spatial-input-profile.v1.schema.json',
+              'node_modules/@agenticgraph/apple-spatial-input/schema/apple-spatial-input-profile.v1.schema.json',
             ), 'utf8'),
           })
         },

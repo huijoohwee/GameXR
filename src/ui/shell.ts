@@ -250,7 +250,7 @@ export function renderShell(
           </div>
           <div class="mcp-card">
             <code>/tool.catalog #tool-function @tool-function</code>
-            <p>Discover the browser-local runtime and Game OS tools through the centralized Agentic Canvas OS vocabulary. Direct <code>/flight.sim</code> remains owned by Knowgrph and is not aliased here.</p>
+            <p>Discover the browser-local runtime and Game OS tools through the centralized Agentic Canvas OS vocabulary. Direct <code>/flight.sim</code> remains owned by AgenticGraph and is not aliased here.</p>
           </div>
         </section>
       </div>

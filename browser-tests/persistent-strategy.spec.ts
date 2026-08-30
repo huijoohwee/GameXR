@@ -182,7 +182,7 @@ test('persistent strategy world commits, arbitrates tabs, restores, and inspects
     const takeoverWorldId = `takeover-${Date.now()}`
     await Promise.all([setGameOsTestNow(page, 2_000_000), setGameOsTestNow(secondPage, 2_000_000)])
     await page.evaluate(async ({ worldId }) => {
-      const tool = window.gameXR.tools.find(candidate => candidate.name === 'knowgrph.control_local_world')
+      const tool = window.gameXR.tools.find(candidate => candidate.name === 'agenticgraph.control_local_world')
       if (!tool) throw new Error('Game OS control tool is missing.')
       await tool.execute({
         operation: 'resume', playerActionConfirmed: true, worldId,
@@ -193,7 +193,7 @@ test('persistent strategy world commits, arbitrates tabs, restores, and inspects
     expect(GAME_XR_WORLD_LEASE_TTL_MILLISECONDS).toBeLessThan(3 * 60_000)
     await setGameOsTestNow(secondPage, 2_000_000 + GAME_XR_WORLD_LEASE_TTL_MILLISECONDS + 1)
     await secondPage.evaluate(async ({ worldId }) => {
-      const tool = window.gameXR.tools.find(candidate => candidate.name === 'knowgrph.control_local_world')
+      const tool = window.gameXR.tools.find(candidate => candidate.name === 'agenticgraph.control_local_world')
       if (!tool) throw new Error('Game OS control tool is missing.')
       await tool.execute({
         operation: 'resume', playerActionConfirmed: true, worldId,
@@ -202,7 +202,7 @@ test('persistent strategy world commits, arbitrates tabs, restores, and inspects
     }, { worldId: takeoverWorldId })
     await expect(secondPage.locator('#strategy-live')).toBeVisible()
     const staleToolError = await page.evaluate(async ({ worldId }) => {
-      const tool = window.gameXR.tools.find(candidate => candidate.name === 'knowgrph.control_local_world')
+      const tool = window.gameXR.tools.find(candidate => candidate.name === 'agenticgraph.control_local_world')
       if (!tool) throw new Error('Game OS control tool is missing.')
       try {
         await tool.execute({ operation: 'commit', playerActionConfirmed: true, worldId })
@@ -215,7 +215,7 @@ test('persistent strategy world commits, arbitrates tabs, restores, and inspects
     await expect(page.locator('#strategy-live')).toBeHidden()
     await expect(page.locator('#strategy-status')).toContainText('local writer session was closed')
     await secondPage.evaluate(async ({ worldId }) => {
-      const tool = window.gameXR.tools.find(candidate => candidate.name === 'knowgrph.control_local_world')
+      const tool = window.gameXR.tools.find(candidate => candidate.name === 'agenticgraph.control_local_world')
       if (!tool) throw new Error('Game OS control tool is missing.')
       await tool.execute({ operation: 'close', playerActionConfirmed: true, worldId })
     }, { worldId: takeoverWorldId })
@@ -275,7 +275,7 @@ test('persistent strategy world commits, arbitrates tabs, restores, and inspects
     expect(factionControls.controlFactionIds).toEqual(factionControls.liveFactionIds)
     expect(factionControls.supplyLabel).toBe(factionControls.selectedFactionId)
     const wrongWorldErrors = await page.evaluate(async () => {
-      const tool = window.gameXR.tools.find(candidate => candidate.name === 'knowgrph.control_local_world')
+      const tool = window.gameXR.tools.find(candidate => candidate.name === 'agenticgraph.control_local_world')
       if (!tool) throw new Error('Game OS control tool is missing.')
       const invokeAndCapture = async (input: Record<string, unknown>): Promise<string | null> => {
         try {
@@ -305,7 +305,7 @@ test('persistent strategy world commits, arbitrates tabs, restores, and inspects
       const factionId = (document.querySelector('#strategy-unit') as HTMLSelectElement | null)
         ?.selectedOptions[0]?.dataset.factionId
       if (!factionId) throw new Error(`Strategy faction metadata is missing for ${unitId}.`)
-      const tool = window.gameXR.tools.find(candidate => candidate.name === 'knowgrph.control_local_world')
+      const tool = window.gameXR.tools.find(candidate => candidate.name === 'agenticgraph.control_local_world')
       if (!tool) throw new Error('Game OS control tool is missing.')
       await tool.execute({
         operation: 'order',
@@ -319,7 +319,7 @@ test('persistent strategy world commits, arbitrates tabs, restores, and inspects
     await page.locator('#strategy-close').click()
     await expect(page.locator('#strategy-live')).toBeHidden()
     const queuedStatus = await page.evaluate(async () => {
-      const tool = window.gameXR.tools.find(candidate => candidate.name === 'knowgrph.inspect_game_os')
+      const tool = window.gameXR.tools.find(candidate => candidate.name === 'agenticgraph.inspect_game_os')
       if (!tool) throw new Error('Game OS inspection tool is missing.')
       return tool.execute({ view: 'world_continuity', worldId: 'local-frontier' })
     }) as { entries: Array<{ pendingOrderCount: number; restoredTick: number }> }
@@ -332,7 +332,7 @@ test('persistent strategy world commits, arbitrates tabs, restores, and inspects
     await expect(page.locator('#strategy-tick')).toHaveText('0')
     await expect(page.locator('#strategy-status')).toContainText('externally accepted orders')
     await page.evaluate(async () => {
-      const tool = window.gameXR.tools.find(candidate => candidate.name === 'knowgrph.control_local_world')
+      const tool = window.gameXR.tools.find(candidate => candidate.name === 'agenticgraph.control_local_world')
       if (!tool) throw new Error('Game OS control tool is missing.')
       await tool.execute({
         operation: 'commit', playerActionConfirmed: true, worldId: 'local-frontier',
@@ -349,12 +349,12 @@ test('persistent strategy world commits, arbitrates tabs, restores, and inspects
     expect(toolNames).toEqual([
       'gamexr.inspect_runtime',
       'gamexr.control_runtime',
-      'knowgrph.inspect_game_os',
-      'knowgrph.control_local_world',
+      'agenticgraph.inspect_game_os',
+      'agenticgraph.control_local_world',
     ])
     const bytesBeforeStatus = await gameOsEnvelopeBytes(page, 'local-frontier')
     const status = await page.evaluate(async () => {
-      const tool = window.gameXR.tools.find(candidate => candidate.name === 'knowgrph.inspect_game_os')
+      const tool = window.gameXR.tools.find(candidate => candidate.name === 'agenticgraph.inspect_game_os')
       if (!tool) throw new Error('Game OS inspection tool is missing.')
       return tool.execute({ view: 'world_continuity', worldId: 'local-frontier' })
     }) as { entries: Array<{ restoredTick: number }>; costRecord: { estimated_cost_usd: number } }

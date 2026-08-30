@@ -68,7 +68,7 @@ test('release manifest binds every served artifact byte', async ({ page, request
   expect(releaseDigest(manifest.artifacts)).toBe(manifest.artifactDigest)
 })
 
-test('WebMCP reports the Knowgrph-resolved chase camera while flight controls move it', async ({ page }) => {
+test('WebMCP reports the AgenticGraph-resolved chase camera while flight controls move it', async ({ page }) => {
   await page.goto('/gamexr/')
   await expect(page.locator('#app')).toHaveAttribute('aria-busy', 'false')
 

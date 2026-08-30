@@ -27,7 +27,7 @@
     "physicalIPhoneSafariVerified": false
   },
   "chaseCamera": {
-    "owner": "Knowgrph follow-camera target with GameXR visual projection",
+    "owner": "AgenticGraph follow-camera target with GameXR visual projection",
     "inspection": ["position", "quaternion", "lookTarget", "fieldOfViewDegrees"],
     "automatedBrowserVerification": "local-and-exact-production-targetable",
     "physicalAppleDeviceVerified": false

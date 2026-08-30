@@ -1,5 +1,5 @@
 import Foundation
-import KnowgrphSpatialCore
+import AgenticGraphSpatialCore
 
 public struct GameXRSceneManifest: Codable, Equatable, Sendable {
     public let schemaURL: String?

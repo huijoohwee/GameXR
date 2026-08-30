@@ -5,6 +5,22 @@ import test from 'node:test'
 const shellSource = readFileSync(new URL('../src/ui/shell.ts', import.meta.url), 'utf8')
 const styleSource = readFileSync(new URL('../src/styles.css', import.meta.url), 'utf8')
 const headersSource = readFileSync(new URL('../deployment/cloudflare/headers.fragment', import.meta.url), 'utf8')
+const redirectsSource = readFileSync(new URL('../deployment/cloudflare/redirects.fragment', import.meta.url), 'utf8')
+
+test('production redirect fragment keeps the canonical GameXR route and retires content aliases', () => {
+  const rules = redirectsSource
+    .split(/\r?\n/u)
+    .map(line => line.trim())
+    .filter(line => line && !line.startsWith('#'))
+
+  assert.deepEqual(rules, [
+    '/gamexr /gamexr/ 301',
+    '/gamexr/* /content/gamexr/:splat 200',
+    '/content/gamexr /gamexr 301',
+    '/content/gamexr/ /gamexr/ 301',
+    '/content/gamexr/* /gamexr/:splat 301',
+  ])
+})
 
 test('mobile keeps explicit motion and recenter controls visible', () => {
   assert.match(shellSource, /id="motion-control"[^>]*>Enable Motion<\/button>/)

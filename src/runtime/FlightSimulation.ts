@@ -3,7 +3,7 @@ import {
   integrateFlightModel,
   type FlightSimAircraftState,
   type FlightSimModelProfile,
-} from '@knowgrph/apple-spatial-input/flight'
+} from '@agenticgraph/apple-spatial-input/flight'
 import { Euler, Quaternion, Vector3 } from 'three'
 import type { ControlState, SceneManifest, Vector3Tuple } from '../config/types.ts'
 

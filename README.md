@@ -4,7 +4,7 @@ GameXR is a browser-local spatial flight runtime rebuilt from the useful control
 
 The result is mobile-first, installable, offline-capable, user-configurable, and zero-spend at runtime. A Swift 6 / SwiftUI / RealityKit package consumes the same JSON contract for native iOS and visionOS integration.
 
-The versioned `airvio.apple-spatial-input/v1` contract makes calibration, screen-relative axis mapping, jitter suppression, and elapsed-time smoothing portable across browser and Swift frontends. Knowgrph is the shared backend SSOT: GameXR consumes its browser sensor, filter, flight, camera, Swift Core, and RealityKit flight products at protected revision `1288749a170e1e5790fccd4130e8f76562370745`.
+The versioned `airvio.apple-spatial-input/v1` contract makes calibration, screen-relative axis mapping, jitter suppression, and elapsed-time smoothing portable across browser and Swift frontends. AgenticGraph is the shared backend SSOT: GameXR consumes its browser sensor, filter, flight, camera, Swift Core, and RealityKit flight products at protected revision `19f9da8bc537b782e23ae7669c4a919d94171529`.
 
 ## Run
 
@@ -31,7 +31,7 @@ Select **Tune** to edit high-value controls or the complete `gamexr-scene/v1` ma
 
 ### Phone orientation contract
 
-GameXR installs orientation listeners only after the explicit permission request succeeds. The first valid sample becomes the neutral pose; subsequent samples are remapped when the screen rotates, smoothed by elapsed time, and shaped by the user-configurable `motion.deviceOrientation` profile before they reach normalized flight/camera input. Recenter deliberately takes a new neutral sample instead of assuming one fixed holding angle. The portable profile is closed and range-validated by the schema exported from `@knowgrph/apple-spatial-input`; builds project that canonical schema to `schemas/apple-spatial-input.schema.json`.
+GameXR installs orientation listeners only after the explicit permission request succeeds. The first valid sample becomes the neutral pose; subsequent samples are remapped when the screen rotates, smoothed by elapsed time, and shaped by the user-configurable `motion.deviceOrientation` profile before they reach normalized flight/camera input. Recenter deliberately takes a new neutral sample instead of assuming one fixed holding angle. The portable profile is closed and range-validated by the schema exported from `@agenticgraph/apple-spatial-input`; builds project that canonical schema to `schemas/apple-spatial-input.schema.json`.
 
 Motion stops and clears its transient calibration on **Disable Motion**, hidden-page transition, `pagehide`, or runtime disposal. Raw orientation samples and calibration remain memory-only: they are not written to IndexedDB, included in scene export, returned through MCP, or sent over the network. A deployed origin must serve a same-origin `Permissions-Policy` for the required motion features, and every embedding iframe must delegate them explicitly.
 
@@ -54,7 +54,7 @@ The page exposes:
 - `gamexr.inspect_runtime` — read-only manifest, flight/performance telemetry, projected chase-camera pose/FOV, and zero-cost evidence.
 - `gamexr.control_runtime` — bounded transport, control, animation, and validated manifest-patch operations.
 
-These tools register with `navigator.modelContext` when a host provides it and remain scanner-readable locally when it does not. Agentic Canvas OS already owns `/flight.sim @canvas #flight`, so GameXR does not alias that Knowgrph route. Generic centralized discovery and execution use `/tool.catalog` and `/tool.call`; see [`docs/MCP.md`](docs/MCP.md).
+These tools register with `navigator.modelContext` when a host provides it and remain scanner-readable locally when it does not. Agentic Canvas OS already owns `/flight.sim @canvas #flight`, so GameXR does not alias that AgenticGraph route. Generic centralized discovery and execution use `/tool.catalog` and `/tool.call`; see [`docs/MCP.md`](docs/MCP.md).
 
 ## Apple adapter
 
@@ -66,7 +66,7 @@ These tools register with `navigator.modelContext` when a host provides it and r
 - a SwiftUI `RealityView` with touch and Core Motion controls;
 - iOS 18 and visionOS 2 deployment floors, retained across stable Xcode 26.6 / SDK 26.5 and Xcode 27.0 beta 4 / SDK 27.0.
 
-[`native/App/GameXRVisionApp.xcodeproj`](native/App/GameXRVisionApp.xcodeproj) is the repository-owned visionOS host. Its information property list selects `UISceneSessionRoleImmersiveSpaceApplication` as the preferred default scene role and `UIImmersionStyleFull` as the initial style, so a cold app launch enters the first SwiftUI `.full` `ImmersiveSpace` directly without an entry window or **Enter Full Scene** gate. A suppressed-by-role `WindowGroup` exists only as recovery UI after the person exits or the system dismisses the space. The host embeds the canonical [`shared/default-scene.json`](shared/default-scene.json), fails closed if it is missing or invalid, and projects one deterministic world root containing the configured background, 900-star field, 32-asteroid field, planet, light, and one Knowgrph-driven ship. The cross-runtime fixture fixes the complete default placement stream at digest `14237543821781407139` and verifies the ship, Knowgrph flight trace, procedural animation, and engine-audio target contracts in both TypeScript and Swift. The host contains no WebView, browser wrapper, second flight integrator, chase camera, or asset resolver.
+[`native/App/GameXRVisionApp.xcodeproj`](native/App/GameXRVisionApp.xcodeproj) is the repository-owned visionOS host. Its information property list selects `UISceneSessionRoleImmersiveSpaceApplication` as the preferred default scene role and `UIImmersionStyleFull` as the initial style, so a cold app launch enters the first SwiftUI `.full` `ImmersiveSpace` directly without an entry window or **Enter Full Scene** gate. A suppressed-by-role `WindowGroup` exists only as recovery UI after the person exits or the system dismisses the space. The host embeds the canonical [`shared/default-scene.json`](shared/default-scene.json), fails closed if it is missing or invalid, and projects one deterministic world root containing the configured background, 900-star field, 32-asteroid field, planet, light, and one AgenticGraph-driven ship. The cross-runtime fixture fixes the complete default placement stream at digest `14237543821781407139` and verifies the ship, AgenticGraph flight trace, procedural animation, and engine-audio target contracts in both TypeScript and Swift. The host contains no WebView, browser wrapper, second flight integrator, chase camera, or asset resolver.
 
 ```sh
 npm run native:check
@@ -78,7 +78,7 @@ This is 100% coverage of the defined default-scene source contract, not pixel or
 
 The repository host supplies a meaningful `NSMotionUsageDescription`; any additional host must do the same. The adapter fails closed when that key or processed device motion is unavailable. A future native resolver can admit Reality Composer Pro content behind reviewed semantic IDs; the current native target is an explicitly bounded procedural adapter. Out-of-baseline Reality Composer Pro 3 and OS 27 APIs are not Production dependencies. See [`docs/APPLE-COMPATIBILITY.md`](docs/APPLE-COMPATIBILITY.md).
 
-The immutable Knowgrph dependency and frontend/backend boundary are recorded in [`docs/KNOWGRPH-HARMONIZATION.md`](docs/KNOWGRPH-HARMONIZATION.md).
+The immutable AgenticGraph dependency and frontend/backend boundary are recorded in [`docs/AGENTIC-GRAPH-HARMONIZATION.md`](docs/AGENTIC-GRAPH-HARMONIZATION.md).
 
 ## Verify
 

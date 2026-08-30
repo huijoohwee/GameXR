@@ -10,7 +10,7 @@ Canonical invocation discovery:
 - /tool.catalog #tool-function @tool-function
 - /tool.call #bridge-tool #tool-routing #approval-gate @bridge-tool @tool-function @tool-policy @cost-log
 
-/flight.sim @canvas #flight remains owned by the Knowgrph Canvas runtime and is not an alias for GameXR.
+/flight.sim @canvas #flight remains owned by the AgenticGraph Canvas runtime and is not an alias for GameXR.
 
 Device-orientation steering requires the visible direct-gesture Enable Motion control. MCP can tune the manifest preference, sensitivity, dead zone, and pitch inversion, but cannot grant Safari sensor permission or start a sensor listener.
 

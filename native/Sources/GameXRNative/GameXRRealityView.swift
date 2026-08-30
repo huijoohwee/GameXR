@@ -1,8 +1,8 @@
 #if canImport(RealityKit) && canImport(SwiftUI) && (os(iOS) || os(visionOS))
 import Foundation
 import Observation
-import KnowgrphRealityKitFlight
-import KnowgrphSpatialCore
+import AgenticGraphRealityKitFlight
+import AgenticGraphSpatialCore
 import RealityKit
 import SwiftUI
 import UIKit
@@ -28,7 +28,7 @@ public final class GameXRNativeCoordinator {
     public let rootEntity = Entity()
     let presentationEntity = Entity()
     var isFlightSystemActive: Bool {
-        shipEntity.components[KnowgrphFlightControlComponent.self] != nil
+        shipEntity.components[AgenticGraphFlightControlComponent.self] != nil
     }
     var projectionState: GameXRNativeProjectionState {
         if let worldProjectionError {
@@ -38,7 +38,7 @@ public final class GameXRNativeCoordinator {
     }
     var flightTelemetrySummary: String {
         _ = flightTelemetryRevision
-        guard let state = shipEntity.components[KnowgrphFlightStateComponent.self]?.state else {
+        guard let state = shipEntity.components[AgenticGraphFlightStateComponent.self]?.state else {
             return "Flight state unavailable"
         }
         return String(
@@ -50,9 +50,9 @@ public final class GameXRNativeCoordinator {
             state.throttle
         )
     }
-    public var flightStateSnapshot: FlightSimAircraftState? { shipEntity.components[KnowgrphFlightStateComponent.self]?.state }
-    public var flightControlInputSnapshot: FlightSimTickInput? { shipEntity.components[KnowgrphFlightControlComponent.self]?.input }
-    public var flightProfileSnapshot: FlightSimModelProfile? { shipEntity.components[KnowgrphFlightConfigurationComponent.self]?.profile }
+    public var flightStateSnapshot: FlightSimAircraftState? { shipEntity.components[AgenticGraphFlightStateComponent.self]?.state }
+    public var flightControlInputSnapshot: FlightSimTickInput? { shipEntity.components[AgenticGraphFlightControlComponent.self]?.input }
+    public var flightProfileSnapshot: FlightSimModelProfile? { shipEntity.components[AgenticGraphFlightConfigurationComponent.self]?.profile }
     private let shipEntity = Entity()
     private var exhaustEntities: [ModelEntity] = []
     private var wingEntities: (left: ModelEntity, right: ModelEntity)?
@@ -78,7 +78,7 @@ public final class GameXRNativeCoordinator {
         self.manifest = manifest
         self.presentation = presentation
         self.audioEngine = GameXRNativeAudioEngine(configuration: manifest.audio)
-        KnowgrphRealityKitFlightRegistration.ensureRegistered()
+        AgenticGraphRealityKitFlightRegistration.ensureRegistered()
         presentationEntity.name = "gamexr-presentation"
         presentationEntity.addChild(rootEntity)
         do {
@@ -116,8 +116,8 @@ public final class GameXRNativeCoordinator {
     }
     public func reset() {
         do {
-            shipEntity.components.set(KnowgrphFlightStateComponent(state: initialFlightState()))
-            shipEntity.components.set(KnowgrphFlightAccumulatorComponent(
+            shipEntity.components.set(AgenticGraphFlightStateComponent(state: initialFlightState()))
+            shipEntity.components.set(AgenticGraphFlightAccumulatorComponent(
                 accumulator: try FlightSimFixedStepAccumulator(
                     maximumCatchUpSteps: manifest.performance.maxSimulationCatchUpSteps
                 )
@@ -148,9 +148,9 @@ public final class GameXRNativeCoordinator {
         cameraProfile = try makeCameraProfile()
         cameraResetKey &+= 1
         cameraSequence = 0
-        shipEntity.components.set(KnowgrphFlightConfigurationComponent(profile: try flightProfile()))
-        shipEntity.components.set(KnowgrphFlightStateComponent(state: initialFlightState()))
-        shipEntity.components.set(KnowgrphFlightAccumulatorComponent())
+        shipEntity.components.set(AgenticGraphFlightConfigurationComponent(profile: try flightProfile()))
+        shipEntity.components.set(AgenticGraphFlightStateComponent(state: initialFlightState()))
+        shipEntity.components.set(AgenticGraphFlightAccumulatorComponent())
         shipEntity.components.set(InputTargetComponent())
         shipEntity.components.set(CollisionComponent(shapes: [.generateBox(size: [4.8, 1.0, 5.5])]))
         writeControlComponent()
@@ -256,7 +256,7 @@ public final class GameXRNativeCoordinator {
     func synchronizeFrame(deltaSeconds: Double) {
         guard worldProjectionError == nil else { return }
         writeControlComponent()
-        guard var component = shipEntity.components[KnowgrphFlightStateComponent.self] else { return }
+        guard var component = shipEntity.components[AgenticGraphFlightStateComponent.self] else { return }
         guard component.failure == nil, component.state.isFinite else {
             failClosed("Canonical flight state failed during native projection.")
             return
@@ -337,7 +337,7 @@ public final class GameXRNativeCoordinator {
     private func failClosed(_ message: String) {
         isRunning = false
         audioEngine.pause()
-        shipEntity.components.remove(KnowgrphFlightControlComponent.self)
+        shipEntity.components.remove(AgenticGraphFlightControlComponent.self)
         worldProjectionError = message
     }
     func dispose() { updateSubscription?.cancel(); audioEngine.dispose() }
@@ -360,12 +360,12 @@ public final class GameXRNativeCoordinator {
     }
     private func writeControlComponent() {
         guard isRunning else {
-            shipEntity.components.remove(KnowgrphFlightControlComponent.self)
+            shipEntity.components.remove(AgenticGraphFlightControlComponent.self)
             return
         }
-        let currentThrottle = shipEntity.components[KnowgrphFlightStateComponent.self]?.state.throttle ?? 0
+        let currentThrottle = shipEntity.components[AgenticGraphFlightStateComponent.self]?.state.throttle ?? 0
         let requestedThrottle = brake > 0 ? 0 : Double(max(0, throttle))
-        let control = KnowgrphFlightControlComponent(
+        let control = AgenticGraphFlightControlComponent(
             input: FlightSimTickInput(
                 pitch: normalizedAxis(Double(pitch)) * (manifest.motion.invertPitch ? -1 : 1),
                 roll: normalizedAxis(Double(roll)),

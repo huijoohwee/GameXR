@@ -1,4 +1,6 @@
 # Merge at the protected Pages root owner; do not deploy this fragment alone.
-/gamexr /gamexr/ 308
-/gamexr/ /content/gamexr/index.html 200
+/gamexr /gamexr/ 301
 /gamexr/* /content/gamexr/:splat 200
+/content/gamexr /gamexr 301
+/content/gamexr/ /gamexr/ 301
+/content/gamexr/* /gamexr/:splat 301

@@ -1,12 +1,12 @@
 {
-  "originHash" : "18bad0a30176a347feb54044d2d0178f34409ae2e3af3b0cad2a53a0499a5336",
+  "originHash" : "2c796305e82933f1dacea3114f5ada6ba61ff170d92eee21078dbd4c47d9d852",
   "pins" : [
     {
       "identity" : "knowgrph",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/huijoohwee/knowgrph.git",
       "state" : {
-        "revision" : "1288749a170e1e5790fccd4130e8f76562370745"
+        "revision" : "19f9da8bc537b782e23ae7669c4a919d94171529"
       }
     }
   ],

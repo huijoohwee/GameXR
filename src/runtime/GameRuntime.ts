@@ -12,7 +12,7 @@ import {
 import {
   createFlightSimCameraProfile,
   resolveFlightSimFollowTarget,
-} from '@knowgrph/apple-spatial-input/camera'
+} from '@agenticgraph/apple-spatial-input/camera'
 import type { GameOsWorldState } from 'grph-shared/game-os/index'
 import type { RuntimeTelemetry, SceneManifest } from '../config/types.ts'
 import { LocalDatabase, requestPersistentStorage, type StoredAssetMetadata } from '../storage/LocalDatabase.ts'

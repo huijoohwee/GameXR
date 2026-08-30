@@ -2,7 +2,7 @@ import defaultManifestJson from '../../shared/default-scene.json' with { type: '
 import {
   APPLE_SPATIAL_INPUT_PROFILE_LIMITS,
   APPLE_SPATIAL_INPUT_SCHEMA,
-} from '@knowgrph/apple-spatial-input/profile'
+} from '@agenticgraph/apple-spatial-input/profile'
 import type {
   EnvironmentId,
   ManifestValidationResult,

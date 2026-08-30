@@ -55,7 +55,7 @@ test('validator rejects unknown and out-of-budget fields', () => {
   }
 })
 
-test('camera contract rejects chase heights that canonical Knowgrph cannot resolve', () => {
+test('camera contract rejects chase heights that canonical AgenticGraph cannot resolve', () => {
   const manifest = getDefaultSceneManifest()
   manifest.camera.chaseHeight = 0
   const validation = validateSceneManifest(manifest)

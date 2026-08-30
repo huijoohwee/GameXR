@@ -1,5 +1,5 @@
 import Foundation
-import KnowgrphSpatialCore
+import AgenticGraphSpatialCore
 import Testing
 #if canImport(RealityKit)
 import RealityKit

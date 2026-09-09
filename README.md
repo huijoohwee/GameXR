@@ -106,6 +106,6 @@ This verifies shipped bytes, online service-worker/cache convergence, browser We
 
 ## Release boundary
 
-Dev output is written to `dist/gamexr`. It is not a Production or Cloudflare authorization. The protected production mirror at `huijoohwee/content/gamexr` owns publication, and the Git-connected `joohwee` Pages project is the single forward-deployment owner. GameXR source never writes that mirror or deploys `airvio.co` directly.
+Dev output is written to `dist/gamexr`. The `agentic-graph` protected `.github/workflows/release.yml` is the sole deployment, rollback, verification, and mirror-publication owner for the shared `joohwee` Pages project. It uses Direct Upload and disables Git-triggered deployments. `huijoohwee/content/gamexr` is generated output. GameXR submits its sealed source-bound artifact to that owner; it never writes the mirror or deploys `airvio.co` directly.
 
-[`docs/RELEASE.md`](docs/RELEASE.md) records the protected projection, preview, exact authorization, Git deployment, smoke, and rollback contract. A historical deployment is live at `/gamexr`, but this current candidate is neither release-authorized nor exact-candidate live-verified. Physical iPhone and Vision Pro certification remains a separate promotion gate.
+[`docs/RELEASE.md`](docs/RELEASE.md) records source-artifact admission, exact authorization, owner-controlled deployment, smoke, rollback, and mirror publication. A historical deployment is live at `/gamexr`, but this current candidate is neither release-authorized nor exact-candidate live-verified. Physical iPhone and Vision Pro certification remains a separate product-verification gate.

@@ -4,25 +4,25 @@
 
 `npm run build` creates a production-shaped `/gamexr/` artifact under `dist/gamexr`. Its generated precache manifest covers every emitted runtime JavaScript, CSS, and dynamic chunk except the service worker itself. The emitted worker binds the exact precache digest, so every changed release is discoverable without a circular self-hash. The worker recomputes that aggregate and validates every declared response's byte count and SHA-256 before marking a full-digest cache ready; it never mutates the sealed cache with an unverified navigation or runtime response. `npm run build:apex` creates the root-base variant under `dist/apex`, but compile-time gating disables service-worker registration at `/` because that is shared production scope. `release:prepare` records Git head/worktree state, emits a content-addressed manifest, and explicitly keeps `deploymentAuthorized: false`.
 
-GameXR source does not write `huijoohwee/content/gamexr` or mutate the Cloudflare project. The protected `huijoohwee` mirror and its Git-connected `joohwee` Pages project own Production. The first authorized release is live at `/gamexr`; its receipt remains external to this source repository.
+GameXR source does not write `huijoohwee/content/gamexr` or mutate the Cloudflare project. The `agentic-graph` protected `.github/workflows/release.yml` owns deployment, rollback, verification, and subsequent generated publication into `huijoohwee` for the shared `joohwee` Pages project. Its `runtime:pages:owner-enforce` command disables Git production and preview deployments before Direct Upload. This is the same owner named by `huijoohwee/AGENTS.md`; a mirror merge does not deploy GameXR. A historical release is live at `/gamexr`; its receipt remains external to this source repository.
 
 ## Required controller stages
 
 1. Require a committed exact GameXR source revision and successful repository checks.
 2. Rebuild in a clean source-bound environment and verify `release-manifest.json` digest.
-3. Project only `dist/gamexr` into `huijoohwee/content/gamexr` through an isolated mirror pull request.
-4. Merge generated routing/header fragments at their root owner; never hand-edit stale downstream copies. The root projection must replace inherited policy headers, prevent response transformation, revalidate shell metadata/service-worker bytes, and keep hashed assets immutable.
-5. Keep Pages Web Analytics disabled before deployment. Its project-level beacon injection precedes `_headers`, mutates the sealed HTML, and is therefore incompatible with exact-byte verification.
-6. Let the existing Git-connected Pages integration create the pull-request preview; never dispatch a second Wrangler deployment for the same candidate.
-7. Verify preview origin hashes and browser behavior, then stop for exact-candidate human authorization.
-8. Merge the protected mirror pull request. The Git integration is the only forward production deployment owner.
-9. Verify the resulting immutable production origin, `airvio.co/gamexr/`, returning-user service-worker convergence, browser WebMCP schemas, and asset digest parity. Restore the prior Pages deployment on failure.
+3. Submit the sealed artifact, exact source revision, and validation evidence to the Graph release owner. Its candidate assembly must bind those inputs and project only the reviewed GameXR artifact into `content/gamexr`, preserving all sibling applications. If that admission path is unavailable, retain the candidate until the owner supports it; a manual mirror edit is not a substitute.
+4. Merge generated routing/header fragments at their Graph-owned root projection. The root projection must replace inherited policy headers, prevent response transformation, revalidate shell metadata/service-worker bytes, and keep hashed assets immutable.
+5. Require Pages Web Analytics to remain disabled before deployment. Its project-level beacon injection precedes `_headers`, mutates the sealed HTML, and is therefore incompatible with exact-byte verification.
+6. Let the protected release owner prepare and validate the complete source-bound candidate and rollback identity. Do not rely on a Git-connected preview or dispatch a second deployment.
+7. Require exact-candidate human authorization in the owner's protected Production environment before forward effects.
+8. Let that owner deploy the reviewed artifact through Direct Upload and verify the immutable production origin, `airvio.co/gamexr/`, returning-user service-worker convergence, browser WebMCP schemas, asset digest parity, and preserved sibling routes. It restores the prior Pages deployment on failure.
+9. Publish the verified generated mirror only after live smoke succeeds, through the same owner's existing publication path. Record source, artifact, deployment, verification, and publication identities separately.
 
 The Apex production route requires a separate explicit routing decision because `airvio.co/` is shared public estate. A working `npm run dev:apex` does not grant that authority.
 
 ## Required Cloudflare fragments
 
-The future root routing owner should merge the reviewed equivalents of [`../deployment/cloudflare/redirects.fragment`](../deployment/cloudflare/redirects.fragment) and [`../deployment/cloudflare/headers.fragment`](../deployment/cloudflare/headers.fragment). These are source inputs, not self-executing deployment files.
+The Graph root projection owner consumes reviewed equivalents of [`../deployment/cloudflare/redirects.fragment`](../deployment/cloudflare/redirects.fragment) and [`../deployment/cloudflare/headers.fragment`](../deployment/cloudflare/headers.fragment). These are source inputs, not self-executing deployment files.
 
 ## Production verification
 

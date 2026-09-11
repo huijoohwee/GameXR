@@ -30,7 +30,8 @@
     "@types/node": "24.10.13",
     "@types/three": "0.185.4",
     "typescript": "7.0.2",
-    "vite": "8.2.1"
+    "vite": "8.2.1",
+    "agentic-os": "https://codeload.github.com/huijoohwee/agentic-os/tar.gz/13c3839aba7fc64bf94f93aa29b1239ab929840d"
   },
   "engines": {
     "node": "^20.19.0 || >=22.12.0"

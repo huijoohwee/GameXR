@@ -1,21 +1,14 @@
 import { createHash } from 'node:crypto'
-import { readdir, readFile, writeFile } from 'node:fs/promises'
-import { relative, resolve } from 'node:path'
+import { readFile } from 'node:fs/promises'
+import { realpathSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { execFileSync } from 'node:child_process'
+import { generationManifest, writeGeneratedFile } from 'agentic-os/generation'
 
 function option(name, fallback) {
   const prefix = `--${name}=`
   const value = process.argv.slice(2).find((argument) => argument.startsWith(prefix))
   return value ? value.slice(prefix.length) : fallback
-}
-
-async function filesUnder(directory) {
-  const entries = await readdir(directory, { withFileTypes: true })
-  const nested = await Promise.all(entries.map(async (entry) => {
-    const path = resolve(directory, entry.name)
-    return entry.isDirectory() ? filesUnder(path) : [path]
-  }))
-  return nested.flat()
 }
 
 function sha256(bytes) {
@@ -66,20 +59,13 @@ function candidateStatus(source) {
   return 'unsealed-source-status-unknown'
 }
 
-const root = resolve(option('root', 'dist/gamexr'))
+const root = realpathSync(resolve(option('root', 'dist/gamexr')))
 const basePath = option('base', '/gamexr/')
 const packageJson = JSON.parse(await readFile(resolve('package.json'), 'utf8'))
-const paths = (await filesUnder(root))
-  .filter((path) => !path.endsWith('/release-manifest.json'))
-  .sort((left, right) => left.localeCompare(right))
-const artifacts = await Promise.all(paths.map(async (path) => {
-  const bytes = await readFile(path)
-  return {
-    path: relative(root, path).replaceAll('\\', '/'),
-    bytes: bytes.byteLength,
-    sha256: sha256(bytes),
-  }
-}))
+const artifacts = generationManifest(root, { exclude: ['release-manifest.json'],
+  maxEntries: 2000, maxBytes: 64 * 1024 * 1024, maxFileBytes: 16 * 1024 * 1024,
+}).files.map(({ path, bytes, sha256 }) => ({ path, bytes, sha256 }))
+  .sort((left, right) => left.path.localeCompare(right.path))
 const joinedDigestInput = artifacts.map((artifact) => `${artifact.path}\0${artifact.bytes}\0${artifact.sha256}`).join('\n')
 const source = inspectSource()
 const manifest = {
@@ -103,5 +89,5 @@ const manifest = {
   deploymentAuthorized: false,
   artifacts,
 }
-await writeFile(resolve(root, 'release-manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`)
+await writeGeneratedFile(resolve(root, 'release-manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`)
 process.stdout.write(`GameXR ${manifest.candidateStatus}: ${manifest.artifactDigest}\n`)

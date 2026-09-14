@@ -169,5 +169,6 @@
     }
   },
   "source_check_log_sha256": "d996b37807db46c9bd832d5bfb0995b44a7986256fa660640f5f2bd4beb6b906",
-  "release_preparation": "Historical host evidence retained; provenance verifier and parent links made portable, drone checks added to CI. Protected PR checks provide release evidence separately."
+  "release_preparation": "Historical host evidence retained; provenance verifier and parent links made portable, drone checks added to CI. Protected PR checks provide release evidence separately.",
+  "source_snapshot_locator": "../history/evidence/source-snapshot-host-v0.2.0.json"
 }

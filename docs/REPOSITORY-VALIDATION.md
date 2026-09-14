@@ -48,6 +48,11 @@ observed protection, preserves consumer-owned runtime/release authority, and ret
 all cleanup targets. Bootstrap uses an isolated branch before normal lane admission;
 it does not create delegated authority or change GitHub protection settings.
 
+The active drone source snapshot refreshes only the changed package fingerprints.
+The previous snapshot is archived byte-for-byte, and the existing host validation
+report explicitly locates it; those earlier results are not attributed to this candidate.
+All other source fingerprints and the original specification remain unchanged.
+
 ## MVP
 
 Validate the profile against Git origin and existing protection; inspect affected,

@@ -1,0 +1,63 @@
+{
+  "schema": "recommendation-validation/v1",
+  "observed_at": "2026-09-13T23:44:34.166Z",
+  "artifact_sha256": "ba2cd4e8c1c9583a170eafd2df4326743afeb47c28a93cced77fc08c8ab5d53d",
+  "source_snapshot_sha256": "587714ea9dcbf5222ef4cc011e2554bd5497f504c1152942d0274a5986b3fc92",
+  "result": "passed",
+  "checks": [
+    {
+      "name": "strict-frontmatter",
+      "passed": true,
+      "detail": "ok"
+    },
+    {
+      "name": "exact-five-role-join",
+      "passed": true,
+      "detail": "DRONE-RC-001@0.1.0"
+    },
+    {
+      "name": "budget",
+      "passed": true,
+      "detail": {
+        "lines": 382,
+        "bytes": 30201
+      }
+    },
+    {
+      "name": "readiness-not-overclaimed",
+      "passed": true,
+      "detail": "No product VCC claimed satisfied"
+    },
+    {
+      "name": "guideline-binding",
+      "passed": true,
+      "detail": "2.7.0"
+    },
+    {
+      "name": "local-links",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "source-digests-and-preserved-repositories",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "criterion-design-evidence-links",
+      "passed": true,
+      "detail": "7 explicit criterion/design/evidence/decision references; not semantic entailment"
+    },
+    {
+      "name": "five-flow-patterns",
+      "passed": true,
+      "detail": "Text/table flow representations; no diagram render claimed"
+    },
+    {
+      "name": "planning-row-contract",
+      "passed": true,
+      "detail": "Four-column record with explicit CID and RAO fields"
+    }
+  ],
+  "scope": "Selected structural, provenance, link and explicit traceability checks; not exhaustive guideline semantic certification. No firmware build, browser implementation, bench or flight test performed for this proposal."
+}

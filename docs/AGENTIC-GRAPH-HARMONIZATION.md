@@ -33,4 +33,15 @@ The versioned cross-runtime fixture verifies the complete default-world placemen
 
 ## Update procedure
 
+### Drone bench ownership — reference implementation
+
+The separate drone host prototype owns device-facing command admission, absolute
+setpoints, bench range/dead-zone policy, transport and receiver-fixture lifecycle.
+It reuses the pinned spatial clamp; it adds no sensor filter, flight integrator or
+camera algorithm. GameXR game/WebMCP controls have no reference to the drone output
+sink. A future aircraft owns its onboard flight dynamics and actuation in a separate
+firmware project; the fixture does not change AgenticGraph's shared game ownership.
+
+### Shared dependency update
+
 Admit a new protected AgenticGraph revision first, regenerate both npm-compatible tarballs twice from that exact revision, verify byte identity and digests, update both npm and SwiftPM pins together, regenerate `native/Package.resolved`, then run `npm run check`, `npm run check:apex`, and `npm run native:check`. Do not float either dependency or add compatibility aliases.

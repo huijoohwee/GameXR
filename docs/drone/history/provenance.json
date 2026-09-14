@@ -1,0 +1,13 @@
+{
+  "original_revision": "DRONE-RC-001@0.1.0",
+  "original_locator": "/Users/katrina/Documents/GitHub/.workspace/.artifacts/gamexr-esp32-drone-control/prd-tad-adr-mvp-gtm-gamexr-esp32-drone-control.md",
+  "original_sha256": "ba2cd4e8c1c9583a170eafd2df4326743afeb47c28a93cced77fc08c8ab5d53d",
+  "archive_locator": "prd-tad-adr-mvp-gtm-gamexr-esp32-drone-control-v0.1.0.md",
+  "archive_sha256": "fc68aa6ce590869e20aaa6980347d6e1d10ef992dfed9146ba58babf0a549b54",
+  "change": "Only the historical parent-plan link was relocated to this provenance record. The original input digest is verified by reversing that one relocation.",
+  "original_parent_locator": "../../../esp32-firmware-starter/docs/prd-tad-adr-mvp-gtm-esp32-firmware-development.md",
+  "archive_parent_locator": "provenance.json",
+  "parent_continuity": "FW-DEV-001@0.3.0",
+  "parent_original_locator": "/Users/katrina/Documents/GitHub/esp32-firmware-starter/docs/prd-tad-adr-mvp-gtm-esp32-firmware-development.md",
+  "parent_sha256": "e597969ec8e0599edb39f3167059795a8602296b77c66bf40fc9378f49315963"
+}

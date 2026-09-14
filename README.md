@@ -29,6 +29,15 @@ Controls:
 
 Select **Tune** to edit high-value controls or the complete `gamexr-scene/v1` manifest. Scene profiles, configuration, and admitted GLB files stay in IndexedDB. JSON export is the portable recovery path.
 
+### Drone bench — reference implementation
+
+Select **Drone** for a separate motor-disabled control workbench. With Node 24.15+, run
+`npm run check` and `npm run drone:bench`, then open the printed loopback URL. The panel
+sends independent controls through a real WebSocket/UDP bridge to a separate simulated
+receiver. Physical ESP32 flight control and local Wi-Fi integration await a reviewed
+board, sensor and motor-driver contract. See the [runbook](docs/DRONE-CONTROL.md) and
+[joined implementation plan](docs/drone/prd-tad-adr-mvp-gtm-gamexr-esp32-drone-control.md).
+
 ### Phone orientation contract
 
 GameXR installs orientation listeners only after the explicit permission request succeeds. The first valid sample becomes the neutral pose; subsequent samples are remapped when the screen rotates, smoothed by elapsed time, and shaped by the user-configurable `motion.deviceOrientation` profile before they reach normalized flight/camera input. Recenter deliberately takes a new neutral sample instead of assuming one fixed holding angle. The portable profile is closed and range-validated by the schema exported from `@agenticgraph/apple-spatial-input`; builds project that canonical schema to `schemas/apple-spatial-input.schema.json`.
@@ -89,7 +98,7 @@ npm run test:webkit
 npm run native:check
 ```
 
-The current source candidate passes all 40 focused tests, all eight local WebKit checks, and both `/gamexr/` and Apex release checks. `npm run check` type-checks, runs the focused tests, creates the `/gamexr/` production bundle, seals a deterministic local artifact manifest, and enforces chunk, initial-payload, schema, offline-shell, and zero-spend contracts.
+The current host candidate passes 70 source tests, nine existing local WebKit checks, four drone bench browser checks, and both `/gamexr/` and Apex release checks. Drone evidence covers the motor-disabled host fixture only. `npm run check` type-checks, runs the focused tests, creates the `/gamexr/` production bundle, seals a deterministic local artifact manifest, and enforces chunk, initial-payload, schema, offline-shell, and zero-spend contracts.
 
 The `/gamexr/` build registers a full-build-digest-addressed service worker. The emitted worker binds that exact digest, so an assets-only release still produces a discoverable worker revision without placing the worker inside its own circular precache hash. Before a cache becomes ready, the worker validates the precache aggregate, exact cache inventory, and every declared response's byte count and SHA-256. The sealed cache is never overwritten by an unverified navigation or runtime fetch. Local Playwright WebKit uses a disposable origin to verify cache hashes and genuine origin-outage navigation/reload. Exact external runs verify shipped bytes and online service-worker/cache convergence without disrupting the deployed origin. Neither automated browser proof is physical-device certification. Apex mode deliberately disables service-worker registration because `/` is shared production scope; `npm run dev:apex` remains useful for local route parity, but it is not an offline-install claim.
 

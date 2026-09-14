@@ -1,10 +1,10 @@
 {
   "schema": "drone-host-source-snapshot/v1",
-  "observed_at": "2026-09-14T04:55:21.759712+00:00",
+  "observed_at": "2026-09-14T00:03:44.866204+00:00",
   "base_revision": "8334355dc2c1f9bdf463ba102a63b5a3ac579d89",
-  "branch": "agent/device-0232231d4a19/repository-validation-bootstrap-provenance",
-  "candidate_status": "validation adoption refresh; package and lockfile digests changed; historical host results remain bound to archived snapshot",
-  "worktree": "/Users/huijoohwee/Documents/GitHub/.worktrees/GameXR/device-0232231d4a19--repository-validation-bootstrap",
+  "branch": "codex/gamexr-drone-bench",
+  "candidate_status": "uncommitted isolated worktree; file digests bind scoped evidence",
+  "worktree": "/Users/katrina/Documents/GitHub/.worktrees/GameXR/codex-gamexr-drone-bench",
   "specification_input": {
     "path": "/Users/katrina/Documents/GitHub/.workspace/.artifacts/gamexr-esp32-drone-control/prd-tad-adr-mvp-gtm-gamexr-esp32-drone-control.md",
     "revision": "DRONE-RC-001@0.1.0",
@@ -60,8 +60,8 @@
     "native/Tests/GameXRNativeTests/GameXRNativeAudioEngineTests.swift": "3b6757085445521160de114e4247773d925dc8ab4d792afd327b9af6ba4fc3f7",
     "native/Tests/GameXRNativeTests/GameXRPersistentStrategyTests.swift": "891c5f88662e0de59d53556d7f14e6e98fbc3c191e2b3eda7678d501c43380da",
     "native/Tests/GameXRNativeTests/GameXRSceneManifestTests.swift": "da1e6cebcb7f8ba2360e411aa7bc4a477eb40ea44c824ebffddce7e9bec4bcdf",
-    "package-lock.json": "5834b45c426d363505d34d3f97789089dd14ef436fc9ddc128bd50e3140fd8cc",
-    "package.json": "2ffaf333a5aa71e18e5c5e4c04da7009e534eef470bc7fd7a8051ffed23e3345",
+    "package-lock.json": "68debe39288e14dc893d7195d80c8f8a203a4b2fc235113bf93ab5c1d664a967",
+    "package.json": "20b29d00527c756e5f428193c1a24eb1036a4d708c80c6b0e36967419a38aaa7",
     "playwright.config.ts": "3366a68f67719705dfd0c97bc04264aec66e7122b1348864e1c1691e56c71376",
     "playwright.drone.config.ts": "7e51abc5de34067818b263007732360c0063678fe0091a00416df78aae2d89e3",
     "public/.well-known/runtime-readiness.json": "4098430ee81c52043a198668e17b29f4ef83da312a80f1cb92be10efc39cdc6c",
@@ -133,6 +133,5 @@
     "vendor/agenticgraph-apple-spatial-input-0.1.0.tgz": "06ce0ee14b53a97f5981df38d66f0b83bdb0aedd8b54a313b02aa47ca4a7028b",
     "vendor/grph-shared-0.0.0.tgz": "12b943cd79be56c258b3fd4a97dac1c0db7ffc334719942376fb5f3c38ad5363",
     "vite.config.ts": "fe13e079e6c64c339db61cf42784b902b2be3ffc20a8b98a9e9a069ebab374eb"
-  },
-  "previous_snapshot": "docs/drone/history/evidence/source-snapshot-host-v0.2.0.json"
+  }
 }

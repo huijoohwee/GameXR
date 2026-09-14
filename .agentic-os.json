@@ -1,0 +1,46 @@
+{
+  "schema": "agentic-os/repository-profile/v1",
+  "repository": "github.com/huijoohwee/GameXR",
+  "canonical": {
+    "localRef": "refs/heads/main",
+    "remoteRef": "refs/remotes/origin/main"
+  },
+  "adapters": {
+    "repository": {
+      "id": "git",
+      "version": "1"
+    },
+    "provider": {
+      "id": "github",
+      "version": "1"
+    }
+  },
+  "requiredChecks": [
+    "Integration Gate"
+  ],
+  "capabilities": [
+    "deep-byte-audit-opt-in",
+    "history:linear",
+    "host-qualified-repository-pin",
+    "integration-method:squash",
+    "protected-integration:pull-request",
+    "read-only-repository-observation",
+    "read-only-review-observation",
+    "required-check-policy:strict",
+    "retain-all-cleanup",
+    "shallow-observation-default"
+  ],
+  "authority": {
+    "runtime": "consumer",
+    "release": "consumer"
+  },
+  "cleanup": {
+    "localBranch": "retain",
+    "remoteBranch": "retain",
+    "remoteTrackingRef": "retain",
+    "unreachableObjects": "retain",
+    "worktreeProjection": "retain",
+    "worktreeRegistration": "retain"
+  },
+  "profileDigest": "9ef64b82728a676e85d689ddcbaf486a2961ed27bdac0702f22d94b3ef082f37"
+}

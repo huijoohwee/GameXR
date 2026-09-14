@@ -1,0 +1,76 @@
+{
+  "schema": "agentic-os/repository-validation-policy/v1",
+  "repository": "github.com/huijoohwee/GameXR",
+  "broadInputs": [
+    "tsconfig.json",
+    "tsconfig.app.json",
+    "tsconfig.node.json",
+    "vite.config.ts",
+    "playwright.config.ts",
+    "playwright.drone.config.ts",
+    ".github/"
+  ],
+  "always": [
+    "evaluators",
+    "candidate"
+  ],
+  "fallback": [
+    "evaluators",
+    "candidate",
+    "behavior"
+  ],
+  "checks": [
+    {
+      "id": "evaluators",
+      "command": [
+        "npm",
+        "--prefix",
+        "node_modules/agentic-os",
+        "run",
+        "evals"
+      ],
+      "inputs": [],
+      "requires": [],
+      "reuse": "never",
+      "timeoutMs": 120000
+    },
+    {
+      "id": "candidate",
+      "command": [
+        "npm",
+        "run",
+        "check:candidate"
+      ],
+      "inputs": [
+        "src/",
+        "shared/",
+        "vendor/",
+        "public/",
+        "scripts/",
+        "index.html"
+      ],
+      "requires": [],
+      "reuse": "never",
+      "timeoutMs": 900000
+    },
+    {
+      "id": "behavior",
+      "command": [
+        "npm",
+        "test"
+      ],
+      "inputs": [
+        "src/",
+        "shared/",
+        "vendor/",
+        "tools/",
+        "scripts/",
+        "tests/",
+        "browser-tests/"
+      ],
+      "requires": [],
+      "reuse": "never",
+      "timeoutMs": 900000
+    }
+  ]
+}

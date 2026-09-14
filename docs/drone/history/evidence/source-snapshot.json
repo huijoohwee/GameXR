@@ -1,0 +1,102 @@
+{
+  "schema": "drone-recommendation-grounding/v1",
+  "observed_at": "2026-09-13T23:41:28.337416+00:00",
+  "continuity": "DRONE-RC-001@0.1.0",
+  "user_decisions": [
+    "Local Wi-Fi first",
+    "ESP32 runs flight control"
+  ],
+  "repositories": [
+    {
+      "repository": "GameXR",
+      "revision": "8334355dc2c1f9bdf463ba102a63b5a3ac579d89",
+      "status": "",
+      "files": [
+        {
+          "path": "README.md",
+          "sha256": "8ded11ce82c0d20a22de46e3888ce1bf0184a6b9dd765ef94253a6250bdf5a9d"
+        },
+        {
+          "path": "package.json",
+          "sha256": "623b50589891e41a9c88593fe2c63d3067fb89caaf4892df339fd84d4a946dae"
+        },
+        {
+          "path": "src/runtime/InputController.ts",
+          "sha256": "aea4a6d9e31fa87140822781115c338567439572bb56bad0f1bba0aa78f29c70"
+        },
+        {
+          "path": "src/runtime/GameRuntime.ts",
+          "sha256": "8a4e7d2762e6041d3ebc2a83faf0ad7c484692655144639d52cdf7412bfa2ccd"
+        },
+        {
+          "path": "src/runtime/FlightSimulation.ts",
+          "sha256": "be908898aabeabcd29a030f6825f54f006ff4d3427b2aead9fb66aac32f58cc7"
+        },
+        {
+          "path": "src/mcp/contracts.ts",
+          "sha256": "2b429d247f833d57138ed6d22dbf0a6eee4b61244e434b080ad24e4d82ab050b"
+        },
+        {
+          "path": "docs/AGENTIC-GRAPH-HARMONIZATION.md",
+          "sha256": "5c4b62748649916edca47d37ce07c199931baf73be14b222cfa226dc057a06b6"
+        },
+        {
+          "path": "tests/input-controller.test.ts",
+          "sha256": "6cdbf3d81b70ca16140ac0bfcd45dd0520bc12b8b5034f64b34b10043cb6d615"
+        }
+      ]
+    },
+    {
+      "repository": "esp32-firmware-starter",
+      "revision": "de5d19a47956c740631b879c33242e60f10e4fd3",
+      "status": "",
+      "files": [
+        {
+          "path": "sdk.lock.json",
+          "sha256": "07a9bc1a167ae4c08e2747b87db80172f59016d8e0f1d8a6c9c04b62b1de240b"
+        },
+        {
+          "path": "main/main.c",
+          "sha256": "a3dc290a92d25a92fe0f92e1c980c9161d8513eec1d39272bcfa9fbf819ee7d9"
+        },
+        {
+          "path": "tools/fw.py",
+          "sha256": "7bbf103a027b864c2efc74a4c6d03a28723830c06b71f0371703c6b2b64b2455"
+        },
+        {
+          "path": "docs/implementation-status.md",
+          "sha256": "8ad90d74ce1b2e2745c1192fc98ef471408ba8994009f97280e58d3343fb39f5"
+        }
+      ]
+    },
+    {
+      "repository": "huijoohwee.github.io",
+      "revision": "fe423728bcb52fe6d2434d8957989a057d3efd73",
+      "status": "",
+      "files": [
+        {
+          "path": "guidelines/prd-tad-adr-mvp-gtm-guidelines.md",
+          "sha256": "ae7dff38da1f98386f1b45ee54857734cef8f480b453152c30a4330dae2f31c4"
+        },
+        {
+          "path": "guidelines/prd-tad-adr-mvp-gtm-templates.md",
+          "sha256": "3e5599cea877c77ef0a7a8f5bacc63940928f3bc8392e185e44c283886a9ce33"
+        },
+        {
+          "path": "guidelines/prd-tad-adr-mvp-gtm-planning-record.md",
+          "sha256": "5c31b067b9b14b64e4bf9603340d1c1ae65085b8510b84e61d31d13d4f3a9f10"
+        },
+        {
+          "path": "guidelines/prd-tad-adr-mvp-gtm-readiness.md",
+          "sha256": "e3318a4f5221350ce62ae77c227ef1b8fa4f04ad2cb36748ba383e19c5260e14"
+        }
+      ]
+    }
+  ],
+  "upstream": {
+    "repository": "https://github.com/espressif/esp-drone",
+    "head": "db0f6562e4f67cccee3acac4dff39c9aaea4e5fa",
+    "verification": "git ls-remote HEAD; README and official documentation read; no build or hardware validation"
+  },
+  "product_checks": "not_run"
+}

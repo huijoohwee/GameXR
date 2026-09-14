@@ -1,0 +1,173 @@
+{
+  "schema": "drone-host-validation/v1",
+  "observed_at": "2026-09-14T00:05:12.180906+00:00",
+  "continuity": "DRONE-RC-001@0.2.0",
+  "surface": "authoring",
+  "result": "host checks passed; physical acceptance not run",
+  "source_snapshot_sha256": "d0d5790bee4a7368e6c88513dc5dace1b4d6d8af92fdd2cb45167f9e6a34b37f",
+  "environment": {
+    "node": "v24.15.0",
+    "npm": "11.12.1",
+    "platform": "macOS arm64",
+    "browser": "Playwright WebKit 26.5, build 2336, iPhone 13 emulation; live Codex in-app browser also inspected"
+  },
+  "evidence_references": [
+    {
+      "check": "npm run check",
+      "recorded_result": {
+        "exit_code": 0,
+        "source_tests": 70,
+        "failed": 0,
+        "build": "/gamexr/ passed; release check passed"
+      },
+      "vcc": [
+        "HA4"
+      ],
+      "log": "source-check.log"
+    },
+    {
+      "check": "node --test tests/drone-protocol.test.ts tests/drone-bridge.test.ts",
+      "recorded_result": {
+        "exit_code": 0,
+        "tests": 11,
+        "failed": 0
+      },
+      "vcc": [
+        "HA1",
+        "HA2",
+        "HA3"
+      ]
+    },
+    {
+      "check": "npm run check:apex",
+      "recorded_result": {
+        "exit_code": 0,
+        "files": 20,
+        "initial_gzip_bytes": 211725
+      },
+      "vcc": [
+        "HA4"
+      ]
+    },
+    {
+      "check": "npm run test:webkit",
+      "recorded_result": {
+        "exit_code": 0,
+        "passed": 9,
+        "failed": 0,
+        "summary": "9 passed (14.6s)"
+      },
+      "vcc": [
+        "HA4"
+      ]
+    },
+    {
+      "check": "npm run test:drone-browser",
+      "recorded_result": {
+        "exit_code": 0,
+        "passed": 4,
+        "failed": 0,
+        "summary": "4 passed (6.8s)"
+      },
+      "vcc": [
+        "HA1",
+        "HA2",
+        "HA3",
+        "HA4"
+      ]
+    }
+  ],
+  "host_limits": {
+    "cadence_ms": 40,
+    "lease_ms": 250,
+    "telemetry_max_age_ms": 300,
+    "exact_deadline_scope": "deterministic receiver state machine; host transport settling assertion <1000 ms",
+    "fault_repetitions": "20 deterministic trials each: silence, replay, reordered sequence, wrong owner, malformed frame; browser loss events once each"
+  },
+  "observations": [
+    "Live UI: roll setpoint 1.00 acknowledged by separate receiver, other axes remained zero; explicit disable reset input.",
+    "Mobile overflow was reproduced at 403 px body width on a 390 px viewport; final width 390 px and unchanged regression check passed.",
+    "Bridge serves the full offline precache, including llms.txt; new bench browser test observes Offline shell ready."
+  ],
+  "physical_acceptance": {
+    "E1": "not run; requires identified board/rig and applicable preceding physical gates",
+    "E2": "not run; requires identified board/rig and applicable preceding physical gates",
+    "E3": "not run; requires identified board/rig and applicable preceding physical gates",
+    "E4": "not run; requires identified board/rig and applicable preceding physical gates",
+    "E5": "not run; requires identified board/rig and applicable preceding physical gates",
+    "E6": "not run; requires identified board/rig and applicable preceding physical gates",
+    "E7": "not run; requires identified board/rig and applicable preceding physical gates"
+  },
+  "limitations": [
+    "No ESP32 firmware built or flashed for this drone feature; no real Wi-Fi flight link, sensors or actuators.",
+    "Host envelope is a fixture extension, not stock ESP-Drone-compatible transport.",
+    "No hard real-time or flight deadline, physical phone, gamepad or native device claim.",
+    "Candidate is an uncommitted isolated worktree; no protected-source admission or publication.",
+    "Full guideline semantic alignment, comparative TTV and market evidence remain unassessed."
+  ],
+  "structural_check": "python3 docs/drone/evidence/check.py",
+  "structural_result": {
+    "schema": "drone-host-provenance-check/v1",
+    "checks": [
+      {
+        "name": "exact-five-role-join",
+        "passed": true
+      },
+      {
+        "name": "role-locators",
+        "passed": true
+      },
+      {
+        "name": "prd-owns-host-criteria",
+        "passed": true
+      },
+      {
+        "name": "tad-owns-host-contracts",
+        "passed": true
+      },
+      {
+        "name": "source-fingerprints",
+        "passed": true
+      },
+      {
+        "name": "verifier-fingerprint",
+        "passed": true
+      },
+      {
+        "name": "original-specification-preserved",
+        "passed": true
+      },
+      {
+        "name": "active-plan-budget",
+        "passed": true
+      },
+      {
+        "name": "local-links",
+        "passed": true
+      },
+      {
+        "name": "existing-tests-native-shared-pins-and-game-api-preserved",
+        "passed": true
+      },
+      {
+        "name": "guideline-input-bound",
+        "passed": true
+      }
+    ],
+    "passed": true,
+    "missing_links": [],
+    "scope": "11 selected structural/provenance checks; no exhaustive guideline alignment claim"
+  },
+  "builds": {
+    "gamexr": {
+      "artifact_digest": "ba618eb08b1969f9c30cd71ffccc4fc54da74d016505569e20e05ca1a2a5e02a",
+      "status": "unsealed-dirty-source; deployment unauthorized"
+    },
+    "apex": {
+      "artifact_digest": "216efef33f867abf6b8747a88805bf9f6f28286b8abff5f42887b2c3ec2c0a59",
+      "status": "unsealed-dirty-source; deployment unauthorized"
+    }
+  },
+  "source_check_log_sha256": "d996b37807db46c9bd832d5bfb0995b44a7986256fa660640f5f2bd4beb6b906",
+  "release_preparation": "Historical host evidence retained; provenance verifier and parent links made portable, drone checks added to CI. Protected PR checks provide release evidence separately."
+}

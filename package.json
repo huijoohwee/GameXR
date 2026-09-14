@@ -5,6 +5,8 @@
   "type": "module",
   "description": "Local-first, mobile-first configurable spatial flight runtime.",
   "scripts": {
+    "drone:bench": "node tools/drone-bridge/main.ts",
+    "test:drone-browser": "playwright test --config=playwright.drone.config.ts",
     "dev": "vite --mode gamexr",
     "dev:apex": "vite --mode apex",
     "build": "tsc -b && vite build --mode gamexr",
@@ -23,15 +25,17 @@
   "dependencies": {
     "@agenticgraph/apple-spatial-input": "file:vendor/agenticgraph-apple-spatial-input-0.1.0.tgz",
     "grph-shared": "file:vendor/grph-shared-0.0.0.tgz",
-    "three": "0.185.1"
+    "three": "0.185.1",
+    "ws": "8.21.3"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",
     "@types/node": "24.10.13",
     "@types/three": "0.185.4",
+    "@types/ws": "8.18.1",
+    "agentic-os": "https://codeload.github.com/huijoohwee/agentic-os/tar.gz/13c3839aba7fc64bf94f93aa29b1239ab929840d",
     "typescript": "7.0.2",
-    "vite": "8.2.1",
-    "agentic-os": "https://codeload.github.com/huijoohwee/agentic-os/tar.gz/13c3839aba7fc64bf94f93aa29b1239ab929840d"
+    "vite": "8.2.1"
   },
   "engines": {
     "node": "^20.19.0 || >=22.12.0"

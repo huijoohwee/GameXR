@@ -103,6 +103,24 @@ async function boot(): Promise<void> {
   strategy?.initialize()
   const controller = new AppController(runtime, database)
   await controller.initialize()
+  let dronePanel: import('./drone/DronePanel.ts').DronePanel | null = null
+  const droneButton = document.createElement('button')
+  droneButton.className = 'icon-button'
+  droneButton.type = 'button'
+  droneButton.id = 'open-drone'
+  droneButton.textContent = 'Drone'
+  document.getElementById('open-config')?.before(droneButton)
+  droneButton.addEventListener('click', async () => {
+    if (dronePanel?.open) return
+    droneButton.disabled = true
+    runtime.pause()
+    try {
+      const { DronePanel } = await import('./drone/DronePanel.ts')
+      dronePanel = new DronePanel()
+    } catch (error) {
+      console.error('[GameXR] drone panel failed:', error)
+    } finally { droneButton.disabled = false }
+  })
   const bridge = installWebMcpBridge(runtime, strategy?.tools ?? [], {
     persistentStrategyEnabled: Boolean(strategy),
   })
@@ -126,7 +144,7 @@ async function boot(): Promise<void> {
   await registerOfflineShell()
 
   window.addEventListener('pagehide', createGameXrPageHideCleanup({
-    disposeController: () => controller.dispose(),
+    disposeController: () => { dronePanel?.dispose(); controller.dispose() },
     disposeBridge: () => bridge.dispose(),
     disposeStrategy: () => strategy?.dispose() ?? Promise.resolve(),
     disposeRuntime: () => {

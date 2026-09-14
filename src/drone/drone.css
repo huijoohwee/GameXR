@@ -1,0 +1,26 @@
+.drone-panel {
+  color: #eff7fa; background: #10202e; border: 1px solid #527285;
+  border-radius: 20px; padding: 24px; width: min(680px, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px); overflow: auto; box-sizing: border-box;
+}
+.drone-panel::backdrop { background: #020912cc; }
+.drone-panel header { display: flex; justify-content: space-between; align-items: start; gap: 12px; }
+.drone-panel h2 { margin: 4px 0 12px; }
+.drone-panel button { min-height: 44px; padding: 10px 14px; border: 1px solid #789caf; border-radius: 10px; background: #23475b; color: #fff; cursor: pointer; }
+.drone-panel button:disabled { opacity: .45; cursor: default; }
+.drone-panel button:focus-visible, .drone-panel input:focus-visible { outline: 3px solid #80eed7; outline-offset: 3px; }
+.drone-source { padding: 12px; border-radius: 10px; color: #ffe6af; background: #473a22; font-weight: 700; }
+.drone-intro, .drone-panel fieldset p { color: #bfced7; font-size: 13px; line-height: 1.5; }
+#drone-status { min-height: 2.8em; font-weight: 600; color: #a5e9df; }
+.drone-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+#drone-disable { background: #753542; }
+.drone-panel fieldset { border: 1px solid #456175; border-radius: 12px; margin: 0; padding: 14px; }
+.drone-panel fieldset:disabled { opacity: .55; }
+.drone-panel label { display: block; margin: 8px 0 12px; }
+.drone-panel label span { display: flex; justify-content: space-between; }
+.drone-panel input[type=range] { width: 100%; height: 36px; accent-color: #80eed7; touch-action: pan-y; }
+.drone-telemetry { font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
+.drone-telemetry div { border-bottom: 1px solid #30495b; padding: 10px 0; }
+.drone-telemetry dt { color: #bfced7; }
+.drone-telemetry dd { margin: 2px 0 0; font-variant-numeric: tabular-nums; }
+@media (max-width: 480px) { .drone-panel { padding: 16px; } }

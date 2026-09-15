@@ -14,6 +14,8 @@ test('production redirect fragment keeps the canonical GameXR route and retires 
     .filter(line => line && !line.startsWith('#'))
 
   assert.deepEqual(rules, [
+    '/GameXR /gamexr/ 301',
+    '/GameXR/* /gamexr/:splat 301',
     '/gamexr /gamexr/ 301',
     '/gamexr/* /content/gamexr/:splat 200',
     '/content/gamexr /gamexr 301',

@@ -1,10 +1,10 @@
 {
   "schema": "drone-host-source-snapshot/v1",
-  "observed_at": "2026-09-15T15:00:39.622565+00:00",
-  "base_revision": "1d6ef648b1252dc5fc7315521ce0efcf76458d56",
-  "branch": "agent/device-0232231d4a19/durable-route-provenance",
-  "candidate_status": "Approved route-alias integration refresh; route fragment, release documentation and redirect contract fingerprints changed. Historical drone host results remain bound to their archived snapshots; this refresh claims no new flight verification.",
-  "worktree": "/Users/huijoohwee/Documents/GitHub/.worktrees/GameXR/device-0232231d4a19--durable-route-alias",
+  "observed_at": "2026-09-14T04:55:21.759712+00:00",
+  "base_revision": "8334355dc2c1f9bdf463ba102a63b5a3ac579d89",
+  "branch": "agent/device-0232231d4a19/repository-validation-bootstrap-provenance",
+  "candidate_status": "validation adoption refresh; package and lockfile digests changed; historical host results remain bound to archived snapshot",
+  "worktree": "/Users/huijoohwee/Documents/GitHub/.worktrees/GameXR/device-0232231d4a19--repository-validation-bootstrap",
   "specification_input": {
     "path": "/Users/katrina/Documents/GitHub/.workspace/.artifacts/gamexr-esp32-drone-control/prd-tad-adr-mvp-gtm-gamexr-esp32-drone-control.md",
     "revision": "DRONE-RC-001@0.1.0",
@@ -26,13 +26,13 @@
     "browser-tests/persistent-strategy.spec.ts": "592271d6c2cc3cb58d574d80a75fcdb582ff883da5406d7070327f2a47d8aba1",
     "browser-tests/production-runtime.spec.ts": "b69fc217bcabedeb71c09c9e997c3775eac06ebc0f7fe078e7d73f028cd2fc26",
     "deployment/cloudflare/headers.fragment": "4bf8a7fabb618053232de6376343413460ddec416c4715b20189748a1681c661",
-    "deployment/cloudflare/redirects.fragment": "280947d8105b0b94e50b4973109611c566a061fb34f2da3411ed96b9ec2a1f31",
+    "deployment/cloudflare/redirects.fragment": "459bd470ce20ebf0bcb3e30b32068f9c91d1a9ff579fc6b54bab0b128bae38e8",
     "docs/AGENTIC-GRAPH-HARMONIZATION.md": "3a451744e4484a371dede26c34ac02f18e393ed2e7e37e6f79d66a5691e00b64",
     "docs/APPLE-COMPATIBILITY.md": "b819de501ba6769ac8cf3dd2197c0d9d914042d8287d20731c3780d7864da73f",
     "docs/DRONE-CONTROL.md": "fb9e828c73f6962baebba859edf36ce82256d45fbd43bc9e8b60b17cabca8f59",
     "docs/GAME-DESIGN-TECHNICAL-ARCHITECTURE.md": "c78131f84b28f9f49b95c5a81784fbb92872bfe21d18d5ccb8026dee61d4583f",
     "docs/MCP.md": "650b15a1a0c9aae50851cf13ab6408af0d037e84835e0c765796166215446136",
-    "docs/RELEASE.md": "f3f03128b7e3050a0d34b951a15d986afd76716e297d7a0c87a72d7a0a925054",
+    "docs/RELEASE.md": "6e30cf5697e06d4603881d4bbcfbc8fab6ab90ed050daf416f7f297e30b6743b",
     "docs/asset-provenance.json": "a2bcbe31765dd5574b366b235bd4346bbfd211432f7d4556e535a109bd177a04",
     "docs/drone/history/evidence/source-snapshot.json": "587714ea9dcbf5222ef4cc011e2554bd5497f504c1152942d0274a5986b3fc92",
     "docs/drone/history/evidence/validation.json": "133d5e8514352c7109fe2247939321b0967a2fe49b9b5ee8e3c04854b25f7662",
@@ -114,7 +114,7 @@
     "tests/input-controller.test.ts": "6cdbf3d81b70ca16140ac0bfcd45dd0520bc12b8b5034f64b34b10043cb6d615",
     "tests/manifest.test.ts": "9c7813bd40203aecb608fa2a34f635975f36d126ea12736cb825eeb904941ca6",
     "tests/mcp-contract.test.ts": "37bd3a66162af5d7573aa811aee7a49e687b2c8bd10baee8e423794f9a0531e1",
-    "tests/mobile-motion-ui.test.ts": "92759266396c05753fdfafb25f1aa61619c617064483dcbc90130fe19fcbdd33",
+    "tests/mobile-motion-ui.test.ts": "029fdd6312e083908d2be8a14d1cfaebadc9f820f7e5a744f58c30311fef5d64",
     "tests/persistent-strategy.test.ts": "d0972852ee378a4a5a860b2cc72cc97a3410c02420d6b599ef525315c3b36eec",
     "tests/procedural-animation-projection.test.ts": "f3737dbe5030df39a164ba994c0855064f594d16f33e3f698d80f7eacc9da84a",
     "tests/release-generation.test.ts": "689e0d910429b881c053896aaef2bf448b5fde14b31557be5a984b75cc11d621",
@@ -134,5 +134,5 @@
     "vendor/grph-shared-0.0.0.tgz": "12b943cd79be56c258b3fd4a97dac1c0db7ffc334719942376fb5f3c38ad5363",
     "vite.config.ts": "fe13e079e6c64c339db61cf42784b902b2be3ffc20a8b98a9e9a069ebab374eb"
   },
-  "previous_snapshot": "docs/drone/history/evidence/source-snapshot-validation-bootstrap.json"
+  "previous_snapshot": "docs/drone/history/evidence/source-snapshot-host-v0.2.0.json"
 }

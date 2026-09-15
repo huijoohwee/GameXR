@@ -24,6 +24,8 @@ The Apex production route requires a separate explicit routing decision because 
 
 The Graph root projection owner consumes reviewed equivalents of [`../deployment/cloudflare/redirects.fragment`](../deployment/cloudflare/redirects.fragment) and [`../deployment/cloudflare/headers.fragment`](../deployment/cloudflare/headers.fragment). These are source inputs, not self-executing deployment files.
 
+The requested `/GameXR` entry and its child paths redirect to the existing lowercase `/gamexr/` application. The Graph release candidate must include this source fragment and verify both spellings after deployment; a source merge alone does not make the alias live.
+
 ## Production verification
 
 - `/gamexr/`, `manifest.webmanifest`, `sw.js`, `precache-manifest.json`, readiness JSON, scene and Apple spatial-input schemas, and every hashed chunk return the expected MIME type and digest.

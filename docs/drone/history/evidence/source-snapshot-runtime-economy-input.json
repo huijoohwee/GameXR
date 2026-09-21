@@ -1,10 +1,10 @@
 {
   "schema": "drone-host-source-snapshot/v1",
-  "observed_at": "2026-09-21T15:41:40.357621+00:00",
+  "observed_at": "2026-09-15T15:00:39.622565+00:00",
   "base_revision": "1d6ef648b1252dc5fc7315521ce0efcf76458d56",
-  "branch": "agent/device-0232231d4a19/runtime-economy-provenance",
-  "candidate_status": "Runtime work economy guidance refresh; only the architecture document fingerprint changed. The previous active snapshot is archived byte-for-byte. Historical drone host results remain bound to their existing archived snapshots; this refresh claims no new runtime or flight verification.",
-  "worktree": "/Users/huijoohwee/Documents/GitHub/.worktrees/GameXR/device-0232231d4a19--runtime-work-economy",
+  "branch": "agent/device-0232231d4a19/durable-route-provenance",
+  "candidate_status": "Approved route-alias integration refresh; route fragment, release documentation and redirect contract fingerprints changed. Historical drone host results remain bound to their archived snapshots; this refresh claims no new flight verification.",
+  "worktree": "/Users/huijoohwee/Documents/GitHub/.worktrees/GameXR/device-0232231d4a19--durable-route-alias",
   "specification_input": {
     "path": "/Users/katrina/Documents/GitHub/.workspace/.artifacts/gamexr-esp32-drone-control/prd-tad-adr-mvp-gtm-gamexr-esp32-drone-control.md",
     "revision": "DRONE-RC-001@0.1.0",
@@ -30,7 +30,7 @@
     "docs/AGENTIC-GRAPH-HARMONIZATION.md": "3a451744e4484a371dede26c34ac02f18e393ed2e7e37e6f79d66a5691e00b64",
     "docs/APPLE-COMPATIBILITY.md": "b819de501ba6769ac8cf3dd2197c0d9d914042d8287d20731c3780d7864da73f",
     "docs/DRONE-CONTROL.md": "fb9e828c73f6962baebba859edf36ce82256d45fbd43bc9e8b60b17cabca8f59",
-    "docs/GAME-DESIGN-TECHNICAL-ARCHITECTURE.md": "6d1be997e66c3f589c287df1c62874465442b775b1e9448d42035849c8dbb3d0",
+    "docs/GAME-DESIGN-TECHNICAL-ARCHITECTURE.md": "c78131f84b28f9f49b95c5a81784fbb92872bfe21d18d5ccb8026dee61d4583f",
     "docs/MCP.md": "650b15a1a0c9aae50851cf13ab6408af0d037e84835e0c765796166215446136",
     "docs/RELEASE.md": "f3f03128b7e3050a0d34b951a15d986afd76716e297d7a0c87a72d7a0a925054",
     "docs/asset-provenance.json": "a2bcbe31765dd5574b366b235bd4346bbfd211432f7d4556e535a109bd177a04",
@@ -132,8 +132,7 @@
     "tsconfig.node.json": "f5a92ed1261244309e33c1c13ee86b4dc833422fa2c18e82c2917dce1e30b899",
     "vendor/agenticgraph-apple-spatial-input-0.1.0.tgz": "06ce0ee14b53a97f5981df38d66f0b83bdb0aedd8b54a313b02aa47ca4a7028b",
     "vendor/grph-shared-0.0.0.tgz": "12b943cd79be56c258b3fd4a97dac1c0db7ffc334719942376fb5f3c38ad5363",
-    "vite.config.ts": "fe13e079e6c64c339db61cf42784b902b2be3ffc20a8b98a9e9a069ebab374eb",
-    "docs/drone/history/evidence/source-snapshot-runtime-economy-input.json": "7e4cd619727d27ae2d7abe54f1ea805cb16ae8281ca5e8877541f52499da3ae0"
+    "vite.config.ts": "fe13e079e6c64c339db61cf42784b902b2be3ffc20a8b98a9e9a069ebab374eb"
   },
-  "previous_snapshot": "docs/drone/history/evidence/source-snapshot-runtime-economy-input.json"
+  "previous_snapshot": "docs/drone/history/evidence/source-snapshot-validation-bootstrap.json"
 }

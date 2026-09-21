@@ -374,6 +374,9 @@ try {
     'CODE_SIGNING_ALLOWED=NO', 'test',
   ], nativeRoot)
 
+  restoreSimulatorBootState(iOSSimulator)
+  simulatorDestinationsToRestore.splice(simulatorDestinationsToRestore.indexOf(iOSSimulator), 1)
+
   recordCheck({
     id: 'visionos-xrsimulator-compile',
     platform: 'visionOS',
@@ -471,7 +474,6 @@ try {
     compilation: 'unknown',
     execution: 'unknown',
   }, 'xcodebuild', [
-    '-quiet',
     '-project', visionHostProject,
     '-scheme', visionHostScheme,
     '-configuration', 'Debug',

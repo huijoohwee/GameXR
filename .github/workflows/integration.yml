@@ -57,9 +57,14 @@ jobs:
   integration-gate:
     name: Integration Gate
     needs: build-candidate
+    if: ${{ always() }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      - name: Require verified candidate
+        env:
+          CANDIDATE_RESULT: ${{ needs.build-candidate.result }}
+        run: test "$CANDIDATE_RESULT" = success
       - name: Check out exact revision
         uses: actions/checkout@v6
       - name: Download immutable candidate

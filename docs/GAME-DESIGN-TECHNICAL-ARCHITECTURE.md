@@ -124,6 +124,29 @@ Every imported asset is recorded as `user-local`, `local-use-only-unverified`, a
 | Network needed after install | zero | service-worker browser smoke |
 | Model / paid calls | zero | WebMCP + readiness output |
 
+### Incremental execution guidelines
+
+Apply the shared [incremental work contract](https://github.com/huijoohwee/huijoohwee.github.io/blob/main/guidelines/token-performance-economics-guidelines.md#incremental-work-contract)
+within the existing simulation, renderer and native adapter owners. These are
+engineering obligations; this documentation change claims no new runtime proof.
+
+- Forbid rebuilding static geometry, materials, decoded assets, scene hierarchy or
+  unchanged manifest projections on every frame. Reuse assets by content identity
+  and update the affected instance, transform or material when its inputs change.
+- Preserve fixed-step simulation, input ordering, collision events and the existing
+  catch-up limit. Cache derived collision/sort work only for its valid dependency
+  interval; moving either participant invalidates it. Do not skip required steps
+  or reuse mutable contact results across ticks without explicit invalidation.
+- Keep the flight/animation clocks and browser/RealityKit adapters as their current
+  owners. Decouple diagnostic/editor UI refresh from frame updates, coalesce pending
+  projection work and reject stale loads after a scene switch. Suspend optional
+  hidden visual work through the existing lifecycle; do not accumulate replay work.
+- Bound caches and release shared GPU/audio resources only when their final owner
+  releases them. Compare idle, flight, one-object edit, reload and disposal behavior
+  on identical workload/device settings. Report frame time, CPU, memory and changed
+  work counts separately from network/model cost; browser evidence does not certify
+  physical-device thermal, battery or comfort behavior. Retain the existing budgets.
+
 ## Storage and failure behavior
 
 - IndexedDB owns scenes, metadata, and GLB bytes. The app requests persistent storage only from an explicit interaction and never assumes it was granted.

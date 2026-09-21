@@ -44,7 +44,7 @@
     "@types/node": "24.10.13",
     "@types/three": "0.185.4",
     "@types/ws": "8.18.1",
-    "agentic-os": "https://codeload.github.com/huijoohwee/agentic-os/tar.gz/c99988c7bcd7ef3c8c6a68428af4750e5b7a09cd",
+    "agentic-os": "https://codeload.github.com/huijoohwee/agentic-os/tar.gz/8a40d044fe09e2f5eef48407257dd08d0d385c88",
     "typescript": "7.0.2",
     "vite": "8.2.1"
   },

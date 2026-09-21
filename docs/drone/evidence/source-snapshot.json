@@ -69,7 +69,7 @@
     "public/llms.txt": "73d123371c97fce814636a7c3a534fda25d577ae7bfc1502b553ab30594a1aac",
     "public/manifest.webmanifest": "dfe3799064544f7b0421c85860efc640b57c1bf4ef83946f0358c3a3cc473e12",
     "public/sw.js": "acc866eef12face0a487d004e881d23733d31b06d84c01add9a7f3280d184798",
-    "scripts/check-native.mjs": "51b7718e1cecc3e73d5b5a65dda2a00b07fb739897bdf0bb300a6146014a4bad",
+    "scripts/check-native.mjs": "857124c8869d23b0a9a4173bc62cecee9f188056589f5f883812ecb6d7c9f980",
     "scripts/check-release.mjs": "a3c492615a11e46372ff0c46a5e9354712383c1c69c55a490496bf722614ba4d",
     "scripts/prepare-release.mjs": "df16c63fd74d139abb5eb1059b23db3119f1d237dbcc9dba18c84944989afb06",
     "shared/default-scene.json": "338c70784c15ff0dc8278e97abdd64c298b6de847e9860b207d3be8794d38a55",

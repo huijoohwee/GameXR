@@ -48,7 +48,14 @@ observed protection, preserves consumer-owned runtime/release authority, and ret
 all cleanup targets. Bootstrap uses an isolated branch before normal lane admission;
 it does not create delegated authority or change GitHub protection settings.
 
-The active drone source snapshot refreshes only the changed package fingerprints.
+Native validation restores the selected iOS Simulator's original boot state as
+soon as its tests finish, before visionOS work begins. A previously running device
+stays running; a device started by this check stops. Failed restoration retains the
+existing final recovery attempt. The visionOS host UI test emits its full Xcode
+output so a failed assertion or launch can be diagnosed without another blind run.
+This bounded repair changes no test, gate, timeout or native application behavior.
+
+The active drone source snapshot refreshes changed package and native-check fingerprints.
 The previous snapshot is archived byte-for-byte, and the existing host validation
 report explicitly locates it; those earlier results are not attributed to this candidate.
 All other source fingerprints and the original specification remain unchanged.

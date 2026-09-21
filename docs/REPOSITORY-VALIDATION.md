@@ -54,6 +54,9 @@ stays running; a device started by this check stops. Failed restoration retains 
 existing final recovery attempt. The visionOS host UI test emits its full Xcode
 output so a failed assertion or launch can be diagnosed without another blind run.
 This bounded repair changes no test, gate, timeout or native application behavior.
+The required Integration Gate runs even when candidate generation fails, is
+cancelled or is skipped, and requires its dependency's explicit success before
+artifact verification. A skipped dependency must never appear as a green merge.
 
 The active drone source snapshot refreshes changed package and native-check fingerprints.
 The previous snapshot is archived byte-for-byte, and the existing host validation

@@ -18,7 +18,7 @@
   },
   "verifier_sha256": "50562507d46c20ec4bf711d90d48f40cec31bdcc6a22ce5184a4b50033ece72f",
   "files": {
-    ".github/workflows/integration.yml": "81787559e72be14ade317fca05a18bbcf0fa85b438e5c34d5e884d61fd743044",
+    ".github/workflows/integration.yml": "5e7ca70e25803f67628870a67b2543f420f6efcad3c9ef3a18d98cdafe11f113",
     ".gitignore": "b0837f1aab499996910a1e156818a550430c3bfb794fe624162b20812db6eb57",
     "LICENSE": "f7335e73f1f103f1e05622cd5134d42fe1527e6a84acefcbdf09aaee9bdcc78f",
     "README.md": "fe5cbeb040f767fb84146e51a31f79e47737ed2ce6a505ef03970a496613009e",

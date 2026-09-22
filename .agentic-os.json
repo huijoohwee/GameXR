@@ -24,10 +24,10 @@
     "host-qualified-repository-pin",
     "integration-method:squash",
     "protected-integration:pull-request",
+    "quarantine-worktree-cleanup-opt-in",
     "read-only-repository-observation",
     "read-only-review-observation",
     "required-check-policy:strict",
-    "retain-all-cleanup",
     "shallow-observation-default"
   ],
   "authority": {
@@ -39,8 +39,8 @@
     "remoteBranch": "retain",
     "remoteTrackingRef": "retain",
     "unreachableObjects": "retain",
-    "worktreeProjection": "retain",
-    "worktreeRegistration": "retain"
+    "worktreeProjection": "quarantine",
+    "worktreeRegistration": "quarantine"
   },
-  "profileDigest": "9ef64b82728a676e85d689ddcbaf486a2961ed27bdac0702f22d94b3ef082f37"
+  "profileDigest": "2990db94532ea11593497c75ecf537eddae1e15e302369c94b5b7f79b033bca6"
 }

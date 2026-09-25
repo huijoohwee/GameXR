@@ -40,7 +40,9 @@
     "completion:plan": "node node_modules/agentic-os/bin/agentic-os-completion-close.mjs plan",
     "completion:apply": "node node_modules/agentic-os/bin/agentic-os-completion-close.mjs apply",
     "sync:canonical": "agentic-os canonical-sync",
-    "queue:show": "agentic-os queue show"
+    "queue:show": "agentic-os queue show",
+    "drone:diagnostics": "node tools/drone-bridge/diagnostics-main.ts",
+    "test:diagnostics-browser": "playwright test --config=playwright.diagnostics.config.ts"
   },
   "dependencies": {
     "@agenticgraph/apple-spatial-input": "file:vendor/agenticgraph-apple-spatial-input-0.1.0.tgz",

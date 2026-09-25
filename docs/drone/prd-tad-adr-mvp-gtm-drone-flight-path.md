@@ -121,3 +121,14 @@ all six pass with the artifact absent. Wrong-channel messages leave the preview 
 final accepted pose matches the imported sample. Evidence: external `canvas-reuse-*`
 artifacts in `.audit-artifacts/drone-implementation-20260925`. Publication and protected
 integration require separate receipts.
+
+### CI provenance follow-through
+
+GameXR PR #32 passed remote Safari, drone bench/transport and phone diagnostics checks
+but failed the unchanged source-fingerprint verifier because its snapshot predated the
+flight-path extension. Refresh only the source/evidence ledger in a native successor.
+Retain the previous snapshot and validation through exact published revision
+43a79806844e553e2041b54951d5679781da66d3 and their SHA-256 identifiers. The verifier and
+its assertions remain unchanged. This records current source; it does not rewrite past
+physical acceptance or turn local checks into remote CI proof. This narrow follow-through
+adds three evidence files to the 20-file change scope, within the 80 KiB source budget.

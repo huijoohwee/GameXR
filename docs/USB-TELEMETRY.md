@@ -6,6 +6,83 @@ gravity-derived tilt, link health and an explicitly unverified battery estimate.
 It provides no motor controls, arming or firmware writes. The existing **Drone**
 panel remains a separate simulated bench.
 
+The delivery target is the **phone browser**, with an opt-in local camera preview
+and IMU overlay. Default CI checks the mobile WebKit runtime and diagnostics
+instead of building Swift, iOS or visionOS apps. The existing native source and
+explicit `npm run native:check` command are retained outside this delivery path.
+Mobile emulation checks layout and interaction; it is not a physical-phone camera
+test. The USB bridge below still runs on the computer attached to the device;
+`127.0.0.1` on a phone cannot reach that computer. Use the explicit local HTTPS
+gateway below for phone access. Loopback remains the CLI default.
+
+## Camera view and control boundary
+
+Choose **Start camera** in Diagnostics to request the local browser device's
+camera. The preferred rear camera supplies video only, bounded to 1280×720 and
+30 fps. **Switch camera** releases the old stream before requesting the other
+facing direction. Permission denial can be retried; Stop, panel close, page hide
+and navigation release the stream. A permission grant arriving after Stop cannot
+restart capture. Frames stay in the video element: no recording, pixel analysis,
+audio capture, export or upload is implemented.
+
+The overlay labels USB observations versus recorded replay and removes stale IMU
+values. Camera and USB samples are independent streams, with no time synchronization
+or calibrated camera-to-IMU transform. This is the phone's local view, not an onboard
+drone camera feed. Roll/pitch remain the gravity-only preview described below.
+
+The separate **Drone** panel provides the same preview alongside simulated receiver
+controls, labeled **SIMULATED RECEIVER · no motor outputs**. Installed diagnostics
+firmware has no motor command input. Actual drone control requires a reviewed
+firmware/transport protocol, watchdog and arming/disarming behavior, then physical
+bench validation. Choosing a browser camera does not complete that work.
+
+[Browser camera access requires a secure context and user permission](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia).
+The loopback URL works on the USB host. The selected default is phone → local Mac
+gateway → USB drone. Direct phone → ESP32 Wi-Fi remains an alternative/fallback,
+not an implemented transport in this firmware. No system certificate trust change
+or public deployment is performed by the gateway.
+
+## Phone → Mac → USB gateway
+
+On the same local network, provide a TLS server certificate valid for one of the
+Mac's assigned private IPv4 addresses and its private key (mode 0600). Trust its
+issuer on the phone before opening the page. A LAN HTTP URL does not satisfy the
+camera's secure-context requirement. Do not bypass browser certificate warnings.
+
+```sh
+npm run build
+npm run drone:diagnostics -- --serial=/dev/cu.usbserial-110 \
+  --usb-id=1a86:7523 --python=/absolute/path/to/python \
+  --physical-ready=yes --seconds=120 --listen=192.168.0.105 \
+  --tls-cert=/absolute/path/to/server.pem \
+  --tls-key=/absolute/path/to/server-key.pem
+```
+
+The example IP must match the Mac's current address and certificate SAN. The
+server binds only that selected interface; wildcard/public addresses are rejected.
+Open the printed **private one-use pairing link** on the phone within 15 minutes.
+The fragment token is removed from browser history, exchanged via same-origin
+HTTPS, then replaced with a Secure/HttpOnly/SameSite=Strict cookie. The link pairs
+one browser. After pairing, reloads use the cookie; a gateway restart needs a new
+link. Sessions expire one hour after gateway startup, closing sockets and capture.
+A rejected or expired link requires a gateway restart; there is no password or
+persistent token store. Do not share the pairing link with other people.
+
+The authenticated WSS endpoint accepts start/stop observation only, with the same
+USB bounds as loopback. Unpaired sockets, foreign Origin/Host and motor commands
+are rejected. The static app contains no private USB logs or TLS keys. Camera
+frames stay on the phone; telemetry travels only between the Mac and paired
+browser. The gateway neither opens router ports nor changes firewall settings.
+
+For iPhone/iPad, install the public issuer certificate, then enable it under
+Settings → General → About → Certificate Trust Settings; see
+[Apple's certificate trust instructions](https://support.apple.com/102390).
+Trusting a root lets it authenticate certificates it signs: transfer only the
+public certificate, keep the signing/private keys on the Mac, and remove the
+profile when finished. For Android, use the device's CA certificate installation
+settings; the exact menu depends on its Android version/vendor. Physical-phone
+trust, camera permission and live telemetry acceptance still require the user.
+
 ## Run against the installed diagnostics firmware
 
 Use Node 24+, Python 3.10+, `lsof` and `pyserial==3.5`. Keep the previously verified
@@ -26,7 +103,8 @@ cannot verify it. The passive reader sends **zero serial bytes**. USB VID/PID
 selects the bridge model, not an authenticated PCB identity. Do not run esptool,
 the legacy console observer or a second serial monitor concurrently.
 
-The bridge binds only IPv4 loopback and requires exact Host and WebSocket Origin.
+Without the three TLS/listen flags, the bridge binds only IPv4 loopback. Both
+modes require exact Host and WebSocket Origin; HTTPS also requires pairing.
 The only accepted browser requests are start/stop observation. A shared per-port
 lock, `lsof` ownership check and exclusive serial handle prevent cooperative
 contention. Each capture is bounded to 10–600 seconds, 2 MB input and 1,024 bytes
@@ -82,7 +160,8 @@ npm run test:drone-browser
 
 Replay accepts ≤499,999-byte newline captures, ignores non-JSON boot text and
 keeps `source: replay` / **RECORDED REPLAY** visible. It cannot run live calibration.
-The mobile browser regression uses generated synthetic samples, no USB device.
+The mobile browser regression uses generated synthetic samples and mocked camera
+permission/streams, no USB device or physical phone camera.
 Unit checks cover malformed data, freshness, reboot/reconnect, held-out calibration,
 six-face math, observation-only requests and passive-reader handle cleanup.
 

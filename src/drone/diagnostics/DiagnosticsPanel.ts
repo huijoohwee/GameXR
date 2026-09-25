@@ -1,4 +1,6 @@
 import './diagnostics.css'
+import { diagnosticsSocket } from '../PhoneGateway.ts'
+import { CameraView } from '../CameraView.ts'
 import { STALE_MS, type Snapshot, type Sample, type Vector } from './protocol.ts'
 import { fitGyro, fitSixFace, poseMean, validatePose, correctedAccel, subtract, tilt, POSES,
   type Pose, type GyroCalibration, type AccelCalibration } from './calibration.ts'
@@ -21,6 +23,7 @@ export class DiagnosticsPanel {
   private retry: ReturnType<typeof setTimeout> | null = null
   private disposed = false
   private sessionKey = ''
+  private camera: CameraView
 
   constructor() {
     this.dialog.className = 'diagnostics-panel'
@@ -33,6 +36,7 @@ export class DiagnosticsPanel {
       <p class="diagnostics-muted">Read-only sensor observation · Motor control unavailable</p>
       <div class="diagnostics-actions"><button id="diag-start">Start capture</button><button id="diag-stop" disabled>Stop</button>
         <button id="diag-reconnect">Reconnect bridge</button><button id="diag-export">Export session</button></div>
+      <div id="diag-camera"></div>
       <div class="diagnostics-grid">
         <section class="diagnostics-card"><h3>Acceleration <small>m/s²</small></h3><output id="diag-accel">—</output><p id="diag-frame">Sensor axes · uncalibrated</p></section>
         <section class="diagnostics-card"><h3>Angular rate <small>rad/s</small></h3><output id="diag-gyro">—</output><p id="diag-bias-state">Raw sensor values</p></section>
@@ -55,6 +59,7 @@ export class DiagnosticsPanel {
         <p class="diagnostics-muted">Pose collection needs physical orientation by you. Six-face fitting stays inactive until the independent +Z check passes. Battery calibration is deferred.</p>
       </details>`
     document.body.append(this.dialog)
+    this.camera = new CameraView(this.element('camera'))
     this.button('close').onclick = () => this.dispose()
     this.dialog.oncancel = event => { event.preventDefault(); this.dispose() }
     this.button('start').onclick = () => this.command('start')
@@ -72,16 +77,21 @@ export class DiagnosticsPanel {
   private element(name: string) { return this.dialog.querySelector<HTMLElement>(`#diag-${name}`)! }
   private button(name: string) { return this.element(name) as HTMLButtonElement }
   private text(name: string, text: string) { this.element(name).textContent = text }
-  private connect() {
+  private async connect() {
     if (this.disposed) return
     if (this.retry) { clearTimeout(this.retry); this.retry = null }
     const previous = this.socket; this.socket = null; previous?.close()
     this.connection++; this.lastKey = ''; this.sessionKey = ''
     this.snapshot = null; this.clearCalibration('New connection; corrections cleared.')
-    if (location.hostname !== '127.0.0.1' || location.protocol !== 'http:') {
-      this.text('state', 'Open the local diagnostics bridge address'); return
+    const connecting = this.connection
+    let address: string
+    try { address = await diagnosticsSocket() }
+    catch (error) {
+      if (!this.disposed && connecting === this.connection) this.text('state', error instanceof Error ? error.message : 'Gateway pairing failed')
+      return
     }
-    const socket = new WebSocket(`ws://${location.host}/gamexr/diagnostics-socket`)
+    if (this.disposed || connecting !== this.connection) return
+    const socket = new WebSocket(address)
     this.socket = socket
     socket.onmessage = event => {
       if (this.socket !== socket || this.disposed) return
@@ -179,6 +189,9 @@ export class DiagnosticsPanel {
     this.text('tilt', orientation ? `${this.accelVerified ? 'Board' : 'Sensor'} roll ${orientation.roll.toFixed(1)}° · pitch ${orientation.pitch.toFixed(1)}°` : 'Unavailable')
     this.element('horizon').style.transform = orientation ? `rotate(${-orientation.roll}deg) translateY(${Math.max(-25, Math.min(25, orientation.pitch))}px)` : 'none'
     this.element('horizon').style.opacity = orientation ? '1' : '0.2'
+    this.camera.setTelemetry(`${s?.source === 'replay' ? 'RECORDED REPLAY' : 'USB IMU'} · ${fresh ? 'fresh' : 'unavailable'} · observation only`,
+      orientation ? `${this.accelVerified ? 'Board' : 'Sensor'} roll ${orientation.roll.toFixed(1)}° · pitch ${orientation.pitch.toFixed(1)}° · yaw unavailable` : 'Attitude unavailable',
+      sample ? `a ${format(displayedAccel)} m/s² · ω ${format(displayedGyro)} rad/s` : 'No current IMU sample')
     if (!fresh && this.capture) this.failCapture('Data became stale; capture stopped.')
   }
   private export() {
@@ -195,6 +208,6 @@ export class DiagnosticsPanel {
     if (this.disposed) return
     this.disposed = true; clearInterval(this.timer)
     if (this.retry) clearTimeout(this.retry)
-    this.socket?.close(); this.socket = null; this.dialog.close(); this.dialog.remove()
+    this.camera.dispose(); this.socket?.close(); this.socket = null; this.dialog.close(); this.dialog.remove()
   }
 }

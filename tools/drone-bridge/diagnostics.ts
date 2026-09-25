@@ -1,4 +1,6 @@
 import http from 'node:http'
+import https from 'node:https'
+import { phoneGateway, validateGatewayHost, type GatewayTls } from './phone-gateway.ts'
 import { spawn, type ChildProcess } from 'node:child_process'
 import { realpath, readFile, stat } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
@@ -9,7 +11,8 @@ import { staticHandler } from './static.ts'
 
 export type Input = { kind: 'usb'; port: string; usbId: string; python: string; seconds: number }
   | { kind: 'replay'; path: string; cadenceMs?: number }
-export async function startDiagnosticsBridge(options: { root: string; port?: number; input: Input }) {
+export async function startDiagnosticsBridge(options: { root: string; port?: number; input: Input; tls?: GatewayTls }) {
+  if (options.tls) validateGatewayHost(options.tls.host)
   const root = await realpath(options.root)
   if (!(await stat(path.join(root, 'index.html'))).isFile()) throw new Error('Build GameXR first')
   const state = new DiagnosticsState(options.input.kind === 'usb' ? 'usb' : 'replay')
@@ -95,10 +98,16 @@ export async function startDiagnosticsBridge(options: { root: string; port?: num
       if (current()) await stopInput(error instanceof Error ? error.message : 'Observation failed')
     }
   }
-  const server = http.createServer(staticHandler(root, () => origin))
+  const files = staticHandler(root, () => origin)
+  const gateway = options.tls ? phoneGateway(() => origin, files) : null
+  const server = options.tls
+    ? https.createServer({ cert: options.tls.cert, key: options.tls.key, minVersion: 'TLSv1.2' }, gateway!.handler)
+    : http.createServer(files)
+  server.headersTimeout = 5000; server.requestTimeout = 10000; server.maxConnections = 32
   server.on('upgrade', (request, socket, head) => {
     if (request.url !== '/gamexr/diagnostics-socket' || request.headers.origin !== origin
-      || request.headers.host !== new URL(origin).host || sockets.clients.size >= 4) {
+      || request.headers.host !== new URL(origin).host || sockets.clients.size >= 4
+      || (gateway && !gateway.authorized(request))) {
       socket.end('HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n'); return
     }
     sockets.handleUpgrade(request, socket, head, client => sockets.emit('connection', client, request))
@@ -119,7 +128,12 @@ export async function startDiagnosticsBridge(options: { root: string; port?: num
     })
     client.on('close', () => { if (!sockets.clients.size) void stopInput('Dashboard disconnected; serial port released') })
   })
-  const timer = setInterval(broadcast, 200)
+  const timer = setInterval(() => {
+    if (gateway && !gateway.alive()) {
+      for (const client of sockets.clients) client.terminate()
+      if (active) void stopInput('Phone session expired; restart gateway to pair again')
+    } else broadcast()
+  }, 200)
   const close = async () => {
     if (stopped) return
     stopped = true; clearInterval(timer); await stopInput('Bridge stopped')
@@ -130,12 +144,12 @@ export async function startDiagnosticsBridge(options: { root: string; port?: num
   try {
     await new Promise<void>((resolve, reject) => {
       server.once('error', reject)
-      server.listen(options.port ?? 4194, '127.0.0.1', () => {
+      server.listen(options.port ?? (options.tls ? 4196 : 4194), options.tls?.host ?? '127.0.0.1', () => {
         const address = server.address()
         if (!address || typeof address === 'string') { reject(new Error('Invalid address')); return }
-        origin = `http://127.0.0.1:${address.port}`; resolve()
+        origin = `${options.tls ? 'https' : 'http'}://${options.tls?.host ?? '127.0.0.1'}:${address.port}`; resolve()
       })
     })
   } catch (error) { await close(); throw error }
-  return { origin, close }
+  return { origin, close, pairingUrl: gateway ? `${origin}/gamexr/?diagnostics=1#pair=${gateway.pairing}` : null }
 }

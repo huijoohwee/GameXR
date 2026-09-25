@@ -6,7 +6,7 @@ const mime: Record<string, string> = { '.html': 'text/html', '.js': 'text/javasc
   '.css': 'text/css', '.json': 'application/json', '.webmanifest': 'application/manifest+json',
   '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon', '.txt': 'text/plain' }
 
-/** Shared loopback-only GameXR file surface. The caller binds the exact listening origin. */
+/** Shared GameXR file surface; network access is owned by the caller. The caller binds the exact listening origin. */
 export function staticHandler(root: string, origin: () => string): RequestListener {
   return async (request, response) => {
     response.setHeader('Cache-Control', 'no-store')

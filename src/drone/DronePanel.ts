@@ -1,4 +1,5 @@
 import './drone.css'
+import { CameraView } from './CameraView.ts'
 import { BENCH, neutralAxes, shapeAxis, type Axes, type BridgeStatus } from './protocol.ts'
 
 /** Pilot state is private to this panel; game controls and WebMCP have no command handle. */
@@ -14,6 +15,7 @@ export class DronePanel {
   private lastChallenge = ''
   private timer: number
   private records: object[] = []
+  private camera: CameraView
 
   constructor() {
     this.dialog.className = 'drone-panel'
@@ -23,6 +25,7 @@ export class DronePanel {
       <button id="drone-close" type="button" aria-label="Close drone bench">Close</button></header>
       <p class="drone-source">Simulated receiver · No motor outputs</p>
       <p class="drone-intro">Test four independent controls and command-loss handling. Physical aircraft support awaits a reviewed board and firmware profile.</p>
+      <div id="drone-camera"></div>
       <p id="drone-status" role="status">Disconnected</p>
       <div class="drone-actions">
         <button id="drone-connect" type="button">Connect receiver</button>
@@ -46,6 +49,7 @@ export class DronePanel {
       <button id="drone-export" type="button">Export session log</button>
       <p class="drone-intro">Last 1,000 events, kept in memory until this panel closes.</p>`
     document.body.append(this.dialog)
+    this.camera = new CameraView(this.element('camera'))
     const listen = (target: EventTarget, event: string, handler: EventListener) =>
       target.addEventListener(event, handler, { signal: this.listeners.signal })
     listen(this.element('connect'), 'click', () => this.connect())
@@ -158,6 +162,8 @@ export class DronePanel {
     this.element('sequence').textContent = telemetry ? String(telemetry.sequence) : '—'
     this.element('setpoint').textContent = telemetry
       ? Object.entries(telemetry.setpoint).map(([name, value]) => `${name} ${value.toFixed(2)}`).join(' · ') : 'Unavailable'
+    this.camera.setTelemetry('SIMULATED RECEIVER · no motor outputs', 'Physical IMU unavailable in this control fixture',
+      active ? `Bench command · throttle ${this.axes.throttle.toFixed(2)} · roll ${this.axes.roll.toFixed(2)} · pitch ${this.axes.pitch.toFixed(2)} · yaw ${this.axes.yaw.toFixed(2)}` : 'Control inhibited')
   }
   private exportLog(): void {
     const blob = new Blob([JSON.stringify({ schema: 'gamexr-drone-bench-log/v1',
@@ -169,7 +175,7 @@ export class DronePanel {
   dispose(): void {
     if (!this.open) return
     this.inhibit('Drone panel closed')
-    this.listeners.abort(); window.clearInterval(this.timer)
+    this.camera.dispose(); this.listeners.abort(); window.clearInterval(this.timer)
     this.socket?.close(); this.socket = null; this.state = null; this.records = []
     this.dialog.close(); this.dialog.remove()
   }

@@ -2,7 +2,7 @@ import http from 'node:http'
 import dgram from 'node:dgram'
 import { fork } from 'node:child_process'
 import { randomBytes, randomUUID } from 'node:crypto'
-import { readFile, realpath, stat } from 'node:fs/promises'
+import { realpath, stat } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { WebSocketServer, WebSocket } from 'ws'
@@ -11,9 +11,7 @@ import { BENCH, exactKeys, object, parseCommand, type BridgeStatus,
 import { encodeRpyt } from './crtp.ts'
 import { seal, unseal } from './wire.ts'
 
-const mime: Record<string, string> = { '.html': 'text/html', '.js': 'text/javascript',
-  '.css': 'text/css', '.json': 'application/json', '.webmanifest': 'application/manifest+json',
-  '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon', '.txt': 'text/plain' }
+import { staticHandler } from './static.ts'
 
 export async function startDroneBridge(options: { root: string; port?: number }) {
   const root = await realpath(options.root)
@@ -137,24 +135,7 @@ export async function startDroneBridge(options: { root: string; port?: number })
     })
   })
 
-  const server = http.createServer(async (request, response) => {
-    response.setHeader('Cache-Control', 'no-store')
-    response.setHeader('X-Content-Type-Options', 'nosniff')
-    response.setHeader('Content-Security-Policy', "frame-ancestors 'none'")
-    if (request.headers.host !== new URL(origin).host) { response.writeHead(403).end(); return }
-    if (request.method !== 'GET' && request.method !== 'HEAD') { response.writeHead(405).end(); return }
-    try {
-      const pathname = decodeURIComponent(new URL(request.url!, origin).pathname)
-      if (pathname === '/') { response.writeHead(302, { Location: '/gamexr/' }).end(); return }
-      if (!pathname.startsWith('/gamexr/')) { response.writeHead(404).end(); return }
-      const relative = pathname.slice('/gamexr/'.length) || 'index.html'
-      const filename = await realpath(path.resolve(root, relative))
-      if (!filename.startsWith(root + path.sep) || !mime[path.extname(filename)]) { response.writeHead(403).end(); return }
-      const data = await readFile(filename)
-      response.setHeader('Content-Type', mime[path.extname(filename)]!)
-      response.writeHead(200).end(request.method === 'HEAD' ? undefined : data)
-    } catch { response.writeHead(404).end() }
-  })
+  const server = http.createServer(staticHandler(root, () => origin))
   server.on('upgrade', (request, socket, head) => {
     if (request.url !== '/gamexr/drone-socket' || request.headers.origin !== origin
       || request.headers.host !== new URL(origin).host || sockets.clients.size >= 4) {

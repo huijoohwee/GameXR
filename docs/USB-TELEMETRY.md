@@ -1,4 +1,97 @@
-# USB console observation
+# USB diagnostics dashboard
+
+The **Diagnostics** panel observes `gamexr.usb-diagnostics/v1` firmware (the
+separate firmware candidate in PR #27). It shows acceleration, angular rate,
+gravity-derived tilt, link health and an explicitly unverified battery estimate.
+It provides no motor controls, arming or firmware writes. The existing **Drone**
+panel remains a separate simulated bench.
+
+## Run against the installed diagnostics firmware
+
+Use Node 24+, Python 3.10+, `lsof` and `pyserial==3.5`. Keep the previously verified
+physical setup: propellers removed and motors unable to receive power with USB
+connected. Opening a serial device can reset the ESP32 through driver DTR/RTS
+behavior even though the reader sets both lines inactive before opening.
+
+```sh
+npm run build
+npm run drone:diagnostics -- --serial=/dev/cu.usbserial-110 \
+  --usb-id=1a86:7523 --python=/absolute/path/to/python \
+  --physical-ready=yes --seconds=120
+```
+
+Open `http://127.0.0.1:4194/gamexr/?diagnostics=1` and choose **Start capture**.
+The checkbox-like CLI acknowledgment records the existing physical setup; it
+cannot verify it. The passive reader sends **zero serial bytes**. USB VID/PID
+selects the bridge model, not an authenticated PCB identity. Do not run esptool,
+the legacy console observer or a second serial monitor concurrently.
+
+The bridge binds only IPv4 loopback and requires exact Host and WebSocket Origin.
+The only accepted browser requests are start/stop observation. A shared per-port
+lock, `lsof` ownership check and exclusive serial handle prevent cooperative
+contention. Each capture is bounded to 10–600 seconds, 2 MB input and 1,024 bytes
+per line. Silence for five seconds or a disconnect closes the handle before up
+to two retries. Stop, the last browser disconnect, bridge shutdown and the
+capture deadline release the port. A stopped capture requires an explicit start.
+
+Host monotonic time controls freshness; samples at least 1.5 seconds old disappear.
+Malformed frames clear the current reading; duplicate/out-of-order sequences do
+not refresh it. Gaps are counted. Reboot, disconnect and reconnect discard browser
+calibration. Browser reconnection attempts are bounded to three, without starting
+a new serial session automatically. An active Python capture may still reconnect
+within its original time/attempt limits.
+
+**Export session** downloads at most 800 recent samples plus provenance and
+calibration (under 500 kB). Move retained exports to canonical `GameXR/.artifacts`.
+Exports are local; nothing is uploaded. Port opening may reset the device but
+the dashboard does not erase, flash or change firmware configuration.
+
+## Calibration and tilt
+
+Keep the board stationary and select the confirmation in **IMU calibration**.
+**Measure gyro bias** collects 200 consecutive samples: the first 100 fit the bias,
+and the next 100 independently validate it. Missing/stale/error samples cancel
+the measurement. Required limits: gyro standard deviation ≤0.02 rad/s,
+acceleration standard deviation ≤0.12 m/s², gravity magnitude 8.5–11.1 m/s² and
+gyro mean magnitude ≤0.25 rad/s. Held-out residual must be ≤0.01 rad/s, with
+held-out gyro standard deviation ≤0.01 rad/s. Movement rejection means retry
+after the board settles; it does not establish a sensor defect.
+
+To establish board axes, choose +X forward, +Y left and +Z up. Hold each of the
+six labeled axes vertically upward and capture its 50 samples. The six means
+fit a 3×3 accelerometer correction and offset. Geometry, scale, handedness and
+opposite-face consistency checks reject implausible fits. A **new +Z-up** capture
+must agree within 0.3 m/s² before the correction becomes active. Unit tests use
+synthetic known poses; they do not verify this PCB's physical orientation.
+
+Corrections apply only in the current browser session, never to firmware/NVS.
+Gyro bias remains in sensor coordinates; the six-face transform applies to
+acceleration. Tilt is a gravity-only roll/pitch preview, unreliable under motion
+and without yaw. It is not a stabilization estimator or flight controller.
+Battery calibration remains **KIV**: no full-range accuracy, state of charge,
+health, low-voltage protection or flight readiness is inferred.
+
+## Replay and regression checks
+
+```sh
+npm run drone:diagnostics -- --replay=/absolute/path/to/serial-raw.bin
+npm run check
+npm run test:diagnostics-browser
+npm run test:drone-browser
+```
+
+Replay accepts ≤499,999-byte newline captures, ignores non-JSON boot text and
+keeps `source: replay` / **RECORDED REPLAY** visible. It cannot run live calibration.
+The mobile browser regression uses generated synthetic samples, no USB device.
+Unit checks cover malformed data, freshness, reboot/reconnect, held-out calibration,
+six-face math, observation-only requests and passive-reader handle cleanup.
+
+## Legacy vendor console observer
+
+The remainder documents the earlier vendor console profile. **Do not run this
+command-based adapter against the installed streaming diagnostics firmware.**
+Its historical source/pin uncertainty below refers to that initial investigation,
+not the later matched source and schematic work.
 
 GameXR includes a headless, observation-only adapter for the console profile seen
 on the inspected ESP32 firmware. It exports JSON from the fixed display commands

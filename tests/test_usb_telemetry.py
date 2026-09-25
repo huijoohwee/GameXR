@@ -5,9 +5,13 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
+from contextlib import contextmanager
+from types import SimpleNamespace
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools/drone-telemetry'))
+import diagnostics_stream
 from console_protocol import MAX_RESPONSE_BYTES, frame, parse_imu, parse_motors
 
 # Shape from observed device output; numeric values below are synthetic test data.
@@ -89,6 +93,46 @@ class ProtocolTests(unittest.TestCase):
                 capture_output=True, text=True, timeout=10)
             self.assertEqual(process.returncode, 2)
             self.assertFalse(output.exists())
+
+
+class PassiveStreamTests(unittest.TestCase):
+    def run_stream(self, chunks):
+        events, closed, clock = [], [], [0.0]
+        class Port:
+            def read(self, _size):
+                clock[0] += 0.5
+                return chunks.pop(0) if chunks else b''
+            def write(self, _data):
+                raise AssertionError('Passive reader attempted a write')
+        @contextmanager
+        def selected(_args):
+            try:
+                yield Port()
+            finally:
+                closed.append(True)
+        def sleep(seconds):
+            clock[0] += seconds
+        with patch.object(diagnostics_stream, 'selected_port', selected), \
+             patch.object(diagnostics_stream, 'emit', lambda **event: events.append(event)), \
+             patch.object(diagnostics_stream.signal, 'signal'), \
+             patch.object(diagnostics_stream.time, 'monotonic', lambda: clock[0]), \
+             patch.object(diagnostics_stream.time, 'sleep', sleep):
+            diagnostics_stream.stream(SimpleNamespace(seconds=60))
+        return events, closed
+
+    def test_passive_fragmented_lines_timeout_reconnect_and_release(self):
+        events, closed = self.run_stream([b'boot log\n{"a":', b'1}\n{"b":2}\n'])
+        self.assertEqual([e['line'] for e in events if e['kind'] == 'line'], ['{"a":1}', '{"b":2}'])
+        self.assertEqual(len(closed), 3)
+        self.assertEqual(events[-1]['attempts'], 3)
+        self.assertEqual(events[-1]['serial_writes'], 0)
+        self.assertTrue(any(e.get('reason') == 'USB data timeout' for e in events))
+
+    def test_oversized_unterminated_line_closes_handle_without_forwarding(self):
+        events, closed = self.run_stream([b'{' + b'x' * 1024])
+        self.assertFalse(any(e['kind'] == 'line' for e in events))
+        self.assertEqual(len(closed), 3)
+        self.assertTrue(any('exceeds limit' in e.get('reason', '') for e in events))
 
 
 if __name__ == '__main__':

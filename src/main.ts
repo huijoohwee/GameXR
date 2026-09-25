@@ -136,7 +136,9 @@ async function boot(): Promise<void> {
       console.error('[GameXR] diagnostics panel failed:', error)
     } finally { diagnosticsButton.disabled = false }
   })
-  if (new URL(location.href).searchParams.get('diagnostics') === '1') diagnosticsButton.click()
+  const entryParams = new URL(location.href).searchParams
+  if (entryParams.get('drone') === '1') droneButton.click()
+  else if (entryParams.get('diagnostics') === '1') diagnosticsButton.click()
   const bridge = installWebMcpBridge(runtime, strategy?.tools ?? [], {
     persistentStrategyEnabled: Boolean(strategy),
   })

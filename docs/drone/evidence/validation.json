@@ -1,14 +1,14 @@
 {
   "schema": "drone-host-validation/v1",
-  "observed_at": "2026-09-25T17:51:56.962457+00:00",
-  "continuity": "DRONE-RC-001@0.2.0 + DRONE-FLIGHT-PATH-001@1.1.0",
+  "observed_at": "2026-09-25T18:19:05.629952+00:00",
+  "continuity": "DRONE-RC-001@0.2.0 + DRONE-FLIGHT-PATH-001@1.2.0",
   "surface": "authoring",
   "result": "Native selected host checks and unchanged provenance verifier pass; protected integration and physical acceptance pending.",
-  "source_snapshot_sha256": "6bcf3626210d2807bfed3d31b0ecae1f7953008fd56242659083e2874dbc7aa6",
+  "source_snapshot_sha256": "094af25df2d9ea52b86562c4e4cc9fae1175a1149b4f4694434d0620279b8659",
   "previous_validation": {
-    "revision": "43a79806844e553e2041b54951d5679781da66d3",
+    "revision": "36a3a182dc1f21ea5fef16890cc038ede65dae32",
     "path": "docs/drone/evidence/validation.json",
-    "sha256": "0f1d4302d59986a87e763870bd21a1ccad455466f4b35d17fb6b14fc5fa2e909"
+    "sha256": "f12e7f533aa784f14c08b274da3d9dbffc79ca01a690edd5428de2907f10b796"
   },
   "environment": {
     "node": "v22.22.3",
@@ -28,10 +28,25 @@
       "log": "source-check.log"
     },
     {
-      "check": "Remote Safari, drone bench/transport, phone diagnostics",
-      "source_revision": "43a79806844e553e2041b54951d5679781da66d3",
-      "run": "https://github.com/huijoohwee/GameXR/actions/runs/36168668640",
-      "result": "Those steps passed; overall run failed on the predecessor source-fingerprint ledger."
+      "check": "npm run test:drone-browser with Graph Canvas and actual 541-sample Graph path",
+      "exit_code": 0,
+      "scope": "Six unchanged mobile WebKit regression checks plus two new transfer checks. New disconnected-state test assertion corrected before passing focused rerun; no production change followed.",
+      "logs": [
+        "external:flight-transfer-webkit.log",
+        "external:flight-transfer-webkit-rerun.log"
+      ]
+    },
+    {
+      "check": "Predecessor provider integration",
+      "source_revision": "36a3a182dc1f21ea5fef16890cc038ede65dae32",
+      "run": "https://github.com/huijoohwee/GameXR/actions/runs/36169899965",
+      "result": "Build candidate and Integration Gate passed; not evidence for the successor."
+    },
+    {
+      "check": "Cross-application Graph UI Send \u2192 GameXR review \u2192 explicit Connect/Run",
+      "exit_code": 0,
+      "scope": "Actual Graph producer and GameXR consumer on local Chromium; 541 samples, receiver acknowledged landed at tick 540. Phone link 3446 characters. In-app browser popup did not acknowledge; its copy/paste fallback completed the same route.",
+      "log": "external:flight-transfer-cross-browser/transfer-evidence.json"
     }
   ],
   "provenance_checks": {
@@ -86,7 +101,7 @@
     "missing_links": [],
     "scope": "11 selected structural/provenance checks; no exhaustive guideline alignment claim"
   },
-  "source_check_log_sha256": "b120db737bf61eb3cb71e5a63f1d851c4414153bde9ecfb5d57ffd9903611d54",
+  "source_check_log_sha256": "a3f797bcb2a5b78a87bc4ba67eb8d59b4c14091fd05d148508d9beda9c956d76",
   "physical_acceptance": "not run",
   "production_deployment": "not run"
 }

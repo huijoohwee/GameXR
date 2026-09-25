@@ -1,7 +1,7 @@
 ---
 title: GameXR execution of Graph drone paths
 doc_type: PRD-TAD-ADR-MVP-GTM
-version: 1.1.0
+version: 1.2.0
 date: 2026-09-26
 owner: GameXR bench maintainer
 continuity_id: DRONE-FLIGHT-PATH-001
@@ -13,7 +13,7 @@ frontmatter_contract: required
 
 ## PRD
 
-DRONE-FLIGHT-PATH-001@1.1.0 consumes the Graph-owned portable data contract in
+DRONE-FLIGHT-PATH-001@1.2.0 consumes the Graph-owned portable data contract in
 `agentic-graph/docs/documents/prd-tad-adr-mvp-gtm-drone-flight-path.md`. The user explicitly
 confirmed simulated bench operation. Import, review, connect and Run on iPhone/Safari
 must preserve the authored route, visibly acknowledge takeoff/travel/landing, and
@@ -132,3 +132,46 @@ Retain the previous snapshot and validation through exact published revision
 its assertions remain unchanged. This records current source; it does not rewrite past
 physical acceptance or turn local checks into remote CI proof. This narrow follow-through
 adds three evidence files to the 20-file change scope, within the 80 KiB source budget.
+
+
+## Direct transfer and phone links — 1.2.0
+
+PRD: remove mandatory file import while preserving review and explicit Connect/Run.
+The Graph sender, paste, compressed phone link and file input share FlightPathView admission.
+Invalid replacement clears prior data and source navigation; running control blocks changes.
+
+TAD: consume the Graph-owned agentic-drone-flight-handoff/v1 contract with exact opener,
+origin, random channel and envelope checks, a 20-second deadline and one accepted transfer.
+No command message exists. The lazy Drone panel opens for ?drone=1. FlightPathLink encodes
+validated JSON with native gzip/base64url in #flight, bounded to 16,000 encoded characters;
+streaming decode stops above 500,000 bytes before JSON admission. Newer imports fence older
+async work. Closing disposes listeners and preview; no path survives as command authority.
+
+ADR: use a self-contained private link, not a hosted path registry. Require a non-loopback
+HTTPS destination supplied by the user. Preserve only its optional valid pair token and
+remove other query parameters. No session is created, renewed or persisted by sharing.
+The existing one-browser, one-use, expiring gateway pairing remains unchanged; an already
+paired phone needs only the HTTPS address. Strip transfer fields from history after capture,
+retaining pair until the unchanged Connect owner consumes it. Generated text stays only in
+the open panel. User edits, import, Run or disposal invalidate the displayed link. A source
+link may still name the original desktop's loopback Graph address; this release does not
+synchronize browser-local source storage. Safari 16.4+ supplies the built-in compression API;
+older/unsupported browsers use file or paste. Oversized links fail with the same fallback.
+
+MVP: 16 files / 80 KiB added source across both repos, no dependency changes or services.
+Native tests cover exact path roundtrip, unsafe URLs, duplicate fields, decompression bounds
+and forged origins/windows/channels. Mobile WebKit covers paste, link creation and reopen,
+review-only state, one-shot cross-origin handoff, replay rejection and existing nine-second
+receiver-acknowledged takeoff/travel/landing. This is host emulation, not physical iPhone proof.
+Refresh the unchanged source-provenance verifier's inputs after this change, retaining the
+previous snapshot/validation by published revision and digest.
+
+GTM: Graph Results → Send to GameXR → review → Connect → Run. From GameXR choose Share
+flight with iPhone, paste the Mac gateway address or unused pairing link, Create phone link,
+and Copy phone link. Offline alternative: Graph Copy flight path → GameXR Paste flight path
+→ Review pasted path. No clipboard read permission is needed. Share privately; links may
+contain the supplied pairing token. Measure task completion before adding live synchronization.
+
+Release/rollback: native source publication only, with separate protected merge/production
+receipts. Revert this increment for file-only transfer. No firmware, bridge endpoint, pairing
+policy or physical command route changed. Evidence prefix: external flight-transfer-*.

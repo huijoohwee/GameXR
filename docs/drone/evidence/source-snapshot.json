@@ -1,9 +1,9 @@
 {
   "schema": "drone-host-source-snapshot/v1",
-  "observed_at": "2026-09-25T17:50:31.187813+00:00",
+  "observed_at": "2026-09-25T18:17:52.268793+00:00",
   "base_revision": "848c6667c7a886fa275bb59a858ed7e72e0d560a",
-  "branch": "agent/device-0232231d4a19/drone-canvas-proof",
-  "candidate_status": "Graph Canvas reuse and v2 source links; simulated flight paths and paired phone gateway. Remote Safari, bench transport and phone diagnostics passed at 43a79806844e553e2041b54951d5679781da66d3; source-fingerprint ledger refreshed in this successor. Physical iPhone and aircraft acceptance remain pending; no motor outputs.",
+  "branch": "agent/device-0232231d4a19/drone-path-transfer",
+  "candidate_status": "Direct Graph browser handoff, paired phone review links and offline paste; shared Graph Canvas and explicit simulated-bench Run. Local selected checks and mobile WebKit observed. Protected integration and physical iPhone acceptance pending; no motor outputs.",
   "worktree": "/Users/huijoohwee/Documents/GitHub/.worktrees/GameXR/device-0232231d4a19--usb-telemetry-observer",
   "specification_input": {
     "path": "/Users/katrina/Documents/GitHub/.workspace/.artifacts/gamexr-esp32-drone-control/prd-tad-adr-mvp-gtm-gamexr-esp32-drone-control.md",
@@ -41,7 +41,7 @@
     "docs/drone/history/evidence/validation.json": "133d5e8514352c7109fe2247939321b0967a2fe49b9b5ee8e3c04854b25f7662",
     "docs/drone/history/prd-tad-adr-mvp-gtm-gamexr-esp32-drone-control-v0.1.0.md": "fc68aa6ce590869e20aaa6980347d6e1d10ef992dfed9146ba58babf0a549b54",
     "docs/drone/history/provenance.json": "0ec82633e885f6b511bb151acbb5769678ae5e6f5d381244dec6cd61c60faed6",
-    "docs/drone/prd-tad-adr-mvp-gtm-drone-flight-path.md": "c5b444131b5c8fd1c729425e6203b2b43e61d395d1b0ba841ce51f47ddd95d8c",
+    "docs/drone/prd-tad-adr-mvp-gtm-drone-flight-path.md": "5c7a90be99d8ca2017af71d9828eb9b06c1cdad525227fe8ae4932f48b8613f0",
     "docs/drone/prd-tad-adr-mvp-gtm-gamexr-esp32-drone-control.md": "35d737710f2c56f3ae2d29ac99a4905642383548af6146c0244a0664ba797654",
     "docs/drone/prd-tad-adr-mvp-gtm-usb-diagnostics-dashboard.md": "cd24dbf6be8ced2180d849a13a89f28b2ccaa5ec649ed0d5dd1d119facd1776f",
     "drone-browser-tests/bench.spec.ts": "9c1c654ddded170f78e2da18612b4cba9017c24dd74c9316f2ce87ba54e1cee5",
@@ -49,6 +49,7 @@
     "drone-browser-tests/dashboard.diagnostics.ts": "b03642a79abbe2c7b1bf822df7d3ca3ac693a8b2bce66ed26bc529a06fb00e0a",
     "drone-browser-tests/diagnostics-fixture.ts": "12220a80221c9a2fe6f2c40786efb5a431408e78a5a709ad36376ee81318f582",
     "drone-browser-tests/flight-path.spec.ts": "38c9fa3830e22bd59ba5c145e8761233793d31a84b58f9d5a8f5857876260768",
+    "drone-browser-tests/flight-transfer.spec.ts": "cddaf934af0ac66211780e08be74acdac3a712bea0b5f2cc76d85c7ad5594958",
     "index.html": "93d03a56c12e84efb59cd708979dc02d13507134c096a725cb337a93717c9d9a",
     "native/App/GameXRVisionApp.xcodeproj/project.pbxproj": "6882fafcc2e69ace96b5de463ed344fc28e893220e41115a6f5ee2bdd3c8eee2",
     "native/App/GameXRVisionApp.xcodeproj/xcshareddata/xcschemes/GameXRVisionApp.xcscheme": "b5ba17f1ab59cb6d324b32f41795115627fbd715720bfe5dc57d4ea6c147ca93",
@@ -91,7 +92,9 @@
     "src/drone/CameraView.ts": "07f4e32809a1c3351a123fb2b07e3c6a3988b1c6cc121ab0568528a3498b2022",
     "src/drone/DronePanel.ts": "927d57882dc1f8be3e3229f955db96407b24445ad2df8d8080f87b51f0d0f1d8",
     "src/drone/FlightPath.ts": "77596f37367d6f9a0d60841886e233a624b8f939edb2373532e4f3f19375c009",
-    "src/drone/FlightPathView.ts": "b031e49fd4741c1369d85ba405fc73fe373fc70eb2aa9814df56b95974b23576",
+    "src/drone/FlightPathLink.ts": "4fd3f3b27130cf30b4686b05503982cb174e7b73cc9ea50d3802626cbb95826f",
+    "src/drone/FlightPathTransfer.ts": "668d3701debce6711022a089bc19c9e7f1b8489eccaf5aee6436c34b3075872b",
+    "src/drone/FlightPathView.ts": "0a479da4c65a5716b12392d5b29bc55ef2b671dfe71d609b8bf1821369340a56",
     "src/drone/GraphCanvasPreview.ts": "d06596b079cf4fc8e6c923af9639e2668837951dfb634ed61d0cd2a793b28370",
     "src/drone/PhoneGateway.ts": "62694d902eafd12cbb88d40f80432376f35a352503e9b77cefc91fec15d2a810",
     "src/drone/camera.css": "4fe263b4678510c77bad62b13785c9ee2751883bce7019be531b27ccdfefd209",
@@ -101,7 +104,7 @@
     "src/drone/diagnostics/protocol.ts": "acf7df8d33e4d85fecc8ed5ea4f0e7d586394b8c1b792fead08eaa3c880b2ca1",
     "src/drone/drone.css": "da81a268d6cca619641516d1f8c83959d70f522505646d226715fa215716f8fb",
     "src/drone/protocol.ts": "568dfb9a6501289da85c6b21f461e47f06022e6e51fc9242aff4cf2bf1439b02",
-    "src/main.ts": "40671e7cedc70e4315785ceba7bbb37000a723fb1559dd03c085fa50ae76454a",
+    "src/main.ts": "cd28f774da8d1738ced9e6ce82821b089176b9742d40b288deea0f04d246f09f",
     "src/mcp/WebMcpBridge.ts": "3c0565f2974b86af92a84a461eff991d223a234e7fc4e5261b6812ad3670b5a4",
     "src/mcp/contracts.ts": "2b429d247f833d57138ed6d22dbf0a6eee4b61244e434b080ad24e4d82ab050b",
     "src/runtime/AnimationController.ts": "17fbd66c6734e3b8961ee86a4104b99539cb36ba15694715d9056c8b77be9346",
@@ -134,6 +137,7 @@
     "tests/diagnostics-server.test.ts": "642502187c66e6e3e70dddce9cb4f4342ab97832fe04cc10d065b17f39ac16ea",
     "tests/drone-bridge.test.ts": "c13503fd5ab75e6de1279760416ce00a20c334cb67789e232a4d53002d67ba72",
     "tests/drone-flight-path.test.ts": "1f604c73f42d39965b2b57441915a5692eded195689389499309cc5ea41a6668",
+    "tests/drone-flight-transfer.test.ts": "f65fcd5d9f408ba6851f3dd8e32a18ba26ca45edc42107217fcc3b9ae99a8764",
     "tests/drone-protocol.test.ts": "c6ab020ae31e67fd29cb36048b0771fac6c6281c5975a21ce6ba2c72a1268ea4",
     "tests/engine-audio-projection.test.ts": "aa4371ff7a5a9a3fdb5a9d05b5d758d5eefb39809acddb08c19f9035a9b1eb47",
     "tests/fixtures/gamexr-cross-runtime-parity.v1.json": "422346d3a7f2cf9d91d59201f80dc7854c28cb923dcc97689c0fd8117d69219b",
@@ -174,8 +178,8 @@
   },
   "previous_snapshot": "docs/drone/history/evidence/source-snapshot-runtime-economy-input.json",
   "previous_candidate_snapshot": {
-    "revision": "43a79806844e553e2041b54951d5679781da66d3",
+    "revision": "36a3a182dc1f21ea5fef16890cc038ede65dae32",
     "path": "docs/drone/evidence/source-snapshot.json",
-    "sha256": "a028d080eaed91741e52c059e641c7c210e97b148f452fa02ea1aed303b323bf"
+    "sha256": "6bcf3626210d2807bfed3d31b0ecae1f7953008fd56242659083e2874dbc7aa6"
   }
 }

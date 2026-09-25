@@ -2,13 +2,13 @@
 > gamexr@0.1.0 check
 > node node_modules/agentic-os/bin/agentic-os-validation.mjs run
 
-broad: 3/3 owner checks; 47 changed paths; no full-suite parity inferred
+broad: 3/3 owner checks; 53 changed paths; no full-suite parity inferred
 running evaluators: npm --prefix node_modules/agentic-os run evals
-evaluators: exit 0, 3.09s
+evaluators: exit 0, 3.10s
 running candidate: npm run check:candidate
-candidate: exit 0, 1.66s
+candidate: exit 0, 1.68s
 running behavior: npm test
-behavior: exit 0, 2.08s
+behavior: exit 0, 2.12s
 validation receipt: /Users/huijoohwee/Documents/GitHub/GameXR/.git/worktrees/device-0232231d4a19--usb-telemetry-observer/agentic-os-tests/validation-last.json
 
 {

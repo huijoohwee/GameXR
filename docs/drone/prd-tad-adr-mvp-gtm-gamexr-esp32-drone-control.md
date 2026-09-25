@@ -484,3 +484,46 @@ do not modify the already compiled starter merely to accommodate another project
 | PRD-TAD-ADR-MVP-GTM | CID | RAO | Updated Date |
 |---|---|---|---|
 | `DRONE-RC-001@0.2.0` | C: GameXR lacks a physical drone link · I: control one ESP32 aircraft locally · D: implement independently verifiable host control while preserving physical acceptance | R: Interface/protocol maintainer · A: Maintainer implements host bench control · O: executable host slice and pending aircraft gates · check: HA1–HA4 | 2026-09-14 |
+
+### 2026-09-25 — independent USB observation slice
+
+Continuity `DRONE-USB-OBS-001@0.1.0`; predecessor `DRONE-RC-001@0.2.0`.
+This slice supplements C1/C4 diagnostics without satisfying aircraft control E1–E7
+or changing the local Wi-Fi product direction. The current diagnostic evidence
+constraint is live USB only; runtime control and flight remain separate.
+
+**PRD:** inspect the installed firmware before replacement. The user confirmed
+propellers removed and motor power isolated. Bounded console displays established
+MPU-6500/WHO_AM_I 0x70, active parameter values and software motor outputs. Values
+are observations, not a claim of a full electrical schematic or physical actuation.
+The host deliverable is an observation-only JSON adapter and offline replay.
+
+**TAD:** `tools/drone-telemetry/console_protocol.py` owns strict parsing;
+`usb_observe.py` owns explicit USB selection, locking, bounded fixed display requests,
+private evidence and replay. The profile is `esp32-console-observation/v1`.
+Transport accepts no arbitrary console command and exposes no control path to the
+Drone panel. Unknown units, arming state and battery voltage remain unavailable;
+replayed data cannot claim a live acquisition timestamp.
+
+**ADR:** reuse installed POSIX Python and exact `pyserial==3.5` (BSD); no additional
+MCP service, browser gateway or flight implementation. Raw firmware/configuration
+stays private in the canonical GameXR `.artifacts` exception; maintained adapter
+source uses the START-admitted GameXR worktree. Opening this device's port produced
+startup messages, so the CLI requires explicit acknowledgment and an isolated rig.
+Source/SDK matching remains Arduino-ESP32 3.3.8 / IDF 5.5.4 evidence, not editable
+application source or authorization to migrate firmware. Original source remains
+unidentified from the USB evidence.
+
+**MVP:** six independent parser/CLI rejection and replay tests pass; a captured USB
+pair replays as historical evidence; two fresh live samples parse with the expected
+sensor identity and zero reported motor outputs. The adapter sends only `imu` and
+`mot`, closes the port and preserves a digest receipt. Device timestamps, rate units,
+calibration accuracy and electrical output behavior remain unverified. Repository
+release checks and provider handoff are recorded separately from this device proof.
+
+**GTM/handoff:** this small headless diagnostic reduces configuration uncertainty
+before host control or replacement firmware work. Development: observer and the
+specific live profile are locally verified. Production: no new aircraft firmware,
+browser deployment or physical controller connection. No control/flight readiness
+claim follows from this slice. See [USB observation](../USB-TELEMETRY.md) for bounded
+usage, replay, tests and the remaining hardware/source constraints.

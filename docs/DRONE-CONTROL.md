@@ -180,8 +180,35 @@ key readable only by its owner. No router port forwarding or Internet service is
 The receiver still runs on the Mac over loopback UDP with no motor outputs. This is
 phone-to-Mac Wi-Fi delivery of simulated setpoints, not radio delivery to an aircraft.
 
-The importer accepts Graph's `agentic-drone-flight-path/v1` contract, at most 500 kB,
+The importer accepts Graph's `agentic-drone-flight-path/v1` and `/v2` contracts, at most 500 kB,
 7,201 samples and 120 seconds. It does not execute Python or translate positions into
 throttle. The maximum planned translation is 3 m/s within ±8 m horizontal and 0–4 m
 altitude; these are educational bounds. Path sessions cannot mix with manual axes.
 See [the implementation plan](drone/prd-tad-adr-mvp-gtm-drone-flight-path.md) for acceptance.
+
+
+### Reuse the Graph Canvas
+
+In the Graph checkout, build its render-only entry:
+
+```sh
+node canvas/scripts/build_learning_canvas_embed.mjs
+```
+
+Start this gateway with `--graph-canvas-root=/absolute/path/to/agentic-graph/canvas/dist/learning-canvas`
+(or set GAME_XR_GRAPH_CANVAS_ROOT), alongside the existing phone TLS flags. Use a build
+from the matching reviewed Graph revision. This serves Graph's own scene and camera
+framing at the same origin as GameXR, avoiding a second renderer and mixed HTTP/HTTPS
+content. The Drone panel loads it on demand. A missing or incompatible artifact produces
+an explicit unavailable message; Run and receiver authority remain separate.
+
+New Graph UI exports include **Open source in Graph**. Clicking it opens the original
+kgDoc file route in a separate tab. Existing v1 files need re-export for that link.
+The file belongs to the workspace at that Graph address: opening it on another phone
+browser does not transfer local workspace storage or pin the historical source contents.
+Use **Export debrief** when the exact source snapshot is needed.
+
+Simpler transfer recommendations: **Send to GameXR** for one-click handoff within the
+same browser; a **paired share link or QR** when moving to iPhone; **copy/paste** as an
+offline fallback. These options are not implemented by this revision. File import is
+still supported and every transfer must lead to review and an explicit Run.

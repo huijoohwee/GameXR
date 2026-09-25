@@ -3,7 +3,7 @@ import https from 'node:https'
 import dgram from 'node:dgram'
 import { fork } from 'node:child_process'
 import { randomBytes, randomUUID } from 'node:crypto'
-import { realpath, stat } from 'node:fs/promises'
+import { readFile, realpath, stat } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { WebSocketServer, WebSocket } from 'ws'
@@ -15,10 +15,18 @@ import { seal, unseal } from './wire.ts'
 import { staticHandler } from './static.ts'
 import { phoneGateway, validateGatewayHost, type GatewayTls } from './phone-gateway.ts'
 
-export async function startDroneBridge(options: { root: string; port?: number; tls?: GatewayTls }) {
+export async function startDroneBridge(options: { root: string; port?: number; tls?: GatewayTls; graphCanvasRoot?: string }) {
   if (options.tls) validateGatewayHost(options.tls.host)
   const root = await realpath(options.root)
   if (!(await stat(path.join(root, 'index.html'))).isFile()) throw new Error('Build GameXR before starting the bridge')
+  const graphRoot = options.graphCanvasRoot ? await realpath(options.graphCanvasRoot) : null
+  if (graphRoot) {
+    const manifest = JSON.parse(await readFile(path.join(graphRoot, 'graph-canvas-manifest.json'), 'utf8'))
+    if (manifest.schema !== 'agentic-graph/learning-canvas-artifact/v1' || manifest.protocol !== 'agentic-graph/learning-canvas/v1'
+      || manifest.entry !== 'index.html' || manifest.base !== '/gamexr/graph-canvas/'
+      || typeof manifest.sourceRevision !== 'string' || !/^[a-f0-9]{40}$/u.test(manifest.sourceRevision)
+      || !(await stat(path.join(graphRoot, 'index.html'))).isFile()) throw new Error('Unsupported Graph Canvas artifact')
+  }
   const key = randomBytes(32), udp = dgram.createSocket('udp4')
   await new Promise<void>((resolve, reject) => {
     udp.once('error', reject)
@@ -138,7 +146,15 @@ export async function startDroneBridge(options: { root: string; port?: number; t
     })
   })
 
-  const files = staticHandler(root, () => origin)
+  const gameFiles = staticHandler(root, () => origin)
+  const graphFiles = graphRoot ? staticHandler(graphRoot, () => origin, '/gamexr/graph-canvas/', true) : null
+  const files: http.RequestListener = (request, response) => {
+    if (request.url?.split('?')[0]?.startsWith('/gamexr/graph-canvas/')) {
+      if (graphFiles) return graphFiles(request, response)
+      response.writeHead(404).end(); return
+    }
+    return gameFiles(request, response)
+  }
   const gateway = options.tls ? phoneGateway(() => origin, files) : null
   const server = options.tls ? https.createServer(options.tls, gateway!.handler) : http.createServer(files)
   server.on('upgrade', (request, socket, head) => {

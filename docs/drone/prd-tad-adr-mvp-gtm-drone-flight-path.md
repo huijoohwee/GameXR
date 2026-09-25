@@ -1,7 +1,7 @@
 ---
 title: GameXR execution of Graph drone paths
 doc_type: PRD-TAD-ADR-MVP-GTM
-version: 1.0.0
+version: 1.1.0
 date: 2026-09-26
 owner: GameXR bench maintainer
 continuity_id: DRONE-FLIGHT-PATH-001
@@ -13,7 +13,7 @@ frontmatter_contract: required
 
 ## PRD
 
-DRONE-FLIGHT-PATH-001@1.0.0 consumes the Graph-owned portable data contract in
+DRONE-FLIGHT-PATH-001@1.1.0 consumes the Graph-owned portable data contract in
 `agentic-graph/docs/documents/prd-tad-adr-mvp-gtm-drone-flight-path.md`. The user explicitly
 confirmed simulated bench operation. Import, review, connect and Run on iPhone/Safari
 must preserve the authored route, visibly acknowledge takeoff/travel/landing, and
@@ -24,7 +24,7 @@ oversized or invalid files clear prior imported data and fail visibly.
 
 Graph owns 60 Hz kinematic simulation; GameXR consumes rounded sampled positions and
 owns sample selection, preview and transport. `FlightPath.ts` validates the versioned
-JSON file without executing source; `FlightPathView.ts` projects the trace isometrically.
+JSON file without executing source; `FlightPathView.ts` hosts the Graph-owned Canvas build through `GraphCanvasPreview.ts`.
 The existing lazy Drone panel owns Run and its session. A 40 ms sender selects the
 current authored sample. It never invents velocity, attitude, rotor or throttle values.
 
@@ -78,3 +78,46 @@ All chunks remain below 500 kB; the lazy Drone panel is about 15 kB uncompressed
 Evidence lives outside the source tree under
 `.audit-artifacts/drone-implementation-20260925/gamexr-path-*`; it observes working
 source before publication, not protected integration or physical iPhone acceptance.
+
+
+## Canvas reuse and source navigation — 1.1.0
+
+PRD: show Graph's existing drone scene in the phone preview and provide a clickable
+return to its authored file. GameXR's SVG geometry is removed. The UI still owns import,
+review and explicit Run; no preview operation enables control.
+
+TAD/ADR: the optional `--graph-canvas-root=DIR` flag (or GAME_XR_GRAPH_CANVAS_ROOT)
+mounts a locally built Graph artifact under the gateway's same HTTP(S) origin. Validate
+its versioned manifest before spawning the receiver; preserve path/Host/method guards
+and reject filesystem escape. Only this mount allows same-origin framing. A versioned
+channel exchanges bounded read-only pose tuples; stale/foreign messages are ignored.
+The lazy Drone panel starts the embed, disposes its listener/iframe, and visibly reports
+missing artifacts. GameXR's release output does not silently vendor a sibling repository;
+the local operator supplies the explicit Graph build described in its source runbook.
+
+Graph's v2 file adds sourceUrl using its existing kgDoc route. Consumer validation
+rejects executable schemes, credentials, extra parameters, traversal and oversized
+links. Source navigation requires a user click and opens a separate tab with noopener
+and noreferrer. v1 files still run but require re-export for a source link. A source route
+opens that browser workspace's current file; it is not cross-device workspace sync or
+proof that the file still matches sourceDigest.
+
+MVP: test source-link admission, static mount/symlink containment and actual mobile
+WebKit Canvas loading, wrong-channel rejection, accepted final pose and no UI overflow.
+Retain the 250 ms lease and all stop/focus-loss checks. CI's completion screenshot moves
+after landing because screenshot capture can block an active WebKit event loop.
+A separate run with no artifact verifies the explicit unavailable state. Actual iPhone
+Wi-Fi remains a physical acceptance step; host emulation cannot certify it.
+
+GTM: recommend Send to GameXR for same-browser handoff, a paired link/QR for iPhone,
+then copy/paste for offline exchange. These are future transfer choices; this revision
+keeps file import. Shared Canvas and source navigation are implemented now. Rollback
+reverts this successor and restarts the gateway with the prior candidate.
+
+1.1.0 working-source validation: native selected evaluators, candidate and behavior
+checks pass. Six path admission/clock/lease/TLS/source-link/artifact-containment tests
+pass; all six mobile WebKit bench tests pass with the real Graph Canvas artifact, and
+all six pass with the artifact absent. Wrong-channel messages leave the preview unchanged;
+final accepted pose matches the imported sample. Evidence: external `canvas-reuse-*`
+artifacts in `.audit-artifacts/drone-implementation-20260925`. Publication and protected
+integration require separate receipts.

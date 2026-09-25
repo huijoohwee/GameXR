@@ -5,8 +5,8 @@ import { startDroneBridge } from './server.ts'
 // There is deliberately no arbitrary UDP peer or flight-enable CLI switch.
 const args = new Map<string, string>()
 for (const argument of process.argv.slice(2)) {
-  const match = /^--(port|listen|tls-cert|tls-key)=(.+)$/u.exec(argument)
-  if (!match || args.has(match[1]!)) throw new Error('Use --port=4192 and optional --listen=PRIVATE_IP --tls-cert=FILE --tls-key=FILE. Simulated receiver only.')
+  const match = /^--(port|listen|tls-cert|tls-key|graph-canvas-root)=(.+)$/u.exec(argument)
+  if (!match || args.has(match[1]!)) throw new Error('Use --port=4192 and optional --listen=PRIVATE_IP --tls-cert=FILE --tls-key=FILE. Optional --graph-canvas-root=DIR. Simulated receiver only.')
   args.set(match[1]!, match[2]!)
 }
 const port = Number(args.get('port') ?? 4192)
@@ -19,7 +19,8 @@ if (tlsFlags) {
   if ((await stat(keyPath)).mode & 0o077) throw new Error('TLS key must be private: chmod 600')
   tls = { host: args.get('listen')!, cert: await readFile(path.resolve(args.get('tls-cert')!)), key: await readFile(keyPath) }
 }
-const bridge = await startDroneBridge({ root: path.resolve(import.meta.dirname, '../../dist/gamexr'), port, tls })
+const graphCanvasRoot = args.get('graph-canvas-root') ?? process.env.GAME_XR_GRAPH_CANVAS_ROOT
+const bridge = await startDroneBridge({ root: path.resolve(import.meta.dirname, '../../dist/gamexr'), port, tls, graphCanvasRoot })
 console.log(`GameXR drone bench: ${bridge.origin}/gamexr/`)
 if (bridge.pairingUrl) console.log(`Private one-use phone pairing link (15 minutes): ${bridge.pairingUrl}`)
 console.log('SIMULATED RECEIVER · loopback UDP · no physical device or motor outputs')

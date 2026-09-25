@@ -1,12 +1,12 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
-import { mkdtemp, readFile, writeFile, rm } from 'node:fs/promises'
+import { mkdtemp, readFile, writeFile, rm, mkdir, symlink } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import https from 'node:https'
 import { WebSocket } from 'ws'
-import { parseFlightPath, FlightPathRun } from '../src/drone/FlightPath.ts'
+import { parseFlightPath, readFlightPath, FlightPathRun } from '../src/drone/FlightPath.ts'
 import { PATH_PROFILE, parsePathCommand, neutralAxes, type BridgeStatus } from '../src/drone/protocol.ts'
 import { ReceiverState } from '../tools/drone-bridge/receiver-state.ts'
 import { startDroneBridge } from '../tools/drone-bridge/server.ts'
@@ -94,4 +94,36 @@ test('paired HTTPS → WebSocket → UDP accepts path only for paired origin and
     await until(() => state?.telemetry?.pathPose?.[4] === 0.05)
     socket.send(JSON.stringify({ kind: 'disable' })); await until(() => state?.telemetry?.pathPose === null && !state?.enabled)
   } finally { clients.forEach(c => c.terminate()); await bridge?.close(); await rm(dir, { recursive: true, force: true }) }
+})
+
+
+test('v2 source navigation is explicit and rejects credentials, executable schemes and extra parameters', () => {
+  const path = { ...mission(), schema: 'agentic-drone-flight-path/v2', sourceUrl: 'https://example.test/graph/?kgDoc=flight.py' }
+  assert.equal(readFlightPath(JSON.stringify(path)).sourceUrl, path.sourceUrl)
+  assert.equal(readFlightPath(JSON.stringify(mission())).sourceUrl, null)
+  for (const sourceUrl of ['javascript:alert(1)', 'https://user:secret@example.test/?kgDoc=flight.py',
+    'https://example.test/?kgDoc=flight.py&token=secret', 'https://example.test/?kgDoc=../private', 'https://example.test/'])
+    assert.throws(() => readFlightPath(JSON.stringify({ ...path, sourceUrl })))
+})
+
+test('gateway mounts only the explicit Graph build and contains path traversal and symlinks', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'gamexr-graph-canvas-'))
+  let bridge: Awaited<ReturnType<typeof startDroneBridge>> | undefined
+  try {
+    const graph = join(dir, 'graph'); await mkdir(graph)
+    await writeFile(join(dir, 'index.html'), 'GameXR'); await writeFile(join(graph, 'index.html'), 'Graph Canvas')
+    await writeFile(join(graph, 'graph-canvas-manifest.json'), JSON.stringify({ schema: 'agentic-graph/learning-canvas-artifact/v1',
+      protocol: 'agentic-graph/learning-canvas/v1', sourceRevision: 'a'.repeat(40), entry: 'index.html', base: '/gamexr/graph-canvas/' }))
+    await writeFile(join(dir, 'private.txt'), 'private'); await symlink(join(dir, 'private.txt'), join(graph, 'escape.txt'))
+    bridge = await startDroneBridge({ root: dir, graphCanvasRoot: graph, port: 0 })
+    const response = await fetch(bridge.origin + '/gamexr/graph-canvas/')
+    assert.equal(await response.text(), 'Graph Canvas')
+    assert.match(response.headers.get('content-security-policy')!, /frame-ancestors 'self'/u)
+    assert.equal((await fetch(bridge.origin + '/gamexr/graph-canvas/escape.txt')).status, 403)
+    assert.equal((await fetch(bridge.origin + '/gamexr/graph-canvas/%2e%2e%2fprivate.txt')).status, 403)
+    assert.equal((await fetch(bridge.origin + '/gamexr/graph-canvas/', { method: 'POST' })).status, 405)
+    await bridge.close(); bridge = undefined
+    await writeFile(join(graph, 'graph-canvas-manifest.json'), '{}')
+    await assert.rejects(startDroneBridge({ root: dir, graphCanvasRoot: graph, port: 0 }), /Unsupported Graph/u)
+  } finally { await bridge?.close(); await rm(dir, { recursive: true, force: true }) }
 })

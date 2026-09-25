@@ -1,4 +1,5 @@
 import http from 'node:http'
+import https from 'node:https'
 import dgram from 'node:dgram'
 import { fork } from 'node:child_process'
 import { randomBytes, randomUUID } from 'node:crypto'
@@ -6,14 +7,16 @@ import { realpath, stat } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { WebSocketServer, WebSocket } from 'ws'
-import { BENCH, exactKeys, object, parseCommand, type BridgeStatus,
+import { BENCH, exactKeys, object, parseCommand, parsePathCommand, type BridgeStatus,
   type ReceiverTelemetry } from '../../src/drone/protocol.ts'
 import { encodeRpyt } from './crtp.ts'
 import { seal, unseal } from './wire.ts'
 
 import { staticHandler } from './static.ts'
+import { phoneGateway, validateGatewayHost, type GatewayTls } from './phone-gateway.ts'
 
-export async function startDroneBridge(options: { root: string; port?: number }) {
+export async function startDroneBridge(options: { root: string; port?: number; tls?: GatewayTls }) {
+  if (options.tls) validateGatewayHost(options.tls.host)
   const root = await realpath(options.root)
   if (!(await stat(path.join(root, 'index.html'))).isFile()) throw new Error('Build GameXR before starting the bridge')
   const key = randomBytes(32), udp = dgram.createSocket('udp4')
@@ -112,7 +115,7 @@ export async function startDroneBridge(options: { root: string; port?: number })
           exactKeys(message, ['kind'])
           if (owner === client) release('Pilot disabled bench control')
         } else {
-          const command = parseCommand(message)
+          const command = message.kind === 'path' ? parsePathCommand(message) : parseCommand(message)
           if (owner !== client || command.session !== epoch) throw new Error('Pilot does not own this session')
           if (!fresh() || !telemetry?.enabled || telemetry.session !== epoch) throw new Error('Receiver is not ready')
           if (performance.now() - lastCommand >= BENCH.leaseMs) throw new Error('Pilot lease expired')
@@ -121,8 +124,8 @@ export async function startDroneBridge(options: { root: string; port?: number })
           if (challengeAt === undefined || performance.now() - challengeAt >= BENCH.leaseMs) throw new Error('Stale or replayed receiver challenge')
           challenges.delete(command.challenge)
           sequence = command.sequence; lastCommand = performance.now()
-          sendReceiver({ kind: 'controls', session: epoch, challenge: command.challenge,
-            sequence, frame: encodeRpyt(command.axes).toString('hex') })
+          sendReceiver({ kind: command.kind, session: epoch, challenge: command.challenge,
+            sequence, ...(command.kind === 'path' ? { pose: command.pose } : { frame: encodeRpyt(command.axes).toString('hex') }) })
           reason = 'Bench control enabled · simulated receiver · no motor outputs'
         }
         sendStatus(client)
@@ -135,15 +138,18 @@ export async function startDroneBridge(options: { root: string; port?: number })
     })
   })
 
-  const server = http.createServer(staticHandler(root, () => origin))
+  const files = staticHandler(root, () => origin)
+  const gateway = options.tls ? phoneGateway(() => origin, files) : null
+  const server = options.tls ? https.createServer(options.tls, gateway!.handler) : http.createServer(files)
   server.on('upgrade', (request, socket, head) => {
     if (request.url !== '/gamexr/drone-socket' || request.headers.origin !== origin
-      || request.headers.host !== new URL(origin).host || sockets.clients.size >= 4) {
+      || request.headers.host !== new URL(origin).host || sockets.clients.size >= 4 || (gateway && !gateway.authorized(request))) {
       socket.end('HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n'); return
     }
     sockets.handleUpgrade(request, socket, head, client => sockets.emit('connection', client, request))
   })
   const timer = setInterval(() => {
+    if (gateway && !gateway.alive()) { release('Phone pairing expired'); for (const client of sockets.clients) client.close(1008, 'Pairing expired') }
     if (owner && (!fresh() || performance.now() - lastCommand >= BENCH.leaseMs)) release('Pilot lease expired')
     broadcast()
   }, BENCH.cadenceMs)
@@ -166,12 +172,12 @@ export async function startDroneBridge(options: { root: string; port?: number })
   try {
     await new Promise<void>((resolve, reject) => {
       server.once('error', reject)
-      server.listen(options.port ?? 4192, '127.0.0.1', () => {
+      server.listen(options.port ?? 4192, options.tls?.host ?? '127.0.0.1', () => {
         const address = server.address()
         if (!address || typeof address === 'string') { reject(new Error('Invalid bridge address')); return }
-        origin = `http://127.0.0.1:${address.port}`; resolve()
+        origin = `${options.tls ? 'https' : 'http'}://${options.tls?.host ?? '127.0.0.1'}:${address.port}`; resolve()
       })
     })
   } catch (error) { await close(); throw error }
-  return { origin, close, receiverPid: child.pid, receiverPort }
+  return { origin, close, receiverPid: child.pid, receiverPort, pairingUrl: gateway ? `${origin}/gamexr/#pair=${gateway.pairing}` : undefined }
 }

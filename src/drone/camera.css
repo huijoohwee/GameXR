@@ -1,0 +1,10 @@
+.drone-camera { margin: 16px 0; min-width: 0; }
+.drone-camera-stage { position: relative; aspect-ratio: 16/10; background: #061019; border: 1px solid #426079; border-radius: 12px; overflow: hidden; }
+.drone-camera video { width: 100%; height: 100%; object-fit: contain; display: block; }
+.drone-camera-placeholder { position: absolute; inset: 0; display: grid; place-items: center; color: #849caf; font: 16px system-ui; pointer-events: none; }
+.drone-camera[data-phase="active"] .drone-camera-placeholder { display: none; }
+.drone-camera-overlay { position: absolute; inset: auto 0 0; padding: 14px; display: grid; gap: 4px; color: #f0ffff; background: linear-gradient(transparent, #061019ed 18%); font: 12px/1.5 ui-monospace, monospace; pointer-events: none; overflow-wrap: anywhere; }
+.drone-camera-overlay strong { color: #b2f7d6; letter-spacing: .5px; }
+.drone-camera-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+.drone-camera [data-camera-status] { margin: 8px 0; color: #a7bccd; font-size: 13px; }
+@media (max-width: 600px) { .drone-camera-stage { aspect-ratio: 4/3; } }

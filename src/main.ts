@@ -121,6 +121,24 @@ async function boot(): Promise<void> {
       console.error('[GameXR] drone panel failed:', error)
     } finally { droneButton.disabled = false }
   })
+  let diagnosticsPanel: import('./drone/diagnostics/DiagnosticsPanel.ts').DiagnosticsPanel | null = null
+  const diagnosticsButton = document.createElement('button')
+  diagnosticsButton.className = 'icon-button'; diagnosticsButton.id = 'open-diagnostics'
+  diagnosticsButton.textContent = 'Diagnostics'; diagnosticsButton.type = 'button'
+  droneButton.after(diagnosticsButton)
+  diagnosticsButton.addEventListener('click', async () => {
+    if (diagnosticsPanel?.open) return
+    diagnosticsButton.disabled = true; runtime.pause()
+    try {
+      const { DiagnosticsPanel } = await import('./drone/diagnostics/DiagnosticsPanel.ts')
+      diagnosticsPanel = new DiagnosticsPanel()
+    } catch (error) {
+      console.error('[GameXR] diagnostics panel failed:', error)
+    } finally { diagnosticsButton.disabled = false }
+  })
+  const entryParams = new URL(location.href).searchParams
+  if (entryParams.get('drone') === '1') droneButton.click()
+  else if (entryParams.get('diagnostics') === '1') diagnosticsButton.click()
   const bridge = installWebMcpBridge(runtime, strategy?.tools ?? [], {
     persistentStrategyEnabled: Boolean(strategy),
   })
@@ -144,7 +162,7 @@ async function boot(): Promise<void> {
   await registerOfflineShell()
 
   window.addEventListener('pagehide', createGameXrPageHideCleanup({
-    disposeController: () => { dronePanel?.dispose(); controller.dispose() },
+    disposeController: () => { diagnosticsPanel?.dispose(); dronePanel?.dispose(); controller.dispose() },
     disposeBridge: () => bridge.dispose(),
     disposeStrategy: () => strategy?.dispose() ?? Promise.resolve(),
     disposeRuntime: () => {

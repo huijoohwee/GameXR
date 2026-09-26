@@ -1,0 +1,28 @@
+.diagnostics-panel { color: #e7eef8; background: #101923; border: 1px solid #405366; border-radius: 18px; width: min(860px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); padding: 24px; overflow: auto; font: 15px/1.5 system-ui, sans-serif; box-sizing: border-box; }
+.diagnostics-panel::backdrop { background: #030a14c9; backdrop-filter: blur(6px); }
+.diagnostics-panel header, .diagnostics-toolbar, .diagnostics-attitude { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.diagnostics-panel h2 { margin: 0; font-size: 28px; letter-spacing: -.6px; }
+.diagnostics-eyebrow { color: #9ee4cc; font-size: 11px; letter-spacing: 2px; margin: 0 0 6px; }
+.diagnostics-toolbar { justify-content: flex-start; flex-wrap: wrap; margin: 20px 0 8px; }
+.diagnostics-badge { border: 1px solid #659b88; background: #183c35; border-radius: 6px; color: #b5f8dc; padding: 4px 8px; font-size: 11px; font-weight: 700; letter-spacing: 1px; }
+.diagnostics-muted, .diagnostics-card p { color: #a3b3c6; font-size: 13px; }
+.diagnostics-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+.diagnostics-panel button { min-height: 42px; border: 1px solid #53697d; background: #233649; color: #edf7ff; border-radius: 8px; padding: 8px 12px; font: inherit; cursor: pointer; }
+.diagnostics-panel button:hover:not(:disabled) { background: #315269; }
+.diagnostics-panel button:disabled { opacity: .4; cursor: default; }
+.diagnostics-panel button:focus-visible, .diagnostics-panel summary:focus-visible { outline: 3px solid #80dbca; outline-offset: 2px; }
+.diagnostics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.diagnostics-card { background: #172531; border: 1px solid #2d4354; border-radius: 12px; padding: 18px; min-width: 0; }
+.diagnostics-card h3 { font-size: 14px; margin: 0 0 12px; font-weight: 500; color: #c8d8e8; }
+.diagnostics-card small { display: block; font-size: 10px; color: #aebfd0; letter-spacing: 1px; }
+.diagnostics-card output { font: 22px/1.4 ui-monospace, monospace; letter-spacing: -.8px; overflow-wrap: anywhere; }
+.diagnostics-card p { margin: 8px 0 0; }
+.diagnostics-attitude { margin-top: 12px; }
+.diagnostics-horizon { flex: 0 0 100px; height: 100px; border: 2px solid #7890a6; border-radius: 50%; position: relative; overflow: hidden; }
+.diagnostics-horizon div { position: absolute; inset: -45px; background: linear-gradient(#22465f 49.5%, #b8dbd6 49.5%, #b8dbd6 50.5%, #584333 50.5%); transition: transform .1s; }
+.diagnostics-horizon span { position: absolute; inset: 0; display: grid; place-items: center; color: #fff; font: 32px monospace; }
+.diagnostics-calibration { border-top: 1px solid #405366; margin-top: 22px; padding-top: 16px; }
+.diagnostics-calibration summary { cursor: pointer; font-weight: 600; }
+.diagnostics-calibration label { display: block; margin: 16px 0; }
+.diagnostics-calibration input { accent-color: #80dbca; width: 18px; height: 18px; vertical-align: middle; }
+@media (max-width: 600px) { .diagnostics-panel { padding: 16px; } .diagnostics-grid { grid-template-columns: 1fr; } .diagnostics-panel h2 { font-size: 24px; } .diagnostics-card output { font-size: 23px; } .diagnostics-attitude { align-items: flex-start; } }

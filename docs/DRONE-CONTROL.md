@@ -48,8 +48,8 @@ npm run drone:bench -- --port=4292
 
 The CLI has no hardware/backend/UDP-target option. `npm run dev`, static hosting and
 the public website can show the panel, but the bench connection requires the local
-bridge URL. A phone cannot reach another computer's loopback address. LAN/mobile
-delivery requires a separately reviewed local gateway or native transport profile.
+bridge URL. A phone cannot reach another computer's loopback address. Use the paired
+HTTPS gateway below for phone access to the simulated bench.
 
 ## Reference implementation — control and telemetry
 
@@ -80,7 +80,8 @@ socket loss or browser stall inhibit the bench session and clear throttle. Recon
 never restores authority automatically. The receiver resets on its own deadline if
 the page or bridge stops sending, even when a disable message cannot arrive.
 
-All sockets bind to 127.0.0.1. The bridge validates HTTP Host and WebSocket Origin,
+UDP sockets bind to 127.0.0.1; HTTP does by default. The optional paired HTTPS server
+binds only one explicitly selected private IPv4 interface. The bridge validates Host and WebSocket Origin,
 limits inbound messages to 1 KiB and 80/s per client, and admits at most four clients.
 UDP packets use a random per-run HMAC key shared only with the child process via IPC.
 This protects the fixture channel; it is not a paired aircraft identity system and
@@ -150,3 +151,64 @@ CLion and the earlier paoloach/ESP32 IDE-plugin reference remain optional develo
 inspiration in the parent firmware-tooling plan. They neither supply onboard flight
 control nor belong in this runtime. The existing native ESP-IDF build workflow remains
 the firmware build owner; its heartbeat starter is not converted into a flight stack.
+
+## Graph flight path → GameXR → simulated receiver
+
+1. In Graph's Python workspace, select **Drone flight and landing**, program the route
+   (or **Load flight example**), and **Run**. Finish without collisions and land.
+2. In **Results**, choose **Export flight path for GameXR**. Transfer that JSON file
+   to iPhone Files using your usual local transfer method.
+3. Open this GameXR candidate through the bench gateway. Choose **Drone**, import the
+   file, inspect its path/duration, then **Connect receiver → Run flight path**.
+4. The preview follows receiver-accepted simulated positions. Completion requires an
+   acknowledged landed final sample. **Disable control** stops early. Keep Safari in
+   the foreground; focus loss, hidden page, stale telemetry and disconnect cancel Run.
+   A new Run always begins at the origin; no automatic resumption is supported.
+
+For iPhone on the same Wi-Fi, reuse the certificate setup in
+[the phone gateway runbook](USB-TELEMETRY.md). The certificate must cover the Mac's
+selected private IP and be trusted on the phone. Do not bypass Safari trust warnings.
+After building the candidate, start the simulated bench with your existing files:
+
+```sh
+npm run drone:bench -- --listen=YOUR_MAC_PRIVATE_IP --tls-cert=/absolute/path/cert.pem --tls-key=/absolute/path/key.pem
+```
+
+Use the private one-use pairing link printed locally; it expires after 15 minutes.
+Pairing creates an in-memory browser session lasting one hour. Keep the TLS private
+key readable only by its owner. No router port forwarding or Internet service is needed.
+The receiver still runs on the Mac over loopback UDP with no motor outputs. This is
+phone-to-Mac Wi-Fi delivery of simulated setpoints, not radio delivery to an aircraft.
+
+The importer accepts Graph's `agentic-drone-flight-path/v1` and `/v2` contracts, at most 500 kB,
+7,201 samples and 120 seconds. It does not execute Python or translate positions into
+throttle. The maximum planned translation is 3 m/s within ±8 m horizontal and 0–4 m
+altitude; these are educational bounds. Path sessions cannot mix with manual axes.
+See [the implementation plan](drone/prd-tad-adr-mvp-gtm-drone-flight-path.md) for acceptance.
+
+
+### Reuse the Graph Canvas
+
+In the Graph checkout, build its render-only entry:
+
+```sh
+node canvas/scripts/build_learning_canvas_embed.mjs
+```
+
+Start this gateway with `--graph-canvas-root=/absolute/path/to/agentic-graph/canvas/dist/learning-canvas`
+(or set GAME_XR_GRAPH_CANVAS_ROOT), alongside the existing phone TLS flags. Use a build
+from the matching reviewed Graph revision. This serves Graph's own scene and camera
+framing at the same origin as GameXR, avoiding a second renderer and mixed HTTP/HTTPS
+content. The Drone panel loads it on demand. A missing or incompatible artifact produces
+an explicit unavailable message; Run and receiver authority remain separate.
+
+New Graph UI exports include **Open source in Graph**. Clicking it opens the original
+kgDoc file route in a separate tab. Existing v1 files need re-export for that link.
+The file belongs to the workspace at that Graph address: opening it on another phone
+browser does not transfer local workspace storage or pin the historical source contents.
+Use **Export debrief** when the exact source snapshot is needed.
+
+Simpler transfer recommendations: **Send to GameXR** for one-click handoff within the
+same browser; a **paired share link or QR** when moving to iPhone; **copy/paste** as an
+offline fallback. These options are not implemented by this revision. File import is
+still supported and every transfer must lead to review and an explicit Run.

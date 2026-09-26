@@ -3,7 +3,7 @@
 Stationary IMU capture is documented in [WIFI-CALIBRATION.md](WIFI-CALIBRATION.md).
 It adds a read-only buffered Wi-Fi capture and local validation/export; calibration
 remains inactive. The operator has used capture and OTA on the installed 0.4.6.
-The joined E2E plan is [programmatic drone flight](prd-tad-adr-mvp-gtm-programmatic-drone-flight.md), `GAMEXR-FLIGHT-PATH-INTEGRATION-001@0.2.1`.
+The joined E2E plan is [programmatic drone flight](prd-tad-adr-mvp-gtm-programmatic-drone-flight.md), `GAMEXR-FLIGHT-PATH-INTEGRATION-001@0.2.2`.
 
 The ESP32 serves a dedicated Wi-Fi Drone cockpit at `/gamexr/`. Its main joystick, throttle,
 Start/Pause, BRAKE and Enable Motion own the authenticated Wi-Fi bench session.

@@ -1,18 +1,18 @@
 ---
 title: "Reference implementation: agentic-graph to GameXR programmatic drone flight"
 doc_type: "PRD-TAD-ADR-MVP-GTM"
-version: "0.2.1"
-revision: "0.2.1"
+version: "0.2.2"
+revision: "0.2.2"
 date: "2026-09-26"
 lang: "en-US"
 frontmatter_contract: "required"
 owner: "Flight Integration Architect"
 continuity_id: "GAMEXR-FLIGHT-PATH-INTEGRATION-001"
-prd_revision: "0.2.1"
-tad_revision: "0.2.1"
-adr_revision: "0.2.1"
-mvp_revision: "0.2.1"
-gtm_revision: "0.2.1"
+prd_revision: "0.2.2"
+tad_revision: "0.2.2"
+adr_revision: "0.2.2"
+mvp_revision: "0.2.2"
+gtm_revision: "0.2.2"
 local_rung: "dev-proven"
 delivered_rung: "undocumented"
 lane: "authoring"
@@ -30,7 +30,7 @@ agenticOsCanvas2dRenderer: "flowchart"
 
 One joined plan owns **cross-system integration and acceptance**, not the producer,
 browser or firmware implementations. All five roles consume
-`GAMEXR-FLIGHT-PATH-INTEGRATION-001@0.2.1`. The parent is
+`GAMEXR-FLIGHT-PATH-INTEGRATION-001@0.2.2`. The parent is
 [firmware planning](../../docs/drone/prd-tad-adr-mvp-gtm-usb-diagnostics-firmware.md)
 at `GAMEXR-USB-DIAGNOSTICS-FIRMWARE-001@0.3.3`.
 This replaces the 0.1.0 integration note; its immutable history remains in F1.
@@ -274,7 +274,7 @@ retire only an exact unused revision after rollback evidence. No parallel servic
 
 ## ADR
 
-Reference implementation decisions at the common 0.2.1 join; constraints precede ranking.
+Reference implementation decisions at the common 0.2.2 join; constraints precede ranking.
 
 | Decision | Alternatives / feasibility | Chosen reason, consequence and revisit trigger |
 |---|---|---|
@@ -300,7 +300,7 @@ unavailable, so rendering and physical-phone timing are not certified.
 Required local validation passed: evaluators, candidate build and 123 behavior tests.
 The [implementation receipt][implementation] carries source publication/provider status.
 
-MVP consumes PRD R1–R6, TAD C1–C5/I1–I5 and ADR A1/A2/A4 at 0.2.1.
+MVP consumes PRD R1–R6, TAD C1–C5/I1–I5 and ADR A1/A2/A4 at 0.2.2.
 R1–R5 have local evidence; R6 clean-phone/TTV acceptance is outstanding. Therefore
 the joined E2E product is `dev-proven`, not `runtime-ready`; physical capabilities
 remain `spec-complete` under their future VCCs, with no delivered evidence.
@@ -401,8 +401,8 @@ Do not clean up or replace active owner worktrees to make the ledger appear comp
 
 ## Coverage and findings
 
-Join: `GAMEXR-FLIGHT-PATH-INTEGRATION-001@0.2.1`; each source section below inherits
-exact revision 0.2.1. Coverage is a disposition, not proof of readiness.
+Join: `GAMEXR-FLIGHT-PATH-INTEGRATION-001@0.2.2`; each source section below inherits
+exact revision 0.2.2. Coverage is a disposition, not proof of readiness.
 
 | Domain | Decision | Source section / evidence or gap | Accountable function / next check |
 |---|---|---|---|
@@ -446,14 +446,25 @@ mechanism separate from document assertions; its scope and failures remain expli
 
 | PRD-TAD-ADR-MVP-GTM | CID | RAO | Updated Date |
 |---|---|---|---|
-| `GAMEXR-FLIGHT-PATH-INTEGRATION-001@0.2.1` | C: G1/B1/F1 and E1–E6 prove separate local paths · I: make E2E capability and remaining gates inspectable · D: Implement M1 source convergence and M2 bench preparation; preserve physical gates. | R: Flight Integration Architect · A: Integrate the exact receiver PR, refresh firmware, verify the combined bench · O: compatible source and retained receipts; no hardware effect · check: E7 plus bench-proof | 2026-09-26 |
+| `GAMEXR-FLIGHT-PATH-INTEGRATION-001@0.2.2` | C: G1/B1/F1 and E1–E6 prove separate local paths · I: make E2E capability and remaining gates inspectable · D: Implement M1 source convergence and M2 bench preparation; preserve physical gates. | R: Flight Integration Architect · A: Integrate the exact receiver PR, refresh firmware, verify the combined bench · O: compatible source and retained receipts; no hardware effect · check: E7 plus bench-proof | 2026-09-26 |
 
-Next bounded action: Release Owner completes firmware source publication from the
-refreshed lane; completion requires its exact PR and required green checks. Receiver
-closeout remains blocked by its older mission candidate binding; checkout and recovery
-bytes are retained. That administrative gap does not widen firmware or hardware authority.
-After that, Browser QA performs V6 on a named exact candidate. Calibration/physical
-axis work remains a separate next hardware prerequisite; no activation is implied.
+Source closeout increment: native immutable workflow collection binds the actual published
+receiver and firmware heads while preserving prior manifests. PR34 integration is retained
+at its exact reviewed merge; later PR37 changes are historical source evolution. Firmware
+uses the native unpublished successor and inherits protected main 74bd6c6 without
+changing the sealed device image. Exact source integration, recovery cleanup and END
+observations are recorded in the [closeout receipt][closeout]. This source ADLC ends
+independently of production or device acceptance.
+
+Development: 541 simulated samples, ACK landing, watchdog and physical-claim rejection
+remain proved by retained receipts. Source release: exact successor PR and required CI
+are prerequisites for cleanup. Production release: no GameXR production activation is
+enrolled; no deployment is asserted. Runtime: firmware installation, R6 named-phone
+walkthrough/TTV and physical V7–V12 remain unaccepted. No flash/reset/OTA is performed.
+
+Next owner handover: Browser QA performs V6 on the released exact candidate. Hardware
+Verification Owner then resolves physical axes/six-face checks and repeatable gyro bias;
+battery full-range calibration remains KIV. Physical flight stays inhibited.
 Original M0 budget: ~20 min active target, 4 file effects, <40 KiB added text,
 20k-token ceiling, no new runtime modules/services and $0 new provider spend. Actual
 agent tokens, wall-time attribution and electricity are unavailable; do not invent
@@ -469,13 +480,15 @@ condition-based rechecks. See receipts for observed bytes/check duration.
 [release]: /Users/huijoohwee/Documents/GitHub/agentic-os/docs/RELEASE-WORKFLOW.md
 [deploy]: /Users/huijoohwee/Documents/GitHub/agentic-os/guides/DEPLOY-WORKFLOW.md
 [graph-plan]: /Users/huijoohwee/Documents/GitHub/.worktrees/agentic-graph/device-0232231d4a19--drone-learning/docs/documents/prd-tad-adr-mvp-gtm-drone-flight-path.md
-[browser-plan]: /Users/huijoohwee/Documents/GitHub/.worktrees/GameXR/device-0232231d4a19--usb-telemetry-observer/docs/drone/prd-tad-adr-mvp-gtm-drone-flight-path.md
-[grounding]: /Users/huijoohwee/Documents/GitHub/GameXR/.artifacts/programmatic-flight-plan-2026-09-26/grounding.json
+[browser-plan]: /Users/huijoohwee/Documents/GitHub/GameXR/docs/drone/prd-tad-adr-mvp-gtm-drone-flight-path.md
+[grounding]: /Users/huijoohwee/Documents/GitHub/GameXR/.artifacts/adlc-closeout-2026-09-26/grounding.json
 [artifacts]: /Users/huijoohwee/Documents/GitHub/GameXR/.artifacts/flight-path-reconcile-2026-09-26
 [receipt]: /Users/huijoohwee/Documents/GitHub/GameXR/.artifacts/flight-path-reconcile-2026-09-26/receipt.json
 [browser-evidence]: /Users/huijoohwee/Documents/GitHub/.audit-artifacts/drone-implementation-20260925/popup-fix-in-app-evidence.json
-[doc-check]: /Users/huijoohwee/Documents/GitHub/GameXR/.artifacts/programmatic-flight-implementation-2026-09-26/doc-validation.json
+[doc-check]: /Users/huijoohwee/Documents/GitHub/GameXR/.artifacts/adlc-closeout-2026-09-26/doc-validation.json
 [successor-evidence]: /Users/huijoohwee/Documents/GitHub/GameXR/.artifacts/programmatic-flight-plan-2026-09-26/owner-handoff.json
 [bench-proof]: /Users/huijoohwee/Documents/GitHub/GameXR/.artifacts/programmatic-flight-implementation-2026-09-26/bench-verification.json
 [browser-bench]: /Users/huijoohwee/Documents/GitHub/GameXR/.artifacts/programmatic-flight-implementation-2026-09-26/browser-bench.json
 [implementation]: /Users/huijoohwee/Documents/GitHub/GameXR/.artifacts/programmatic-flight-implementation-2026-09-26/receipt.json
+
+[closeout]: /Users/huijoohwee/Documents/GitHub/GameXR/.artifacts/adlc-closeout-2026-09-26/REPORT.md

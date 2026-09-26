@@ -6,7 +6,7 @@ physical loading and flight control are separate effects.
 
 ## Current priorities, 2026-09-26
 
-Active: E2E source convergence, GAMEXR-FLIGHT-PATH-INTEGRATION-001@0.2.1;
+Active: E2E source convergence, GAMEXR-FLIGHT-PATH-INTEGRATION-001@0.2.2;
 PRD/TAD/ADR/MVP/GTM: [joined plan](../../firmware/esp32-usb-diagnostics/prd-tad-adr-mvp-gtm-programmatic-drone-flight.md).
 0.4.8 is a build-only candidate. Physical paths and motor actuation remain unavailable.
 USB bootstrap verified; operator confirms OTA 0.4.7 and manual recovery to 0.4.6.

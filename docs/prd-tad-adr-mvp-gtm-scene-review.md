@@ -26,7 +26,7 @@ guidelines_ref: "huijoohwee.github.io/guidelines/prd-tad-adr-mvp-gtm-guidelines.
 
 All five roles join **GAMEXR-SCENE-REVIEW-001@0.1.0**, the GameXR implementation companion of
 Graph's **SPATIAL-GAMEXR-001@0.3.0**. This companion refines its GX1–GX6/T1–T4/A1–A4 criteria
-without changing those owners. `/change #spatial-review @codex-01a0dba4` names this source lane.
+without changing those owners. `/change #spatial-review-integrate @codex-01a0dba4` names this source lane.
 Context: the existing browser could immediately persist an agent manifest patch. Intent: make a
 saved transform change reviewable and recoverable. Directive: use Graph's pure review policy and
 GameXR's existing queue, database, validator and export owner. The maintainer implements and
@@ -106,8 +106,8 @@ constraints. No invented provider score or savings estimate substitutes for thos
 
 ## MVP — reference implementation
 
-R1 is Graph-owned package integration; R2/R3 implement the GameXR consumer here. Scope is 17
-admitted paths, three new runtime modules, a test module and browser harness, and at most 80 KiB
+R1 is Graph-owned package integration; R2/R3 implement the GameXR consumer here. Scope is 20
+changed paths (21 reservations including the renamed predecessor), three new runtime modules, a test module and browser harness, and at most 80 KiB
 net runtime/test/document growth (generated vendor bytes reported separately). Existing large controllers remain
 below 600 lines. One writer/lane per owner, no delegated agents. Estimates: R2 three 90-minute slices,
 R3 two 60-minute slices; estimates are not observed labor. The shared package must be regenerated
@@ -165,3 +165,9 @@ return intent in the existing private pilot record. Automated tests cannot satis
 Open boundary: native hardware/simulator acceptance, real host invocation beyond registration,
 independent experience ratings and real human outcomes remain separately unverified. The current
 artifact does not advance delivered readiness or authorize Production from source integration alone.
+
+The integration successor adds only three existing provenance/planning paths: five explicit
+role revisions on the drone flight-path plan, refreshed source fingerprints, and its validation
+record. The original snapshot and validation remain reachable by exact Git revision and SHA.
+The unchanged provenance verifier checks the new snapshot against the already published runtime
+candidate; no spatial runtime bytes or preserved native archives change in this repair.

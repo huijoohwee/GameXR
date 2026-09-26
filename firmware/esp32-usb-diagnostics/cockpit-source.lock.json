@@ -1,0 +1,9 @@
+{
+  "schema": "gamexr/cockpit-source-lock/v1",
+  "sourceRevision": "9a051ac63960886a52411016aab992380bbedcd6",
+  "artifactDigest": "579290ee35e9314c9abe79be3dd63cc854642746a17fc780dcb0aeaf174c98f0",
+  "pathSchemas": ["agentic-drone-flight-path/v1", "agentic-drone-flight-path/v2"],
+  "pathExecution": "host-simulated-receiver-only",
+  "embeddedPathExecution": false,
+  "physicalAircraft": false
+}

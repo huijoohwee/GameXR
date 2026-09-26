@@ -1,0 +1,11 @@
+{
+  "sdk": "espressif/esp-idf",
+  "version": "6.1",
+  "commit": "fff9895c82d744c7237be8847347bdd1b07c6643",
+  "license": "Apache-2.0; see ESP-IDF component notices",
+  "external_components": [],
+  "target": "esp32",
+  "application_license": "MIT (repository LICENSE)",
+  "hardware_profile": "xw-z1-reference-esp32-mpu6500-v1",
+  "vendor_code_included": false
+}

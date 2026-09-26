@@ -1,13 +1,13 @@
 # USB diagnostics firmware implementation
 
-Continuity: GAMEXR-USB-DIAGNOSTICS-FIRMWARE-001@0.3.1.
+Continuity: GAMEXR-USB-DIAGNOSTICS-FIRMWARE-001@0.3.3.
 Parent: DRONE-RC-001@0.2.0. Scope: new native firmware project, build and host checks;
 physical loading and flight control are separate effects.
 
 ## Current priorities, 2026-09-26
 
-Active: browser/firmware pin reconciliation, GAMEXR-FLIGHT-PATH-INTEGRATION-001@0.1.0;
-PRD/TAD/ADR/MVP/GTM: firmware/esp32-usb-diagnostics/FLIGHT-PATH-INTEGRATION.md.
+Active: E2E source convergence, GAMEXR-FLIGHT-PATH-INTEGRATION-001@0.2.1;
+PRD/TAD/ADR/MVP/GTM: [joined plan](../../firmware/esp32-usb-diagnostics/prd-tad-adr-mvp-gtm-programmatic-drone-flight.md).
 0.4.8 is a build-only candidate. Physical paths and motor actuation remain unavailable.
 USB bootstrap verified; operator confirms OTA 0.4.7 and manual recovery to 0.4.6.
 OTA physical validation: GAMEXR-WIFI-OTA-001@0.1.5, WIFI-OTA.md; automatic rollback untested.

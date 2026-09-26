@@ -115,3 +115,21 @@ for (const dependency of [
     for (const requiredText of dependency.requiredText) assert.match(archiveText, new RegExp(requiredText.replaceAll('.', '\\.')))
   })
 }
+
+test('narrow spatial policy archive binds the exact Graph source without changing the flight/world package', () => {
+  const bytes = readFileSync(new URL('../vendor/agentic-graph-spatial-review-0.1.0.tgz', import.meta.url))
+  assert.equal(`sha512-${createHash('sha512').update(bytes).digest('base64')}`, packageLock.packages?.['node_modules/@agentic-graph/spatial-review']?.integrity)
+  assert.equal(createHash('sha256').update(bytes).digest('hex'), '167c71cc54a60848cc649db6f7f5d59eb902adbb63cbbfc98b880a1d61a20c99')
+  const members = unpackTar(gunzipSync(bytes))
+  assert.deepEqual(members.map(row => row.name).sort(), ['package/index.d.ts', 'package/index.js', 'package/package.json'])
+  const manifest = JSON.parse(members.find(row => row.name === 'package/package.json')!.payload.toString('utf8'))
+  assert.equal(manifest.name, '@agentic-graph/spatial-review')
+  assert.equal(manifest.version, '0.1.0')
+  assert.deepEqual(manifest.source, {
+    repository: 'github.com/huijoohwee/agentic-graph', revision: '14f993caba1a3ee1e3edb8b435d240c34c34339c',
+    path: 'grph-shared/src/spatial-review/index.ts', sha256: '9790bdedde321b3f2bb7cb46fd8bcdebf5b22e3516491d7debc9ef4fc690cafc',
+  })
+  assert.deepEqual(manifest.dependencies ?? {}, {})
+  assert.deepEqual(manifest.scripts ?? {}, {})
+  assertCanonicalArchiveText(gunzipSync(bytes).toString('latin1'), 'spatial policy archive identity')
+})

@@ -1,4 +1,5 @@
-import { applyManifestPatch } from '../config/manifest.ts'
+import type { SpatialReview } from '../runtime/SpatialReview.ts'
+import type { SpatialSourceBinding } from '@agentic-graph/spatial-review'
 import type { RuntimeTelemetry, SceneManifest } from '../config/types.ts'
 import { GAME_OS_MAX_FACTION_COUNT } from 'grph-shared/game-os/index'
 import {
@@ -29,6 +30,7 @@ export interface WebMcpTool {
 }
 
 export interface GameRuntimeControlSurface {
+  readonly spatialReview?: Pick<SpatialReview, 'inspect' | 'preview' | 'cancel' | 'replaceSession'>
   readonly manifest: SceneManifest
   readonly animationClips: string[]
   inspect: () => RuntimeTelemetry
@@ -61,6 +63,8 @@ interface ControlInput {
   timeScale?: number
   clipName?: string | null
   patch?: unknown
+  edit?: unknown
+  source?: SpatialSourceBinding
   strategyVisuals?: Partial<PersistentStrategyVisualConfig>
 }
 
@@ -113,7 +117,7 @@ function parseControlInput(value: unknown, persistentStrategyEnabled: boolean): 
   const input = record(value)
   if (!input || typeof input.operation !== 'string') throw new Error('operation is required.')
   const allowedKeys = new Set([
-    'operation', 'throttle', 'brake', 'pitch', 'roll', 'yaw', 'normalizedTime', 'timeScale', 'clipName', 'patch',
+    'operation', 'throttle', 'brake', 'pitch', 'roll', 'yaw', 'normalizedTime', 'timeScale', 'clipName', 'patch', 'edit', 'source',
     ...(persistentStrategyEnabled ? ['strategyVisuals'] : []),
   ])
   for (const key of Object.keys(input)) {
@@ -126,6 +130,8 @@ function parseControlInput(value: unknown, persistentStrategyEnabled: boolean): 
     'animation-clip': ['clipName'],
     'animation-time-scale': ['timeScale'],
     'apply-manifest-patch': ['patch'],
+    'preview-scene-edit': ['edit', 'source'],
+    'cancel-scene-preview': [],
     ...(persistentStrategyEnabled ? { 'strategy-visuals': ['strategyVisuals'] } : {}),
   }
   const admittedKeys = operationKeys[input.operation]
@@ -214,19 +220,19 @@ async function executeControl(
         runtime.scrubAnimation(finiteNumber(input.normalizedTime, 'normalizedTime', 0, 1))
         break
       case 'animation-clip':
-        await runtime.selectAnimationClip(input.clipName ?? null)
-        break
       case 'animation-time-scale':
-        await runtime.setAnimationTimeScale(finiteNumber(input.timeScale, 'timeScale', 0, 4))
-        break
+      case 'apply-manifest-patch':
+        throw new Error('Saved scene writes require local operator review. Use preview-scene-edit for position or scale; use Tune for other fields.')
+      case 'preview-scene-edit': {
+        if (!runtime.spatialReview || !input.source) throw new Error('A current saved-scene source binding is required.')
+        const proposal = await runtime.spatialReview.preview(input.edit, input.source, 'browser-agent')
+        return { ...runtimeEnvelope(runtime, 'ok'), review: { status: 'preview', proposal, approvalRequired: 'local-operator' } }
+      }
+      case 'cancel-scene-preview':
+        runtime.spatialReview?.cancel()
+        return { ...runtimeEnvelope(runtime, 'ok'), review: { status: 'cancelled' } }
       case 'strategy-visuals': {
         runtime.configurePersistentStrategyVisuals(input.strategyVisuals ?? {})
-        break
-      }
-      case 'apply-manifest-patch': {
-        const validation = applyManifestPatch(runtime.manifest, input.patch)
-        if (!validation.ok) throw new Error(validation.issues.join(' '))
-        await runtime.applyManifest(validation.value)
         break
       }
       default:
@@ -323,11 +329,16 @@ function controlInputSchema(persistentStrategyEnabled: boolean): Record<string, 
     exactOperationSchema('animation-scrub', {
       normalizedTime: { type: 'number', minimum: 0, maximum: 1 },
     }, ['normalizedTime']),
-    exactOperationSchema('animation-clip', { clipName: { type: ['string', 'null'] } }),
-    exactOperationSchema('animation-time-scale', {
-      timeScale: { type: 'number', minimum: 0, maximum: 4 },
-    }, ['timeScale']),
-    exactOperationSchema('apply-manifest-patch', { patch: { type: 'object' } }, ['patch']),
+    exactOperationSchema('preview-scene-edit', {
+      source: { type: 'object', additionalProperties: false, required: ['schema', 'sourceKind', 'sourceToken'], properties: {
+        schema: { const: 'gamexr-scene/v1' }, sourceKind: { const: 'gamexr-manifest' }, sourceToken: { type: 'string', pattern: '^gamexr-manifest:[a-f0-9]{64}$' },
+      } },
+      edit: { type: 'object', additionalProperties: false, minProperties: 1, properties: {
+        position: { type: 'array', minItems: 3, maxItems: 3, items: { type: 'number', minimum: -1000, maximum: 1000 } },
+        scale: { type: 'number', minimum: 0.01, maximum: 20 },
+      } },
+    }, ['source', 'edit']),
+    exactOperationSchema('cancel-scene-preview'),
   ]
   if (persistentStrategyEnabled) {
     branches.push(exactOperationSchema(
@@ -339,27 +350,38 @@ function controlInputSchema(persistentStrategyEnabled: boolean): Record<string, 
   return { type: 'object', oneOf: branches }
 }
 
+const registrations = new WeakMap<GameRuntimeControlSurface, symbol>()
+
 export function createWebMcpTools(
   runtime: GameRuntimeControlSurface,
   options: { persistentStrategyEnabled?: boolean } = {},
 ): WebMcpTool[] {
   const persistentStrategyEnabled = options.persistentStrategyEnabled === true
-  return [
+  const registration = Symbol('GameXR tool session')
+  registrations.set(runtime, registration)
+  runtime.spatialReview?.replaceSession()
+  const tools: WebMcpTool[] = [
     {
       name: GAME_XR_WEB_MCP_TOOLS.inspect,
       description: 'Inspect the active browser-local GameXR scene, controls, animation, performance, and cost state.',
       inputSchema: { type: 'object', additionalProperties: false, properties: {} },
       outputSchema,
       annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
-      execute: async () => ({ ...runtimeEnvelope(runtime, 'ok'), manifest: runtime.manifest }),
+      execute: async (input) => {
+        if (!record(input) || Object.keys(input as object).length) return runtimeEnvelope(runtime, 'blocked', 'Inspection accepts an empty object only.')
+        const review = await runtime.spatialReview?.inspect().catch(error => ({ status: 'unavailable', detail: error instanceof Error ? error.message : 'Saved scene unavailable.' }))
+        return { ...runtimeEnvelope(runtime, 'ok'), manifest: runtime.manifest, review: review ?? { status: 'unavailable' } }
+      },
     },
     {
       name: GAME_XR_WEB_MCP_TOOLS.control,
-      description: 'Apply a bounded local GameXR transport, input, animation, or validated manifest-patch operation.',
+      description: 'Control local transport and live inputs, or prepare a saved position/scale preview for local operator acceptance. This tool cannot accept or persist a scene edit.',
       inputSchema: controlInputSchema(persistentStrategyEnabled),
       outputSchema,
       annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: false },
       execute: (input) => executeControl(runtime, input, persistentStrategyEnabled),
     },
   ]
+  return tools.map(tool => ({ ...tool, execute: input => registrations.get(runtime) === registration
+    ? tool.execute(input) : Promise.resolve(runtimeEnvelope(runtime, 'blocked', 'This tool registration was replaced. Inspect the current registered session.')) }))
 }

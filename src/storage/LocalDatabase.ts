@@ -1,4 +1,5 @@
 import type { SceneManifest } from '../config/types.ts'
+import { enforceSpatialBudget, refuse, spatialValuesEqual } from '@agentic-graph/spatial-review'
 
 const DATABASE_NAME = 'gamexr-local-v1'
 const DATABASE_VERSION = 1
@@ -6,6 +7,16 @@ const SCENE_STORE = 'scenes'
 const ASSET_STORE = 'assets'
 const META_STORE = 'meta'
 const ACTIVE_SCENE_KEY = 'active-scene-id'
+const SCENE_REVISION_KEY = 'scene-write-revision'
+const reviewKey = (id: string) => `scene-review:${id}`
+
+export interface SceneSnapshot {
+  sceneId: string
+  scene: SceneManifest | null
+  activeSceneId: string | null
+  revision: string
+  review: unknown
+}
 
 export const MAX_LOCAL_ASSET_BYTES = 15 * 1024 * 1024
 
@@ -33,7 +44,7 @@ export type StoredAssetMetadata = Omit<StoredAsset, 'bytes'>
 
 interface MetadataEntry {
   key: string
-  value: string
+  value: unknown
 }
 
 function requestResult<T>(request: IDBRequest<T>): Promise<T> {
@@ -86,7 +97,21 @@ export class LocalDatabase {
     const complete = transactionComplete(transaction)
     const entry = await requestResult(transaction.objectStore(META_STORE).get(ACTIVE_SCENE_KEY)) as MetadataEntry | undefined
     await complete
-    return entry?.value ?? null
+    return typeof entry?.value === 'string' ? entry.value : null
+  }
+
+  async getSceneSnapshot(sceneId: string): Promise<SceneSnapshot> {
+    const database = await this.database()
+    const transaction = database.transaction([SCENE_STORE, META_STORE], 'readonly')
+    const complete = transactionComplete(transaction)
+    const meta = transaction.objectStore(META_STORE)
+    const [scene, active, revision, review] = await Promise.all([
+      requestResult(transaction.objectStore(SCENE_STORE).get(sceneId)), requestResult(meta.get(ACTIVE_SCENE_KEY)),
+      requestResult(meta.get(SCENE_REVISION_KEY)), requestResult(meta.get(reviewKey(sceneId))),
+    ])
+    await complete
+    return structuredClone({ sceneId, scene: scene ?? null, activeSceneId: active?.value ?? null,
+      revision: revision?.value ?? 'legacy', review: review?.value ?? null }) as SceneSnapshot
   }
 
   async getScene(id: string): Promise<SceneManifest | null> {
@@ -107,16 +132,45 @@ export class LocalDatabase {
     return scenes.map((scene) => structuredClone(scene)).sort((left, right) => left.name.localeCompare(right.name))
   }
 
-  async saveScene(scene: SceneManifest, makeActive = true): Promise<void> {
+  async saveScene(scene: SceneManifest, makeActive = true, expected?: SceneSnapshot, review?: unknown, check: () => void = () => {}): Promise<string> {
+    const candidate = structuredClone(scene), captured = expected && structuredClone(expected)
+    const history = review === undefined ? undefined : structuredClone(review)
+    enforceSpatialBudget({ scene: candidate, review: history ?? null })
     try {
       const database = await this.database()
-      const stores = makeActive ? [SCENE_STORE, META_STORE] : [SCENE_STORE]
-      const transaction = database.transaction(stores, 'readwrite')
-      transaction.objectStore(SCENE_STORE).put(structuredClone(scene))
-      if (makeActive) {
-        transaction.objectStore(META_STORE).put({ key: ACTIVE_SCENE_KEY, value: scene.id } satisfies MetadataEntry)
+      const transaction = database.transaction([SCENE_STORE, META_STORE], 'readwrite')
+      const complete = transactionComplete(transaction)
+      const scenes = transaction.objectStore(SCENE_STORE), meta = transaction.objectStore(META_STORE)
+      const revision = crypto.randomUUID()
+      try {
+        // Only IndexedDB requests are awaited inside this transaction; no digest or asset work can close it early.
+        const [stored, active, priorRevision, target] = await Promise.all([
+          requestResult(scenes.get(captured?.sceneId ?? candidate.id)), requestResult(meta.get(ACTIVE_SCENE_KEY)),
+          requestResult(meta.get(SCENE_REVISION_KEY)), requestResult(scenes.get(candidate.id)),
+        ])
+        check()
+        if (captured) {
+          if ((active?.value ?? null) !== captured.activeSceneId || (priorRevision?.value ?? 'legacy') !== captured.revision
+            || !spatialValuesEqual(stored ?? null, captured.scene)) refuse('stale-source', 'The saved scene or active profile changed. Reload before editing.')
+          if (candidate.id !== captured.sceneId && target && !spatialValuesEqual(target, candidate)) refuse('conflict', 'An existing target profile has different bytes. Load that profile before replacing it.')
+        } else if (stored || active?.value) {
+          if (history === undefined && active?.value === candidate.id && spatialValuesEqual(stored, candidate)) {
+            await complete
+            return priorRevision?.value ?? 'legacy'
+          }
+          refuse('stale-source', 'Replacing a saved scene requires an expected persisted identity.')
+        }
+        scenes.put(candidate)
+        if (makeActive) meta.put({ key: ACTIVE_SCENE_KEY, value: candidate.id } satisfies MetadataEntry)
+        if (history !== undefined) meta.put({ key: reviewKey(candidate.id), value: history } satisfies MetadataEntry)
+        meta.put({ key: SCENE_REVISION_KEY, value: revision } satisfies MetadataEntry)
+      } catch (error) {
+        transaction.abort()
+        await complete.catch(() => undefined)
+        throw error
       }
-      await transactionComplete(transaction)
+      await complete
+      return revision
     } catch (error) {
       throw describeStorageError(error)
     }
@@ -128,6 +182,8 @@ export class LocalDatabase {
     const complete = transactionComplete(transaction)
     transaction.objectStore(SCENE_STORE).delete(id)
     const metaStore = transaction.objectStore(META_STORE)
+    metaStore.delete(reviewKey(id))
+    metaStore.put({ key: SCENE_REVISION_KEY, value: crypto.randomUUID() } satisfies MetadataEntry)
     const active = await requestResult(metaStore.get(ACTIVE_SCENE_KEY)) as MetadataEntry | undefined
     if (active?.value === id) metaStore.delete(ACTIVE_SCENE_KEY)
     await complete

@@ -271,3 +271,19 @@ test('invalid manifest patch returns a typed block and preserves state', async (
   assert.equal(result.status, 'blocked')
   assert.deepEqual(runtime.manifest, before)
 })
+
+
+test('replacing the tool registry rejects retained old tools and saved scene bypasses', async () => {
+  const runtime = new RuntimeStub(), before = structuredClone(runtime.manifest)
+  const old = createWebMcpTools(runtime)
+  const current = createWebMcpTools(runtime)
+  assert.equal((await old[0]!.execute({}) as any).status, 'blocked')
+  for (const input of [
+    { operation: 'apply-manifest-patch', patch: { ship: { scale: 2 } } },
+    { operation: 'animation-clip', clipName: 'barrel-roll' },
+    { operation: 'animation-time-scale', timeScale: 2 },
+    { operation: 'accept-scene-edit', approved: true },
+    { operation: 'preview-scene-edit', edit: { scale: 2 }, approved: true },
+  ]) assert.equal((await current[1]!.execute(input) as any).status, 'blocked')
+  assert.deepEqual(runtime.manifest, before)
+})

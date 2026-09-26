@@ -5,6 +5,11 @@ version: 1.2.0
 date: 2026-09-26
 owner: GameXR bench maintainer
 continuity_id: DRONE-FLIGHT-PATH-001
+prd_revision: "1.2.0"
+tad_revision: "1.2.0"
+adr_revision: "1.2.0"
+mvp_revision: "1.2.0"
+gtm_revision: "1.2.0"
 status: implementation
 frontmatter_contract: required
 ---

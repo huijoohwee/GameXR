@@ -15,15 +15,17 @@ battery_status_t battery_classify(int raw, bool calibrated, int adc_mv, bool sat
 }
 
 int battery_mv_from_adc(int adc_mv) { return (adc_mv * 43 + 16) / 33; }
+double gyro_radians_per_second(int16_t raw) { return raw * (0.017453292519943295 / 65.5); }
 
 bool format_sample(char *out, size_t capacity, uint32_t sequence, int64_t uptime_ms,
                    imu_status_t status, const imu_sample_t *imu, const battery_sample_t *battery)
 {
     char accel[80] = "null", gyro[80] = "null", raw[20] = "null", adc[20] = "null", mv[20] = "null";
     if (status == IMU_OK) {
-        const double a = 9.80665 / 8192.0, g = 0.017453292519943295 / 65.5;
+        const double a = 9.80665 / 8192.0;
         snprintf(accel, sizeof(accel), "[%.6f,%.6f,%.6f]", imu->accel[0]*a, imu->accel[1]*a, imu->accel[2]*a);
-        snprintf(gyro, sizeof(gyro), "[%.6f,%.6f,%.6f]", imu->gyro[0]*g, imu->gyro[1]*g, imu->gyro[2]*g);
+        snprintf(gyro, sizeof(gyro), "[%.6f,%.6f,%.6f]", gyro_radians_per_second(imu->gyro[0]),
+            gyro_radians_per_second(imu->gyro[1]), gyro_radians_per_second(imu->gyro[2]));
     }
     const char *battery_status;
     switch (battery->status) {

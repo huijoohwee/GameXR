@@ -2,3 +2,5 @@
 /sdkconfig
 /sdkconfig.old
 /dependencies.lock
+/private
+/generated

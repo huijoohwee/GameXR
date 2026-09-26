@@ -13,3 +13,4 @@ bool format_sample(char *out, size_t capacity, uint32_t sequence, int64_t uptime
                    const battery_sample_t *battery);
 battery_status_t battery_classify(int raw, bool calibrated, int adc_mv, bool saturated);
 int battery_mv_from_adc(int adc_mv);
+double gyro_radians_per_second(int16_t raw);

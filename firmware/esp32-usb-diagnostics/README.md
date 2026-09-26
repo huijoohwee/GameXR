@@ -1,9 +1,12 @@
-# ESP32 USB diagnostics firmware
+# ESP32 USB and direct Wi-Fi diagnostics firmware
 
 This standalone ESP-IDF application is the first replacement-firmware milestone:
 motor gates low, MPU-6500 observations and battery ADC telemetry over UART0/USB at
-115200 baud. It has no input parser, receiver, networking, calibration persistence,
-PWM, arming, stabilization or flight control. It does not read or write NVS.
+115200 baud, with a device-hosted phone page since version 0.2.0 and bounded USB
+dry-run commands since 0.3.0. It has no physical receiver integration, calibration
+persistence, motor PWM, arming, validated stabilization or flight control.
+See [USB bench protocol](USB-BENCH.md). It does not read or write NVS. Wi-Fi configuration stays in RAM;
+PHY calibration uses RAM and is repeated at boot.
 
 New application code uses the repository MIT license. Dependencies are the official
 ESP-IDF components in `sdk.lock.json`; no vendor flight firmware or FlixPeriph code
@@ -20,7 +23,7 @@ hardware facts, not a claim of a legally audited clean-room process.
 | Sampling | IMU 100 Hz, telemetry 10 Hz, fresh data-ready status required |
 | Units/frame | m/s^2 and rad/s, native sensor frame; no mounting transform or bias calibration |
 | Battery | ADC1 channel0/GPIO36, 12-bit, 12 dB attenuation, 16-sample average, 43/33 divider |
-| Serial | UART0 via existing USB bridge; newline-delimited JSON, no commands accepted |
+| Serial | UART0 via existing USB bridge; JSON observations and GXR1 diagnostic commands; actual outputs remain zero |
 | Receiver | Unused; GPIO4/16 conflict remains unresolved |
 | SDK | ESP-IDF 6.1 at fff9895c82d744c7237be8847347bdd1b07c6643 |
 
@@ -88,6 +91,59 @@ levels before any actuator work. Do not run an erase-all, change eFuses, or trea
 host tests as physical evidence. Restore only the device's own recorded backup
 after matching identity and an explicit restore decision.
 
+## Direct phone connection (0.2.0)
+
+After exact-device installation, join `XW_Drone_WiFi` with password `12345678`.
+Stay connected when the phone reports no internet. This reuses historical network
+details but serves a new diagnostics application, not the vendor flight controller.
+
+- `http://192.168.4.1:8080/`: page and IMU telemetry; camera is unavailable on HTTP.
+- `https://192.168.4.1:8443/`: the same page with opt-in local phone camera, when
+  the private build includes TLS inputs and the phone trusts its certificate.
+- `GET /api/telemetry`: `gamexr.direct-wifi/v1` envelope around the USB sample,
+  a per-boot session nonce, sample age, and `actuation_available: false`.
+- No command endpoints are registered. Old `/web_rc` commands are unsupported.
+
+The browser polls at most every 300 ms, stops after five failures, and requires
+advancing sequence numbers. It clears readings at 1.5 seconds, stops camera tracks
+when hidden, and releases late camera grants. Camera frames remain on the phone.
+Only raw sensor values and gravity-derived tilt are shown: no synchronized camera
+pose, stabilization, full-range battery calibration, or flight-ready inference.
+Battery calibration remains KIV. Two Wi-Fi clients are allowed for bench use.
+
+The page is embedded without the desktop application's 3D/runtime dependencies.
+The loopback fixture is visibly labeled synthetic and never accesses USB:
+
+```sh
+npm run dev -- --config firmware/esp32-usb-diagnostics/tests/preview.config.mjs
+```
+
+### Private TLS build inputs
+
+An artifact source snapshot may contain ignored `private/server.pem` (PEM leaf
+certificate), `private/server-key.pem` (PEM private key), and `private/ca.cer`
+(DER public issuing root). The leaf must cover IP `192.168.4.1` with serverAuth.
+Absent inputs produce an HTTP-only image. Incomplete inputs fail the build.
+Private keys and images embedding them stay in `GameXR/.artifacts`, never Git.
+Source and configuration hashes plus certificate validity belong in the build receipt.
+
+Use a short-lived local root and verify the public root fingerprint through the
+Mac setup record before installing/trusting it on the phone. Trust is a user
+action; do not bypass a browser certificate warning. The root can authenticate
+certificates it signs, so remove it after this bench setup. No cloud CA, paid
+service, browser exception, or native phone application is needed. When certificates
+expire, provision and verify fresh inputs before rebuilding. Candidate 0.4.6 adds
+the guarded updater described in [WIFI-OTA.md](WIFI-OTA.md); installed 0.4.4 cannot use it.
+
+### Meaning of a fresh application
+
+The independent diagnostics source contains no vendor flight implementation. This
+does not mean an erase-all has occurred. Historical full-flash backups are retained;
+NVS, filesystem data, and inactive flash regions are preserved and unused by this
+application. Keep that distinction in device receipts. An app-only update binds
+offset `0x10000`, verifies partition compatibility, preserves a fresh full backup,
+and checks that all bytes outside the erased application sectors are unchanged.
+
 ## Primary technical references
 
 - [TDK MPU-6500 register map, RM-MPU-6500A-00 rev 2.1](https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-6500-Register-Map2.pdf): identity, configuration and burst register addresses.
@@ -97,3 +153,16 @@ after matching identity and an explicit restore decision.
 
 Hardware facts are recorded in the private reference BOM/schematic and original
 USB evidence. Their document identity does not establish this unit's PCB continuity.
+
+## Direct cockpit 0.4
+
+See [WIFI-COCKPIT.md](WIFI-COCKPIT.md) for the complete direct-Wi-Fi cockpit,
+Motion default, historical input-curve provenance, build packaging and phone steps.
+The legacy read-only page is now `/diagnostics`; `/` redirects to the HTTPS cockpit.
+The authenticated Wi-Fi bench computes virtual outputs with physical gates held low.
+
+## Authenticated OTA candidate 0.4.6
+
+See [WIFI-OTA.md](WIFI-OTA.md) for Safari upload, image verification, recovery,
+and the required one-time rollback-bootloader USB bootstrap. Candidate only;
+physical installation and recovery acceptance remain pending.

@@ -1,4 +1,5 @@
 import http from 'node:http'
+import https from 'node:https'
 import dgram from 'node:dgram'
 import { fork } from 'node:child_process'
 import { randomBytes, randomUUID } from 'node:crypto'
@@ -6,18 +7,26 @@ import { readFile, realpath, stat } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { WebSocketServer, WebSocket } from 'ws'
-import { BENCH, exactKeys, object, parseCommand, type BridgeStatus,
+import { BENCH, exactKeys, object, parseCommand, parsePathCommand, type BridgeStatus,
   type ReceiverTelemetry } from '../../src/drone/protocol.ts'
 import { encodeRpyt } from './crtp.ts'
 import { seal, unseal } from './wire.ts'
 
-const mime: Record<string, string> = { '.html': 'text/html', '.js': 'text/javascript',
-  '.css': 'text/css', '.json': 'application/json', '.webmanifest': 'application/manifest+json',
-  '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon', '.txt': 'text/plain' }
+import { staticHandler } from './static.ts'
+import { phoneGateway, validateGatewayHost, type GatewayTls } from './phone-gateway.ts'
 
-export async function startDroneBridge(options: { root: string; port?: number }) {
+export async function startDroneBridge(options: { root: string; port?: number; tls?: GatewayTls; graphCanvasRoot?: string }) {
+  if (options.tls) validateGatewayHost(options.tls.host)
   const root = await realpath(options.root)
   if (!(await stat(path.join(root, 'index.html'))).isFile()) throw new Error('Build GameXR before starting the bridge')
+  const graphRoot = options.graphCanvasRoot ? await realpath(options.graphCanvasRoot) : null
+  if (graphRoot) {
+    const manifest = JSON.parse(await readFile(path.join(graphRoot, 'graph-canvas-manifest.json'), 'utf8'))
+    if (manifest.schema !== 'agentic-graph/learning-canvas-artifact/v1' || manifest.protocol !== 'agentic-graph/learning-canvas/v1'
+      || manifest.entry !== 'index.html' || manifest.base !== '/gamexr/graph-canvas/'
+      || typeof manifest.sourceRevision !== 'string' || !/^[a-f0-9]{40}$/u.test(manifest.sourceRevision)
+      || !(await stat(path.join(graphRoot, 'index.html'))).isFile()) throw new Error('Unsupported Graph Canvas artifact')
+  }
   const key = randomBytes(32), udp = dgram.createSocket('udp4')
   await new Promise<void>((resolve, reject) => {
     udp.once('error', reject)
@@ -114,7 +123,7 @@ export async function startDroneBridge(options: { root: string; port?: number })
           exactKeys(message, ['kind'])
           if (owner === client) release('Pilot disabled bench control')
         } else {
-          const command = parseCommand(message)
+          const command = message.kind === 'path' ? parsePathCommand(message) : parseCommand(message)
           if (owner !== client || command.session !== epoch) throw new Error('Pilot does not own this session')
           if (!fresh() || !telemetry?.enabled || telemetry.session !== epoch) throw new Error('Receiver is not ready')
           if (performance.now() - lastCommand >= BENCH.leaseMs) throw new Error('Pilot lease expired')
@@ -123,8 +132,8 @@ export async function startDroneBridge(options: { root: string; port?: number })
           if (challengeAt === undefined || performance.now() - challengeAt >= BENCH.leaseMs) throw new Error('Stale or replayed receiver challenge')
           challenges.delete(command.challenge)
           sequence = command.sequence; lastCommand = performance.now()
-          sendReceiver({ kind: 'controls', session: epoch, challenge: command.challenge,
-            sequence, frame: encodeRpyt(command.axes).toString('hex') })
+          sendReceiver({ kind: command.kind, session: epoch, challenge: command.challenge,
+            sequence, ...(command.kind === 'path' ? { pose: command.pose } : { frame: encodeRpyt(command.axes).toString('hex') }) })
           reason = 'Bench control enabled · simulated receiver · no motor outputs'
         }
         sendStatus(client)
@@ -137,32 +146,26 @@ export async function startDroneBridge(options: { root: string; port?: number })
     })
   })
 
-  const server = http.createServer(async (request, response) => {
-    response.setHeader('Cache-Control', 'no-store')
-    response.setHeader('X-Content-Type-Options', 'nosniff')
-    response.setHeader('Content-Security-Policy', "frame-ancestors 'none'")
-    if (request.headers.host !== new URL(origin).host) { response.writeHead(403).end(); return }
-    if (request.method !== 'GET' && request.method !== 'HEAD') { response.writeHead(405).end(); return }
-    try {
-      const pathname = decodeURIComponent(new URL(request.url!, origin).pathname)
-      if (pathname === '/') { response.writeHead(302, { Location: '/gamexr/' }).end(); return }
-      if (!pathname.startsWith('/gamexr/')) { response.writeHead(404).end(); return }
-      const relative = pathname.slice('/gamexr/'.length) || 'index.html'
-      const filename = await realpath(path.resolve(root, relative))
-      if (!filename.startsWith(root + path.sep) || !mime[path.extname(filename)]) { response.writeHead(403).end(); return }
-      const data = await readFile(filename)
-      response.setHeader('Content-Type', mime[path.extname(filename)]!)
-      response.writeHead(200).end(request.method === 'HEAD' ? undefined : data)
-    } catch { response.writeHead(404).end() }
-  })
+  const gameFiles = staticHandler(root, () => origin)
+  const graphFiles = graphRoot ? staticHandler(graphRoot, () => origin, '/gamexr/graph-canvas/', true) : null
+  const files: http.RequestListener = (request, response) => {
+    if (request.url?.split('?')[0]?.startsWith('/gamexr/graph-canvas/')) {
+      if (graphFiles) return graphFiles(request, response)
+      response.writeHead(404).end(); return
+    }
+    return gameFiles(request, response)
+  }
+  const gateway = options.tls ? phoneGateway(() => origin, files) : null
+  const server = options.tls ? https.createServer(options.tls, gateway!.handler) : http.createServer(files)
   server.on('upgrade', (request, socket, head) => {
     if (request.url !== '/gamexr/drone-socket' || request.headers.origin !== origin
-      || request.headers.host !== new URL(origin).host || sockets.clients.size >= 4) {
+      || request.headers.host !== new URL(origin).host || sockets.clients.size >= 4 || (gateway && !gateway.authorized(request))) {
       socket.end('HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n'); return
     }
     sockets.handleUpgrade(request, socket, head, client => sockets.emit('connection', client, request))
   })
   const timer = setInterval(() => {
+    if (gateway && !gateway.alive()) { release('Phone pairing expired'); for (const client of sockets.clients) client.close(1008, 'Pairing expired') }
     if (owner && (!fresh() || performance.now() - lastCommand >= BENCH.leaseMs)) release('Pilot lease expired')
     broadcast()
   }, BENCH.cadenceMs)
@@ -185,12 +188,12 @@ export async function startDroneBridge(options: { root: string; port?: number })
   try {
     await new Promise<void>((resolve, reject) => {
       server.once('error', reject)
-      server.listen(options.port ?? 4192, '127.0.0.1', () => {
+      server.listen(options.port ?? 4192, options.tls?.host ?? '127.0.0.1', () => {
         const address = server.address()
         if (!address || typeof address === 'string') { reject(new Error('Invalid bridge address')); return }
-        origin = `http://127.0.0.1:${address.port}`; resolve()
+        origin = `${options.tls ? 'https' : 'http'}://${options.tls?.host ?? '127.0.0.1'}:${address.port}`; resolve()
       })
     })
   } catch (error) { await close(); throw error }
-  return { origin, close, receiverPid: child.pid, receiverPort }
+  return { origin, close, receiverPid: child.pid, receiverPort, pairingUrl: gateway ? `${origin}/gamexr/#pair=${gateway.pairing}` : undefined }
 }

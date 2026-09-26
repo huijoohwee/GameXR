@@ -1,5 +1,9 @@
 import './drone.css'
-import { BENCH, neutralAxes, shapeAxis, type Axes, type BridgeStatus } from './protocol.ts'
+import { CameraView } from './CameraView.ts'
+import { BENCH, PATH_PROFILE, neutralAxes, shapeAxis, type Axes, type BridgeStatus } from './protocol.ts'
+import { FlightPathRun } from './FlightPath.ts'
+import { FlightPathView } from './FlightPathView.ts'
+import { diagnosticsSocket } from './PhoneGateway.ts'
 
 /** Pilot state is private to this panel; game controls and WebMCP have no command handle. */
 export class DronePanel {
@@ -14,6 +18,10 @@ export class DronePanel {
   private lastChallenge = ''
   private timer: number
   private records: object[] = []
+  private camera: CameraView
+  private path: FlightPathView
+  private pathRun: FlightPathRun | null = null
+  private connecting = false
 
   constructor() {
     this.dialog.className = 'drone-panel'
@@ -23,6 +31,8 @@ export class DronePanel {
       <button id="drone-close" type="button" aria-label="Close drone bench">Close</button></header>
       <p class="drone-source">Simulated receiver · No motor outputs</p>
       <p class="drone-intro">Test four independent controls and command-loss handling. Physical aircraft support awaits a reviewed board and firmware profile.</p>
+      <div id="drone-camera"></div>
+      <section id="drone-path" aria-label="Graph flight path"></section>
       <p id="drone-status" role="status">Disconnected</p>
       <div class="drone-actions">
         <button id="drone-connect" type="button">Connect receiver</button>
@@ -46,6 +56,16 @@ export class DronePanel {
       <button id="drone-export" type="button">Export session log</button>
       <p class="drone-intro">Last 1,000 events, kept in memory until this panel closes.</p>`
     document.body.append(this.dialog)
+    this.camera = new CameraView(this.element('camera'))
+    this.path = new FlightPathView(this.element('path'))
+    this.path.onRun = () => {
+      if (!this.path.poses || this.intent || !this.state?.connected || this.state.telemetry?.enabled
+        || this.state.telemetry?.pathProfile !== PATH_PROFILE) return
+      this.resetAxes(); this.sequence = 0; this.lastChallenge = ''; this.intent = true
+      this.pathRun = new FlightPathRun(this.path.poses)
+      this.path.message('Waiting for receiver acknowledgment…')
+      this.send({ kind: 'enable' }); this.render()
+    }
     const listen = (target: EventTarget, event: string, handler: EventListener) =>
       target.addEventListener(event, handler, { signal: this.listeners.signal })
     listen(this.element('connect'), 'click', () => this.connect())
@@ -98,17 +118,23 @@ export class DronePanel {
   }
   private inhibit(reason: string): void {
     if (this.intent || this.state?.owned) this.send({ kind: 'disable' })
-    this.intent = false; this.resetAxes(); this.lastChallenge = ''
+    if (this.pathRun) this.path.message(reason)
+    this.pathRun = null; this.intent = false; this.resetAxes(); this.lastChallenge = ''
     this.note('inhibited', reason)
     this.render(reason)
   }
-  private connect(): void {
-    if (this.socket && this.socket.readyState <= WebSocket.OPEN) return
-    if (location.hostname !== '127.0.0.1' || location.protocol !== 'http:') {
-      this.render('Open the local address printed by npm run drone:bench to connect.'); return
-    }
+  private async connect(): Promise<void> {
+    if (this.connecting || (this.socket && this.socket.readyState <= WebSocket.OPEN)) return
     this.inhibit('Connecting to simulated receiver')
-    const socket = new WebSocket(`ws://${location.host}/gamexr/drone-socket`)
+    this.connecting = true
+    let endpoint: URL
+    try {
+      // Both local gateways use the same admitted origin and one-use pairing owner.
+      endpoint = new URL(await diagnosticsSocket()); endpoint.pathname = '/gamexr/drone-socket'
+    } catch (error) { this.render(error instanceof Error ? error.message : 'Connection failed'); return }
+    finally { this.connecting = false }
+    if (!this.open) return
+    const socket = new WebSocket(endpoint)
     this.socket = socket
     this.render('Connecting to simulated receiver')
     socket.onmessage = event => {
@@ -138,10 +164,23 @@ export class DronePanel {
     this.element('age').textContent = Number.isFinite(age) ? `${Math.round(age)} ms${age >= BENCH.telemetryMaxAgeMs ? ' · stale' : ''}` : 'Unavailable'
     if (this.intent && age >= BENCH.telemetryMaxAgeMs) { this.inhibit('Telemetry stale'); return }
     if (!this.intent || !this.state?.enabled || !this.state.session || !this.state.telemetry || document.hidden) return
+    if (this.pathRun) {
+      if (this.state.telemetry.pathProfile !== PATH_PROFILE) { this.inhibit('Receiver does not support simulated paths'); return }
+      if (this.state.telemetry.pathPose) this.path.accepted(this.state.telemetry.pathPose)
+      if (this.pathRun.complete(this.state.telemetry.pathPose)) { this.inhibit('Flight path complete · receiver acknowledged landing'); return }
+    }
     const challenge = this.state.telemetry.challenge
     if (challenge === this.lastChallenge) return
     this.lastChallenge = challenge
-    this.send({ kind: 'controls', profile: BENCH.profile, session: this.state.session,
+    if (this.pathRun) {
+      try {
+        const pose = this.pathRun.next(performance.now())
+        if (pose) {
+          this.path.message('Running flight path · simulated receiver')
+          this.send({ kind: 'path', profile: PATH_PROFILE, session: this.state.session, challenge, sequence: ++this.sequence, pose })
+        }
+      } catch (error) { this.inhibit(error instanceof Error ? error.message : 'Path failed') }
+    } else this.send({ kind: 'controls', profile: BENCH.profile, session: this.state.session,
       challenge, sequence: ++this.sequence, axes: { ...this.axes } })
   }
   private render(message?: string): void {
@@ -150,7 +189,8 @@ export class DronePanel {
     ;(this.element('connect') as HTMLButtonElement).disabled = !!this.socket && this.socket.readyState <= WebSocket.OPEN
     ;(this.element('enable') as HTMLButtonElement).disabled = !connected || this.intent || this.state?.telemetry?.enabled === true
     ;(this.element('disable') as HTMLButtonElement).disabled = !this.intent
-    ;(this.element('axes') as HTMLFieldSetElement).disabled = !active
+    ;(this.element('axes') as HTMLFieldSetElement).disabled = !active || !!this.pathRun
+    this.path.availability(!!connected && !this.intent && !this.state?.telemetry?.enabled && this.state?.telemetry?.pathProfile === PATH_PROFILE, this.intent)
     this.element('status').textContent = message ?? (active ? 'Bench control enabled · simulated receiver' : this.state?.reason ?? 'Disconnected')
     this.dialog.dataset.control = active ? 'enabled' : 'inhibited'
     const telemetry = this.state?.telemetry
@@ -158,6 +198,8 @@ export class DronePanel {
     this.element('sequence').textContent = telemetry ? String(telemetry.sequence) : '—'
     this.element('setpoint').textContent = telemetry
       ? Object.entries(telemetry.setpoint).map(([name, value]) => `${name} ${value.toFixed(2)}`).join(' · ') : 'Unavailable'
+    this.camera.setTelemetry('SIMULATED RECEIVER · no motor outputs', 'Physical IMU unavailable in this control fixture',
+      active ? `Bench command · throttle ${this.axes.throttle.toFixed(2)} · roll ${this.axes.roll.toFixed(2)} · pitch ${this.axes.pitch.toFixed(2)} · yaw ${this.axes.yaw.toFixed(2)}` : 'Control inhibited')
   }
   private exportLog(): void {
     const blob = new Blob([JSON.stringify({ schema: 'gamexr-drone-bench-log/v1',
@@ -169,7 +211,7 @@ export class DronePanel {
   dispose(): void {
     if (!this.open) return
     this.inhibit('Drone panel closed')
-    this.listeners.abort(); window.clearInterval(this.timer)
+    this.path.dispose(); this.camera.dispose(); this.listeners.abort(); window.clearInterval(this.timer)
     this.socket?.close(); this.socket = null; this.state = null; this.records = []
     this.dialog.close(); this.dialog.remove()
   }

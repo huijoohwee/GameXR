@@ -8,12 +8,16 @@ export const BENCH = Object.freeze({
 })
 
 export type Axes = { roll: number; pitch: number; yaw: number; throttle: number }
+export const PATH_PROFILE = 'simulated-drone-path/v1'
+export type PathPose = [tick: number, x: number, z: number, heading: number, altitude: number]
+export type PathCommand = { kind: 'path'; profile: typeof PATH_PROFILE; session: string; challenge: string; sequence: number; pose: PathPose }
 export const neutralAxes = (): Axes => ({ roll: 0, pitch: 0, yaw: 0, throttle: 0 })
 export type ReceiverTelemetry = {
   source: 'simulated'; device: string; firmware: string; profile: string
   challenge: string; sample: number; session: string | null; enabled: boolean; sequence: number
   commandAgeMs: number | null; setpoint: Axes; motorOutputs: false
   batteryVolts: null; attitudeDegrees: null; reason: string
+  pathProfile?: typeof PATH_PROFILE; pathPose?: PathPose | null
 }
 export type PilotCommand = {
   kind: 'controls'; profile: string; session: string; challenge: string; sequence: number; axes: Axes
@@ -59,6 +63,21 @@ export function parseCommand(value: unknown): PilotCommand {
   if (!Number.isSafeInteger(message.sequence) || (message.sequence as number) < 1) throw new Error('Invalid sequence')
   return { kind: 'controls', profile: BENCH.profile, session: token(message.session),
     challenge: token(message.challenge), sequence: message.sequence as number, axes: parseAxes(message.axes) }
+}
+
+export function parsePathPose(value: unknown): PathPose {
+  if (!Array.isArray(value) || value.length !== 5 || !value.every(n => typeof n === 'number' && Number.isFinite(n))
+    || !Number.isInteger(value[0]) || value[0] < 0 || value[0] > 7200 || Math.abs(value[1]) > 8 || Math.abs(value[2]) > 8
+    || value[3] < 0 || value[3] >= 360 || value[4] < 0 || value[4] > 4) throw new Error('Invalid path pose')
+  return [...value] as PathPose
+}
+export function parsePathCommand(value: unknown): PathCommand {
+  const message = object(value)
+  exactKeys(message, ['kind', 'profile', 'session', 'challenge', 'sequence', 'pose'])
+  if (message.kind !== 'path' || message.profile !== PATH_PROFILE || !Number.isSafeInteger(message.sequence)
+    || (message.sequence as number) < 1) throw new Error('Wrong path command/profile')
+  return { kind: 'path', profile: PATH_PROFILE, session: token(message.session), challenge: token(message.challenge),
+    sequence: message.sequence as number, pose: parsePathPose(message.pose) }
 }
 
 /** Independent axes: no game throttle accumulation, yaw coupling or Brake mapping. */

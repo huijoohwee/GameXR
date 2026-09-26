@@ -31,7 +31,7 @@ The requested `/GameXR` entry and its child paths redirect to the existing lower
 - `/gamexr/`, `manifest.webmanifest`, `sw.js`, `precache-manifest.json`, readiness JSON, scene and Apple spatial-input schemas, and every hashed chunk return the expected MIME type and digest.
 - every release artifact byte count and SHA-256 hash recomputes to the aggregate release digest; the precache digest independently covers its complete entry set, and the installed cache independently validates every listed response before its ready marker is written.
 - HTML is `no-store`, `no-cache`, and `no-transform`; `sw.js`, manifests, readiness, and schemas are revalidated without transformation; hashed assets are immutable and `no-transform`; no response contains a Cloudflare analytics beacon or any other injected executable.
-- motion/XR and same-origin camera permissions are delegated at the root owner. GameXR does not call `getUserMedia`, persist camera frames, or claim physical-camera capture.
+- motion/XR and same-origin camera permissions are delegated at the root owner. GameXR camera panels call `getUserMedia` only after an explicit user action, with video-only constraints. They do not persist or upload frames. Physical-phone camera capture remains unverified until recorded device acceptance.
 - initial compressed JavaScript remains under 220 kB and each chunk below 500 kB.
 - first online load, a genuinely offline navigation/reload, iOS Safari touch/motion/audio, and visionOS Safari presentation pass.
 - `gamexr.inspect_runtime` and `gamexr.control_runtime` match the shipped schemas with zero egress/spend; inspection exposes the projected chase-camera position, quaternion, look target, and FOV.

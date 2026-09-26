@@ -1,123 +1,65 @@
 
 > gamexr@0.1.0 check
-> npm run typecheck && npm test && npm run build && npm run release:prepare && npm run release:check
+> node node_modules/agentic-os/bin/agentic-os-validation.mjs run
 
+broad: 3/3 owner checks; 53 changed paths; no full-suite parity inferred
+running evaluators: npm --prefix node_modules/agentic-os run evals
+evaluators: exit 0, 3.10s
+running candidate: npm run check:candidate
+candidate: exit 0, 1.68s
+running behavior: npm test
+behavior: exit 0, 2.12s
+validation receipt: /Users/huijoohwee/Documents/GitHub/GameXR/.git/worktrees/device-0232231d4a19--usb-telemetry-observer/agentic-os-tests/validation-last.json
 
-> gamexr@0.1.0 typecheck
-> tsc -b
-
-
-> gamexr@0.1.0 test
-> node --test tests/*.test.ts
-
-✔ an unavailable imported clip leaves the active animation unchanged (2.308167ms)
-✔ versioned profile validates every user-configurable shaping bound (1.015833ms)
-✔ screen-relative mapping covers every cardinal device rotation (0.797333ms)
-✔ first sample is neutral and elapsed-time smoothing is refresh-rate independent (1.726ms)
-✔ jitter suppression and clamping remain deterministic (0.132792ms)
-✔ non-finite sensor samples never establish calibration or change axes (0.122167ms)
-✔ browser default world matches the fixed cross-runtime visual contract (11.791708ms)
-✔ browser procedural ship matches the fixed cross-runtime parts contract (3.964417ms)
-✔ browser flight executes the shared deterministic cross-runtime control trace (2.321292ms)
-✔ browser engine audio projection matches fixed cross-runtime target samples (0.361375ms)
-✔ real WS → UDP → separate receiver accepts setpoints; silence inhibits within the host scheduling allowance (502.293959ms)
-✔ only one owner; socket loss requires explicit re-enable and never preserves throttle (307.1735ms)
-✔ replayed challenge with higher sequence revokes ownership (263.209166ms)
-✔ wrong profile and malformed owner input revoke control; receiver death removes telemetry (305.191292ms)
-✔ bridge restricts origin, Host, paths, symlinks, methods and payload size (137.949125ms)
-✔ drone axes reject invalid values and fields; steering axes remain independent (1.982458ms)
-✔ CRTP codec matches the legacy packed little-endian wire layout and checks checksum (0.641ms)
-✔ fixture envelope rejects tampering, wrong key, extra fields and oversized packets (1.715ms)
-✔ receiver independently expires control at 250 ms and requires a fresh enable (1.816916ms)
-✔ replay, reordered commands, wrong owner and malformed frame never renew the receiver lease (20 each) (3.5335ms)
-✔ receiver rejects delayed fresh-sequence packets and session takeover; new session starts neutral (0.318833ms)
-✔ default engine audio targets preserve the browser procedural contract (1.448875ms)
-✔ engine audio clamps throttle and mutes only when the manifest disables audio (2.246834ms)
-✔ fixed-step throttle accelerates deterministically along ship forward (4.666042ms)
-✔ idle command drives canonical throttle toward zero (0.757541ms)
-✔ world bounds wrap instead of allowing an unbounded simulation position (6.379291ms)
-✔ bank angle bounds accumulated roll (2.087125ms)
-✔ permission is requested synchronously and sensor listeners wait for the grant (4.672916ms)
-✔ a denied permission never starts orientation or screen listeners (7.723042ms)
-✔ portrait and both landscape rotations map pitch into screen-relative axes (0.230042ms)
-✔ first reliable sample calibrates, jitter is suppressed, and recenter resets neutral (12.785ms)
-✔ screen rotation starts a fresh calibration and the next sample becomes neutral (0.3885ms)
-✔ no-sample timeout and page lifecycle remove every active listener (529.989875ms)
-✔ device orientation runtime has no persistence or network egress path (0.521542ms)
-✔ bundled manifest validates and round-trips without changing its contract (1.618459ms)
-✔ portable Apple motion shaping is closed and range-validated (0.459291ms)
-✔ validator rejects unknown and out-of-budget fields (0.337542ms)
-✔ camera contract rejects chase heights that canonical AgenticGraph cannot resolve (0.986958ms)
-✔ manifest patch is deep, closed, and preserves unrelated values (0.354875ms)
-✔ asset contract does not accept a local id on the procedural owner (0.157833ms)
-✔ WebMCP exposes exactly one inspection and one bounded control tool (1.653584ms)
-✔ zero-mode shell omits persistent strategy UI before first paint (0.539791ms)
-✔ flight and strategy share one declared scene-surface registry (6.189167ms)
-✔ inspection exposes the projected chase-camera pose without sensor samples (0.384291ms)
-✔ control tool applies local input with explicit zero-spend evidence (0.505875ms)
-✔ control tool configures persistent strategy visuals without another scene owner (0.502875ms)
-✔ strategy color contract deeply validates faction records and advertises the same JSON Schema (0.680417ms)
-✔ strategy rendering derives a stable first-party fallback for arbitrary factions (0.210291ms)
-✔ zero-mode rollback removes the strategy visual capability and rejects its input (0.258459ms)
-✔ control JSON Schema exposes exact operation-specific branches matching runtime admission (0.441666ms)
-✔ invalid manifest patch returns a typed block and preserves state (0.518708ms)
-✔ production redirect fragment keeps the canonical GameXR route and retires content aliases (1.113792ms)
-✔ mobile keeps explicit motion and recenter controls visible (0.294167ms)
-✔ production header fragment delegates only same-origin motion sensors (0.295ms)
-✔ production header fragment preserves sealed bytes and a self-only application policy (0.518417ms)
-✔ persistent strategy world IDs are exact strings and are never coerced (0.9225ms)
-✔ shell base paths are injectable in Node and canvas lookup stays exact (0.922917ms)
-✔ pagehide cleanup ignores BFCache returns and queues one abrupt-return release (0.197625ms)
-✔ GameXR lease ownership expires below three minutes and cannot drift by tool input (1.841792ms)
-✔ store-unavailable close preserves projection, renewal, and an exact retry (7.723417ms)
-✔ surface displacement clears synchronously and catches queued cleanup failure (0.362666ms)
-✔ GameXR adapter reuses the shared local-world controller across an offline session boundary (7.115209ms)
-✔ GameXR consumer preserves shared continuity compare-and-set conflicts (0.115ms)
-✔ procedural ship and world animation targets stay source-owned and deterministic (1.807042ms)
-✔ paused animation projects zero world motion (1.274541ms)
-✔ release generation streams bounded artifacts and reuses identical manifest bytes (329.061333ms)
-✔ flight transport exposes a reversible start, pause, and resume path (1.565625ms)
-✔ ../vendor/agenticgraph-apple-spatial-input-0.1.0.tgz is canonical, snapshot-bound, and contains no retired identity (3.4445ms)
-✔ ../vendor/grph-shared-0.0.0.tgz is canonical, snapshot-bound, and contains no retired identity (14.97275ms)
-✔ environment selection projects distinct orbit and hangar scene features (4.51125ms)
-ℹ tests 70
-ℹ suites 0
-ℹ pass 70
-ℹ fail 0
-ℹ cancelled 0
-ℹ skipped 0
-ℹ todo 0
-ℹ duration_ms 1699.539708
-
-> gamexr@0.1.0 build
-> tsc -b && vite build --mode gamexr
-
-vite v8.2.1 building client environment for gamexr...
-[2Ktransforming...✓ 452 modules transformed.
-rendering chunks...
-computing gzip size...
-dist/gamexr/schemas/apple-spatial-input.schema.json    1.04 kB │ gzip:  0.39 kB
-dist/gamexr/index.html                                 1.44 kB │ gzip:  0.61 kB
-dist/gamexr/schemas/default-scene.json                 2.46 kB │ gzip:  1.05 kB
-dist/gamexr/schemas/gamexr.scene.schema.json           8.94 kB │ gzip:  1.78 kB
-dist/gamexr/assets/DronePanel-CbqjGQyz.css             1.65 kB │ gzip:  0.72 kB
-dist/gamexr/assets/index-DbUBMIck.css                 15.08 kB │ gzip:  4.08 kB
-dist/gamexr/assets/DronePanel-C0NTeijW.js              8.24 kB │ gzip:  3.27 kB
-dist/gamexr/assets/three-assets-GM0YnDur.js           31.80 kB │ gzip:  9.34 kB
-dist/gamexr/assets/GLTFLoader-DgvSWouF.js             44.29 kB │ gzip: 13.18 kB
-dist/gamexr/assets/three-animation-B5LeBG1o.js        45.98 kB │ gzip: 14.39 kB
-dist/gamexr/assets/three-core-1qkaC_lC.js            166.24 kB │ gzip: 44.47 kB
-dist/gamexr/assets/index-C82eOd8g.js                 206.58 kB │ gzip: 56.50 kB
-dist/gamexr/assets/three-renderer-9B9Ug37H.js        354.51 kB │ gzip: 88.57 kB
-
-✓ built in 115ms
-
-> gamexr@0.1.0 release:prepare
-> node scripts/prepare-release.mjs
-
-GameXR unsealed-dirty-source: ba618eb08b1969f9c30cd71ffccc4fc54da74d016505569e20e05ca1a2a5e02a
-
-> gamexr@0.1.0 release:check
-> node scripts/check-release.mjs
-
-release check passed: 20 files, 211870 initial gzip bytes
+{
+  "schema": "drone-host-provenance-check/v1",
+  "checks": [
+    {
+      "name": "exact-five-role-join",
+      "passed": true
+    },
+    {
+      "name": "role-locators",
+      "passed": true
+    },
+    {
+      "name": "prd-owns-host-criteria",
+      "passed": true
+    },
+    {
+      "name": "tad-owns-host-contracts",
+      "passed": true
+    },
+    {
+      "name": "source-fingerprints",
+      "passed": true
+    },
+    {
+      "name": "verifier-fingerprint",
+      "passed": true
+    },
+    {
+      "name": "original-specification-preserved",
+      "passed": true
+    },
+    {
+      "name": "active-plan-budget",
+      "passed": true
+    },
+    {
+      "name": "local-links",
+      "passed": true
+    },
+    {
+      "name": "existing-tests-native-shared-pins-and-game-api-preserved",
+      "passed": true
+    },
+    {
+      "name": "guideline-input-bound",
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "missing_links": [],
+  "scope": "11 selected structural/provenance checks; no exhaustive guideline alignment claim"
+}

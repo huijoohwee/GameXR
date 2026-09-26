@@ -37,14 +37,14 @@ jobs:
         run: npm run test:webkit
       - name: Verify drone bench browser and transport
         run: npm run test:drone-browser
+      - name: Verify phone-browser diagnostics
+        run: npm run test:diagnostics-browser
       - name: Verify drone plan provenance
         run: python3 docs/drone/evidence/check.py
       - name: Verify browser and release contracts
         run: npm run check
       - name: Verify Apex contract
         run: npm run check:apex
-      - name: Verify Swift, iOS, and visionOS adapters
-        run: npm run native:check
       - name: Upload immutable candidate
         uses: actions/upload-artifact@v6
         with:

@@ -13,6 +13,9 @@ import {
   RUNTIME_TELEMETRY_EVENT,
   type GameRuntime,
 } from '../runtime/GameRuntime.ts'
+import { parseSceneReviewExport, SCENE_REVIEW_EXPORT_SCHEMA } from '../runtime/SpatialReview.ts'
+import { spatialValuesEqual, enforceSpatialBudget } from '@agentic-graph/spatial-review'
+import type { SpatialReviewPanel } from './SpatialReviewPanel.ts'
 import type { LocalDatabase } from '../storage/LocalDatabase.ts'
 import { transportActionForPhase, transportLabelForPhase } from './runtimeStatus.ts'
 
@@ -51,13 +54,22 @@ export class AppController {
   private readonly motionRecenterButton = element<HTMLButtonElement>('motion-recenter')
   private activeJoystickPointer: number | null = null
   private motionActionRevision = 0
-
+  private reviewPanel: Promise<SpatialReviewPanel> | null = null
+  private importedReview: ReturnType<typeof parseSceneReviewExport> | null = null
   constructor(
     private readonly runtime: GameRuntime,
     private readonly database: LocalDatabase,
   ) {}
-
   async initialize(): Promise<void> {
+    const review = document.createElement('button')
+    review.id = 'open-scene-review'
+    review.textContent = 'Review scene'
+    review.className = 'secondary-button'
+    document.querySelector('.launch-actions')?.append(review)
+    review.addEventListener('click', () => {
+      this.reviewPanel ??= import('./SpatialReviewPanel.ts').then(({ SpatialReviewPanel }) => new SpatialReviewPanel(this.runtime, downloadText))
+      void this.reviewPanel.then(panel => panel.open()).catch(error => this.showError(error))
+    })
     this.bindTransport()
     this.bindConfiguration()
     this.bindAssets()
@@ -73,13 +85,13 @@ export class AppController {
     this.setValidation(true, 'Manifest valid. Every field is editable in this source-of-truth view.')
     document.getElementById('app')?.setAttribute('aria-busy', 'false')
   }
-
   dispose(): void {
+    void this.reviewPanel?.then(panel => panel.dispose())
+    document.getElementById('open-scene-review')?.remove()
     this.runtime.removeEventListener(RUNTIME_TELEMETRY_EVENT, this.handleTelemetry)
     this.runtime.removeEventListener(RUNTIME_STATUS_EVENT, this.handleStatus)
     this.runtime.removeEventListener(RUNTIME_DEVICE_MOTION_EVENT, this.handleDeviceMotionStatus)
   }
-
   private bindTransport(): void {
     element<HTMLButtonElement>('launch-flight').addEventListener('click', async () => {
       try {
@@ -136,7 +148,6 @@ export class AppController {
     brake.addEventListener('pointerup', releaseBrake)
     brake.addEventListener('pointercancel', releaseBrake)
   }
-
   private bindConfiguration(): void {
     element<HTMLFormElement>('quick-config').addEventListener('submit', (event) => {
       event.preventDefault()
@@ -148,13 +159,22 @@ export class AppController {
       downloadText(`${manifest.id}.gamexr.json`, serializeSceneManifest(manifest))
     })
     element<HTMLInputElement>('manifest-file').addEventListener('change', async (event) => {
-      const file = (event.currentTarget as HTMLInputElement).files?.[0]
+      const fileInput = event.currentTarget as HTMLInputElement
+      const file = fileInput.files?.[0]
       if (!file) return
-      const source = await file.text()
-      const validation = parseSceneManifest(source)
-      if (!validation.ok) return this.setValidation(false, validation.issues.join('\n'))
-      this.editor.value = serializeSceneManifest(validation.value)
-      this.setValidation(true, 'Imported manifest is valid. Select “Validate & apply” to activate it.')
+      try {
+        if (file.size > 128 * 1024) throw new Error('Scene imports are limited to 128 KiB.')
+        const source = await file.text()
+        const raw = JSON.parse(source)
+        enforceSpatialBudget(raw)
+        const bundle = raw?.schema === SCENE_REVIEW_EXPORT_SCHEMA ? parseSceneReviewExport(raw) : null
+        const validation = bundle ? { ok: true as const, value: bundle.manifest } : parseSceneManifest(source)
+        if (!validation.ok) throw new Error(validation.issues.join(' '))
+        this.importedReview = bundle
+        this.editor.value = serializeSceneManifest(validation.value)
+        this.setValidation(true, 'Import staged. Select “Validate & apply” to save; imported operator identity is unverified.')
+      } catch (error) { this.showError(error) }
+      finally { fileInput.value = '' }
     })
     element<HTMLButtonElement>('load-profile').addEventListener('click', () => void this.loadSelectedProfile())
     element<HTMLButtonElement>('delete-profile').addEventListener('click', () => void this.deleteSelectedProfile())
@@ -193,7 +213,6 @@ export class AppController {
       }
     })
   }
-
   private async toggleDeviceMotion(): Promise<void> {
     const actionRevision = ++this.motionActionRevision
     const current = this.runtime.inspectDeviceMotion()
@@ -213,7 +232,6 @@ export class AppController {
     }
     await this.applyDeviceMotionPreference(true, actionRevision)
   }
-
   private async applyDeviceMotionPreference(enabled: boolean, actionRevision: number): Promise<void> {
     if (this.runtime.manifest.motion.deviceMotionEnabled === enabled) {
       this.syncDeviceMotionControls(this.runtime.inspectDeviceMotion())
@@ -236,7 +254,6 @@ export class AppController {
       this.showError(error)
     }
   }
-
   private bindAssets(): void {
     element<HTMLInputElement>('asset-file').addEventListener('change', async (event) => {
       const file = (event.currentTarget as HTMLInputElement).files?.[0]
@@ -299,7 +316,6 @@ export class AppController {
       }
     })
   }
-
   private bindJoystick(): void {
     const update = (event: PointerEvent) => {
       if (this.activeJoystickPointer !== event.pointerId) return
@@ -334,7 +350,6 @@ export class AppController {
     this.joystick.addEventListener('pointerup', release)
     this.joystick.addEventListener('pointercancel', release)
   }
-
   private async applyQuickConfiguration(): Promise<void> {
     const manifest = this.runtime.manifest
     manifest.name = element<HTMLInputElement>('scene-name').value.trim()
@@ -363,12 +378,12 @@ export class AppController {
       this.showError(error)
     }
   }
-
   private async applyEditorManifest(): Promise<void> {
     const validation = parseSceneManifest(this.editor.value)
     if (!validation.ok) return this.setValidation(false, validation.issues.join('\n'))
     try {
-      await this.runtime.applyManifest(validation.value)
+      if (this.importedReview && !spatialValuesEqual(this.importedReview.manifest, validation.value)) throw new Error('The imported manifest was edited. Import the complete bundle again before applying its history.')
+      await this.runtime.applyManifest(validation.value, this.importedReview?.review)
       this.syncManifestControls(this.runtime.manifest)
       await this.refreshProfiles()
       this.refreshAnimationClips()
@@ -377,7 +392,6 @@ export class AppController {
       this.showError(error)
     }
   }
-
   private async refreshProfiles(selectedId = this.runtime.manifest.id): Promise<void> {
     const scenes = await this.database.listScenes()
     this.profileSelect.replaceChildren(...scenes.map((scene) => {
@@ -388,7 +402,6 @@ export class AppController {
       return option
     }))
   }
-
   private async loadSelectedProfile(): Promise<void> {
     const manifest = await this.database.getScene(this.profileSelect.value)
     if (!manifest) return this.setValidation(false, 'Selected local scene no longer exists.')
@@ -402,16 +415,14 @@ export class AppController {
       this.showError(error)
     }
   }
-
   private async deleteSelectedProfile(): Promise<void> {
     const id = this.profileSelect.value
     if (!id || !confirm(`Delete local scene “${id}”? Export it first if you need a recovery copy.`)) return
+    if (this.runtime.manifest.id === id) return this.setValidation(false, 'Load another profile before deleting the active saved scene.')
     await this.database.deleteScene(id)
-    if (this.runtime.manifest.id === id) await this.runtime.applyManifest(getDefaultSceneManifest())
     this.syncManifestControls(this.runtime.manifest)
     await this.refreshProfiles()
   }
-
   private async refreshAssets(selectedId?: string): Promise<void> {
     const assets = await this.runtime.listAssets()
     const options = assets.map((asset) => {
@@ -429,7 +440,6 @@ export class AppController {
     }
     this.assetSelect.replaceChildren(...options)
   }
-
   private async activateSelectedAsset(): Promise<void> {
     const id = this.assetSelect.value
     if (!id) return this.setValidation(false, 'Import and select a GLB first.')
@@ -447,7 +457,6 @@ export class AppController {
       this.showError(error)
     }
   }
-
   private async deleteSelectedAsset(): Promise<void> {
     const id = this.assetSelect.value
     if (!id || !confirm(`Delete local asset “${id}”? This cannot be undone unless you retain the source GLB.`)) return
@@ -459,7 +468,6 @@ export class AppController {
       this.showError(error)
     }
   }
-
   private refreshAnimationClips(): void {
     const current = this.runtime.manifest.animation.importedClip
     const none = document.createElement('option')
@@ -475,8 +483,8 @@ export class AppController {
     this.animationClip.replaceChildren(none, ...options)
     this.animationClip.value = current ?? ''
   }
-
   private syncManifestControls(manifest: SceneManifest): void {
+    this.importedReview = null
     this.editor.value = serializeSceneManifest(manifest)
     element<HTMLInputElement>('scene-name').value = manifest.name
     element<HTMLInputElement>('scene-id').value = manifest.id
@@ -501,7 +509,6 @@ export class AppController {
     this.joystick.tabIndex = touchEnabled ? 0 : -1
     this.syncDeviceMotionControls(this.runtime.inspectDeviceMotion())
   }
-
   private syncDeviceMotionControls(snapshot: DeviceOrientationSnapshot): void {
     const phase = snapshot.phase
     const active = phase === 'calibrating' || phase === 'running'
@@ -533,30 +540,25 @@ export class AppController {
         break
     }
   }
-
   private openConfiguration(): void {
     this.syncManifestControls(this.runtime.manifest)
     this.refreshAnimationClips()
     if (!this.dialog.open) this.dialog.showModal()
   }
-
   private setValidation(valid: boolean, message: string): void {
     this.validationOutput.dataset.valid = String(valid)
     this.validationOutput.textContent = message
   }
-
   private showError(error: unknown): void {
     const message = error instanceof Error ? error.message : 'The operation failed.'
     this.stageStatus.textContent = message
     this.setValidation(false, message)
   }
-
   private async startFlight(): Promise<void> {
     await this.runtime.start()
     this.launchCard.hidden = true
     void this.runtime.requestPersistentStorage().catch(() => false)
   }
-
   private updateRuntimeStatus(phase: RuntimeTelemetry['phase'], message: string): void {
     const badge = element<HTMLElement>('runtime-badge')
     badge.dataset.phase = phase
@@ -564,10 +566,11 @@ export class AppController {
     this.stageStatus.textContent = message
     document.documentElement.dataset.gamexrRuntime = phase
     if (phase === 'running') this.launchCard.hidden = true
+    const review = document.getElementById('open-scene-review')
+    if (review) document.querySelector(this.launchCard.hidden ? '.transport' : '.launch-actions')?.append(review)
     this.pauseButton.textContent = transportLabelForPhase(phase)
     this.pauseButton.disabled = transportActionForPhase(phase) === 'none'
   }
-
   private readonly handleTelemetry = (event: Event): void => {
     const telemetry = (event as CustomEvent<RuntimeTelemetry>).detail
     element<HTMLElement>('telemetry-speed').textContent = telemetry.speed.toFixed(1)
@@ -575,12 +578,10 @@ export class AppController {
     element<HTMLElement>('telemetry-altitude').textContent = telemetry.altitude.toFixed(1)
     element<HTMLElement>('telemetry-fps').textContent = String(Math.round(telemetry.framesPerSecond))
   }
-
   private readonly handleStatus = (event: Event): void => {
     const detail = (event as CustomEvent<{ phase: RuntimeTelemetry['phase']; message: string }>).detail
     this.updateRuntimeStatus(detail.phase, detail.message)
   }
-
   private readonly handleDeviceMotionStatus = (event: Event): void => {
     const snapshot = (event as CustomEvent<DeviceOrientationSnapshot>).detail
     this.syncDeviceMotionControls(snapshot)

@@ -1,52 +1,38 @@
 {
   "schema": "drone-host-validation/v1",
-  "observed_at": "2026-09-25T18:19:05.629952+00:00",
-  "continuity": "DRONE-RC-001@0.2.0 + DRONE-FLIGHT-PATH-001@1.2.0",
+  "observed_at": "2026-09-26T10:28:36.753267+00:00",
+  "continuity": "DRONE-RC-001@0.2.0 + DRONE-FLIGHT-PATH-001@1.2.0 + GAMEXR-SCENE-REVIEW-001@0.1.0",
   "surface": "authoring",
-  "result": "Native selected host checks and unchanged provenance verifier pass; protected integration and physical acceptance pending.",
-  "source_snapshot_sha256": "094af25df2d9ea52b86562c4e4cc9fae1175a1149b4f4694434d0620279b8659",
+  "result": "Unchanged provenance verifier passes all 11 selected checks on the scene-review successor. Runtime/browser evidence belongs to published runtime 495c05d5f3012d7fb57f4be9f4073ddf3811669b; successor protected integration pending.",
+  "source_snapshot_sha256": "9cce4fe684a363439ce9ddbc565b30c8a1482024c0b5e97cc1da81e2a7c3b43d",
   "previous_validation": {
-    "revision": "36a3a182dc1f21ea5fef16890cc038ede65dae32",
+    "revision": "495c05d5f3012d7fb57f4be9f4073ddf3811669b",
     "path": "docs/drone/evidence/validation.json",
-    "sha256": "f12e7f533aa784f14c08b274da3d9dbffc79ca01a690edd5428de2907f10b796"
+    "sha256": "1d4a5fbc8c504ab3b4fc892a9355d81764cc08b21834f97906a668b9a8773b9a"
   },
   "environment": {
-    "node": "v22.22.3",
+    "node": "v24.15.0",
     "platform": "macOS arm64"
   },
   "evidence_references": [
     {
-      "check": "npm run check",
-      "exit_code": 0,
-      "scope": "3 selected owner checks: evaluators, candidate and behavior",
-      "log": "source-check.log"
-    },
-    {
       "check": "python3 docs/drone/evidence/check.py",
       "exit_code": 0,
-      "scope": "11 selected structural/provenance checks; no exhaustive guideline alignment claim",
-      "log": "source-check.log"
+      "scope": "All 11 unchanged structural/provenance checks, exact successor working bytes.",
+      "report": "provenance_checks in this record"
     },
     {
-      "check": "npm run test:drone-browser with Graph Canvas and actual 541-sample Graph path",
+      "check": "npm run check; npm run test:spatial; env -u NO_COLOR npm run test:webkit",
       "exit_code": 0,
-      "scope": "Six unchanged mobile WebKit regression checks plus two new transfer checks. New disconnected-state test assertion corrected before passing focused rerun; no production change followed.",
-      "logs": [
-        "external:flight-transfer-webkit.log",
-        "external:flight-transfer-webkit-rerun.log"
-      ]
+      "source_revision": "495c05d5f3012d7fb57f4be9f4073ddf3811669b",
+      "scope": "Three owner checks; 15 spatial browser cases; 14 WebKit regression cases. Runtime bytes unchanged by successor. Exact runtime evidence is in the saved-scene implementation companion.",
+      "artifact": "../../prd-tad-adr-mvp-gtm-scene-review.md"
     },
     {
-      "check": "Predecessor provider integration",
-      "source_revision": "36a3a182dc1f21ea5fef16890cc038ede65dae32",
-      "run": "https://github.com/huijoohwee/GameXR/actions/runs/36169899965",
-      "result": "Build candidate and Integration Gate passed; not evidence for the successor."
-    },
-    {
-      "check": "Cross-application Graph UI Send \u2192 GameXR review \u2192 explicit Connect/Run",
-      "exit_code": 0,
-      "scope": "Actual Graph producer and GameXR consumer on local Chromium; 541 samples, receiver acknowledged landed at tick 540. Phone link 3446 characters. In-app browser popup did not acknowledge; its copy/paste fallback completed the same route.",
-      "log": "external:flight-transfer-cross-browser/transfer-evidence.json"
+      "check": "Mobile WebKit, drone bench browser, phone-browser diagnostics",
+      "source_revision": "495c05d5f3012d7fb57f4be9f4073ddf3811669b",
+      "run": "https://github.com/huijoohwee/GameXR/actions/runs/36235706438",
+      "result": "All three browser steps passed. This run failed the old source fingerprint and old preserved-file baseline checks; those are refreshed here without changing the verifier."
     }
   ],
   "provenance_checks": {
@@ -101,7 +87,6 @@
     "missing_links": [],
     "scope": "11 selected structural/provenance checks; no exhaustive guideline alignment claim"
   },
-  "source_check_log_sha256": "a3f797bcb2a5b78a87bc4ba67eb8d59b4c14091fd05d148508d9beda9c956d76",
   "physical_acceptance": "not run",
   "production_deployment": "not run"
 }

@@ -45,3 +45,24 @@ firmware project; the fixture does not change AgenticGraph's shared game ownersh
 ### Shared dependency update
 
 Admit a new protected AgenticGraph revision first, regenerate both npm-compatible tarballs twice from that exact revision, verify byte identity and digests, update both npm and SwiftPM pins together, regenerate `native/Package.resolved`, then run `npm run check`, `npm run check:apex`, and `npm run native:check`. Do not float either dependency or add compatibility aliases.
+
+## Saved scene review policy — reference implementation
+
+`GAMEXR-SCENE-REVIEW-001@0.1.0` consumes the independent internal package
+`@agentic-graph/spatial-review@0.1.0`. Its owner is Graph's
+`grph-shared/src/spatial-review/index.ts`; `grph-shared/scripts/pack-spatial-review.mjs`
+projects only the compiled module, declaration and manifest. This is the same pure policy that
+Graph imports, with no Canvas runtime, renderer, dependency, network request or downstream fork.
+
+Protected source revision: `14f993caba1a3ee1e3edb8b435d240c34c34339c` (Graph PR #1309). Source-byte SHA-256:
+`9790bdedde321b3f2bb7cb46fd8bcdebf5b22e3516491d7debc9ef4fc690cafc`.
+Archive SHA-256: `167c71cc54a60848cc649db6f7f5d59eb902adbb63cbbfc98b880a1d61a20c99`.
+Two clean source-bound builds compared byte-identically with Node 24.15.0 and npm 11.12.1; the package manifest records the
+source revision and digest, while `tests/vendor-archives.test.ts` verifies archive membership,
+identity, source binding and lock integrity.
+
+This narrow package does not refresh either older immutable flight/Apple archive above. Those
+archives include unrelated persisted-world schemas; replacing them would broaden this change and
+invalidate native pin parity. Their two existing SHA-256 values, SwiftPM resolution, schema and
+flight fixtures remain unchanged. The whole-flight update procedure above applies when those
+packages change; the new pure policy has its own protected source and zero-dependency projection.

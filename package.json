@@ -42,9 +42,11 @@
     "sync:canonical": "agentic-os canonical-sync",
     "queue:show": "agentic-os queue show",
     "drone:diagnostics": "node tools/drone-bridge/diagnostics-main.ts",
-    "test:diagnostics-browser": "playwright test --config=playwright.diagnostics.config.ts"
+    "test:diagnostics-browser": "playwright test --config=playwright.diagnostics.config.ts",
+    "test:spatial": "playwright test --config=playwright.spatial.config.ts"
   },
   "dependencies": {
+    "@agentic-graph/spatial-review": "file:vendor/agentic-graph-spatial-review-0.1.0.tgz",
     "@agenticgraph/apple-spatial-input": "file:vendor/agenticgraph-apple-spatial-input-0.1.0.tgz",
     "grph-shared": "file:vendor/grph-shared-0.0.0.tgz",
     "three": "0.185.1",

@@ -14,6 +14,10 @@ import {
   resolveFlightSimFollowTarget,
 } from '@agenticgraph/apple-spatial-input/camera'
 import type { GameOsWorldState } from 'grph-shared/game-os/index'
+import { validateSceneManifest } from '../config/manifest.ts'
+import { refuse, spatialValuesEqual } from '@agentic-graph/spatial-review'
+import { SpatialReview, readSceneReviewLedger, type SceneReviewLedger } from './SpatialReview.ts'
+import { prepareScene, disposePreparedScene, type PreparedScene } from './SceneProjection.ts'
 import type { RuntimeTelemetry, SceneManifest } from '../config/types.ts'
 import { LocalDatabase, requestPersistentStorage, type StoredAssetMetadata } from '../storage/LocalDatabase.ts'
 import { AnimationController } from './AnimationController.ts'
@@ -23,9 +27,8 @@ import type { DeviceOrientationSnapshot } from './DeviceOrientationController.ts
 import { FlightSimulation } from './FlightSimulation.ts'
 import { InputController } from './InputController.ts'
 import { PERSISTENT_STRATEGY_VISUAL_CONFIG_EVENT, PersistentStrategyProjection, type PersistentStrategyVisualConfig } from './PersistentStrategyProjection.ts'
-import { createProceduralShip } from './createProceduralShip.ts'
 import { projectProceduralWorldAnimationDelta } from './proceduralAnimationProjection.ts'
-import { createWorld, type WorldResources } from './createWorld.ts'
+import type { WorldResources } from './createWorld.ts'
 import { disposeObject3D } from './resources.ts'
 
 export const RUNTIME_TELEMETRY_EVENT = 'gamexr:telemetry'
@@ -39,18 +42,12 @@ interface RuntimeStatusDetail {
   message: string
 }
 
-interface PreparedScene {
-  scene: Scene
-  world: WorldResources
-  shipRoot: Group
-  animation: AnimationController
-}
-
 function boundedPixelRatio(manifest: SceneManifest, qualityScale: number): number {
   return Math.max(0.65, Math.min(devicePixelRatio, manifest.performance.maxPixelRatio) * qualityScale)
 }
 
 export class GameRuntime extends EventTarget {
+  readonly spatialReview: SpatialReview
   private manifestValue: SceneManifest
   private scene = new Scene()
   private readonly camera: PerspectiveCamera
@@ -92,6 +89,12 @@ export class GameRuntime extends EventTarget {
   ) {
     super()
     this.manifestValue = structuredClone(manifest)
+    this.spatialReview = new SpatialReview(database, {
+      manifest: () => this.manifest, phase: () => this.phase, enqueue: operation => this.enqueueConfiguration(operation),
+      project: (candidate, persist) => this.rebuildScene(candidate, persist),
+      block: message => { cancelAnimationFrame(this.animationFrame); this.animationFrame = 0; this.lastError = message; this.setPhase('blocked', message) },
+      recovered: () => { this.lastError = null; this.setPhase('paused', 'Recovered saved scene. Flight remains paused.') },
+    })
     this.camera = new PerspectiveCamera(
       manifest.camera.fieldOfView,
       1,
@@ -132,25 +135,33 @@ export class GameRuntime extends EventTarget {
     return this.lastError
   }
 
-  async applyManifest(manifest: SceneManifest): Promise<void> {
+  async applyManifest(manifest: SceneManifest, importedReview?: SceneReviewLedger): Promise<void> {
     this.assertUsable()
-    const nextManifest = structuredClone(manifest)
+    if (this.spatialReview.busy) refuse('busy', 'Wait for the reviewed commit.')
+    const parsed = validateSceneManifest(manifest)
+    if (!parsed.ok) refuse('invalid-input', parsed.issues.join(' '))
+    const nextManifest = parsed.value, base = this.manifest
+    const review = importedReview === undefined ? undefined : readSceneReviewLedger(importedReview, nextManifest.id)
+    this.spatialReview.invalidate()
     await this.enqueueConfiguration(async () => {
-      this.assertUsable()
+      const expected = await this.configurationSource(base)
       const previousPhase = this.phase
-      await this.rebuildScene(nextManifest, true)
-      if (previousPhase === 'running') {
-        this.phase = 'running'
-        this.dispatchStatus('Configuration applied locally; flight remains running.')
-      } else {
-        this.setPhase('paused', 'Configuration applied locally.')
-      }
+      let committed = false
+      try {
+        await this.rebuildScene(nextManifest, async () => {
+          await this.database.saveScene(nextManifest, true, expected, review)
+          committed = true
+        })
+        this.setPhase(previousPhase === 'running' ? 'running' : 'paused', 'Configuration saved locally.')
+      } catch (error) { if (committed) this.spatialReview.projectionFailed(); throw error }
+      finally { this.spatialReview.invalidate() }
     })
   }
 
   async start(): Promise<void> {
     this.assertUsable()
     if (this.phase === 'blocked') throw new Error(this.lastError ?? 'The runtime is blocked.')
+    if (this.spatialReview.busy) refuse('busy', 'Wait for the reviewed commit before starting flight.')
     this.claimFlightSurface()
     let silentMode = false
     if (this.manifestValue.audio.enabled) {
@@ -160,7 +171,9 @@ export class GameRuntime extends EventTarget {
         silentMode = true
       }
     }
+    if (this.spatialReview.busy || this.inspect().phase === 'blocked') refuse('busy', 'The runtime changed while starting flight.')
     this.phase = 'running'
+    this.spatialReview.invalidate()
     this.lastFrameTime = performance.now()
     this.accumulator = 0
     this.dispatchStatus(silentMode
@@ -182,6 +195,7 @@ export class GameRuntime extends EventTarget {
 
   reset(): void {
     this.assertUsable()
+    if (this.spatialReview.busy) refuse('busy', 'Wait for the reviewed commit.')
     this.claimFlightSurface()
     this.simulation.reset(this.manifestValue)
     this.animation.reset()
@@ -217,22 +231,13 @@ export class GameRuntime extends EventTarget {
     return this.input.inspectDeviceOrientation()
   }
   async setDeviceMotionEnabled(enabled: boolean): Promise<void> {
-    this.assertUsable()
-    await this.enqueueConfiguration(async () => {
-      const nextManifest = structuredClone(this.manifestValue)
-      nextManifest.motion.deviceMotionEnabled = enabled
-      await this.database.saveScene(nextManifest)
-      this.manifestValue = nextManifest
-      this.input.configure(this.manifestValue)
-    })
+    await this.updateConfiguration(next => { next.motion.deviceMotionEnabled = enabled }, next => this.input.configure(next))
   }
   playAnimations(): void {
     this.animation.play()
-    this.manifestValue.animation.playing = true
   }
   pauseAnimations(): void {
     this.animation.pause()
-    this.manifestValue.animation.playing = false
   }
   scrubAnimation(normalizedTime: number): void {
     this.animation.scrub(normalizedTime)
@@ -240,25 +245,32 @@ export class GameRuntime extends EventTarget {
   }
 
   async selectAnimationClip(name: string | null): Promise<void> {
-    await this.enqueueConfiguration(async () => {
-      if (name && !this.animationClips.includes(name)) throw new Error(`Imported animation clip “${name}” is not available.`)
-      const nextManifest = structuredClone(this.manifestValue)
-      nextManifest.animation.importedClip = name
-      await this.database.saveScene(nextManifest)
-      this.animation.configure(nextManifest)
-      this.manifestValue = nextManifest
-      this.renderSingleFrame()
-    })
+    if (name && !this.animationClips.includes(name)) throw new Error(`Imported animation clip “${name}” is not available.`)
+    await this.updateConfiguration(next => { next.animation.importedClip = name }, next => this.animation.configure(next))
+    this.renderSingleFrame()
   }
-
   async setAnimationTimeScale(value: number): Promise<void> {
     if (!Number.isFinite(value) || value < 0 || value > 4) throw new Error('Animation time scale must be from 0 through 4.')
+    await this.updateConfiguration(next => { next.animation.timeScale = value }, next => this.animation.configure(next))
+  }
+  private async configurationSource(base: SceneManifest) {
+    this.assertUsable()
+    if (this.spatialReview.recoveryRequired || !spatialValuesEqual(base, this.manifestValue)) refuse('stale-source', 'The configuration changed. Refresh before applying it.')
+    const saved = await this.database.getSceneSnapshot(base.id)
+    if (saved.activeSceneId !== base.id || !spatialValuesEqual(saved.scene, base)) refuse('stale-source', 'The persisted source changed. Recover the saved scene before editing.')
+    return saved
+  }
+  private async updateConfiguration(change: (next: SceneManifest) => void, project: (next: SceneManifest) => void): Promise<void> {
+    if (this.spatialReview.busy) refuse('busy', 'Wait for the reviewed commit.')
+    const base = this.manifest, next = this.manifest
+    change(next)
+    this.spatialReview.invalidate()
     await this.enqueueConfiguration(async () => {
-      const nextManifest = structuredClone(this.manifestValue)
-      nextManifest.animation.timeScale = value
-      await this.database.saveScene(nextManifest)
-      this.animation.configure(nextManifest)
-      this.manifestValue = nextManifest
+      const expected = await this.configurationSource(base)
+      await this.database.saveScene(next, true, expected)
+      try { project(next); this.manifestValue = next }
+      catch (error) { this.spatialReview.projectionFailed(); throw error }
+      finally { this.spatialReview.invalidate() }
     })
   }
 
@@ -338,6 +350,7 @@ export class GameRuntime extends EventTarget {
   async dispose(): Promise<void> {
     if (this.disposed) return
     this.disposed = true
+    this.spatialReview.invalidate()
     cancelAnimationFrame(this.animationFrame)
     this.resizeObserver.disconnect()
     this.canvas.removeEventListener('webglcontextlost', this.handleContextLost)
@@ -356,16 +369,16 @@ export class GameRuntime extends EventTarget {
     this.dispatchStatus('Runtime disposed and local resources released.')
   }
 
-  private async rebuildScene(manifest: SceneManifest, persist = false): Promise<void> {
+  private async rebuildScene(manifest: SceneManifest, persist?: () => Promise<void>): Promise<void> {
     const generation = ++this.rebuildGeneration
     let prepared: PreparedScene | null = null
     try {
-      prepared = await this.prepareScene(manifest)
-      if (generation !== this.rebuildGeneration) throw new Error('Scene update was superseded by a newer request.')
-      if (persist) await this.database.saveScene(manifest)
-      if (generation !== this.rebuildGeneration) throw new Error('Scene update was superseded by a newer request.')
+      prepared = await prepareScene(manifest, this.assetManager)
+      if (this.disposed || generation !== this.rebuildGeneration) throw new Error('Scene update was superseded by a newer request.')
+      if (persist) await persist()
+      if (this.disposed || generation !== this.rebuildGeneration) throw new Error('Scene update was superseded by a newer request.')
     } catch (error) {
-      if (prepared) this.disposePreparedScene(prepared)
+      if (prepared) disposePreparedScene(prepared)
       throw error
     }
 
@@ -393,44 +406,9 @@ export class GameRuntime extends EventTarget {
     this.updateSceneObjects(0, true)
   }
 
-  private async prepareScene(manifest: SceneManifest): Promise<PreparedScene> {
-    const scene = new Scene()
-    const world = createWorld(scene, manifest)
-    const animation = new AnimationController(manifest)
-    let shipRoot: Group | null = null
-    try {
-      if (manifest.ship.asset.kind === 'procedural') {
-        const ship = createProceduralShip(manifest)
-        shipRoot = ship.root
-        animation.attachProcedural(ship)
-      } else {
-        const assetId = manifest.ship.asset.localAssetId
-        if (!assetId) throw new Error('A local-glb ship requires a local asset id.')
-        const imported = await this.assetManager.loadLocalGlb(assetId)
-        shipRoot = imported.root
-        shipRoot.scale.multiplyScalar(manifest.ship.scale)
-        animation.attachImported(imported.root, imported.animations)
-      }
-      scene.add(shipRoot)
-      animation.configure(manifest)
-      return { scene, world, shipRoot, animation }
-    } catch (error) {
-      animation.dispose()
-      if (shipRoot) disposeObject3D(shipRoot)
-      world.dispose()
-      throw error
-    }
-  }
-
-  private disposePreparedScene(prepared: PreparedScene): void {
-    prepared.animation.dispose()
-    disposeObject3D(prepared.shipRoot)
-    prepared.world.dispose()
-  }
-
-  private enqueueConfiguration(operation: () => Promise<void>): Promise<void> {
+  private enqueueConfiguration<T>(operation: () => Promise<T>): Promise<T> {
     const queued = this.configurationQueue.then(operation)
-    this.configurationQueue = queued.catch(() => undefined)
+    this.configurationQueue = queued.then(() => undefined, () => undefined)
     return queued
   }
 
@@ -594,8 +572,7 @@ export class GameRuntime extends EventTarget {
   }
 
   private readonly handleContextRestored = (): void => {
-    void this.rebuildScene(this.manifestValue)
-      .then(() => this.setPhase('paused', 'Graphics context restored.'))
+    void this.spatialReview.recover()
       .catch((error: unknown) => {
         this.lastError = error instanceof Error ? error.message : 'Graphics context restoration failed.'
         this.setPhase('blocked', this.lastError)

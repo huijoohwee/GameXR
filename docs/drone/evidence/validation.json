@@ -1,14 +1,14 @@
 {
   "schema": "drone-host-validation/v1",
-  "observed_at": "2026-09-26T10:28:36.753267+00:00",
-  "continuity": "DRONE-RC-001@0.2.0 + DRONE-FLIGHT-PATH-001@1.2.0 + GAMEXR-SCENE-REVIEW-001@0.1.0",
+  "observed_at": "2026-09-27T14:48:56.354971+00:00",
+  "continuity": "DRONE-RC-001@0.2.0 + GAMEXR-DRONE-PATH-CONSUMER-001@1.2.1 + GAMEXR-SCENE-REVIEW-001@0.1.0",
   "surface": "authoring",
-  "result": "Unchanged provenance verifier passes all 11 selected checks on the scene-review successor. Runtime/browser evidence belongs to published runtime 495c05d5f3012d7fb57f4be9f4073ddf3811669b; successor protected integration pending.",
-  "source_snapshot_sha256": "9cce4fe684a363439ce9ddbc565b30c8a1482024c0b5e97cc1da81e2a7c3b43d",
+  "result": "All 11 unchanged provenance checks pass for the planning ownership successor. No runtime bytes changed; existing runtime/browser evidence retains its original subjects. Protected integration remains pending.",
+  "source_snapshot_sha256": "d825e358133d25ab6a1657b1ae0b2fb6fb7cac0241d44b05f6a02e44d2b8f4f1",
   "previous_validation": {
-    "revision": "495c05d5f3012d7fb57f4be9f4073ddf3811669b",
+    "revision": "a9340b3c8dfca66623a975d54b9601a803595e9d",
     "path": "docs/drone/evidence/validation.json",
-    "sha256": "1d4a5fbc8c504ab3b4fc892a9355d81764cc08b21834f97906a668b9a8773b9a"
+    "sha256": "04a822dfcf6f995b3b9e72934cdc5c5b58d5fc1df7e0d1c4a423363d3a75d5d1"
   },
   "environment": {
     "node": "v24.15.0",

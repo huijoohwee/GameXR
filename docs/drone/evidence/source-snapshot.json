@@ -1,10 +1,10 @@
 {
   "schema": "drone-host-source-snapshot/v1",
-  "observed_at": "2026-09-26T10:28:36.569217+00:00",
-  "base_revision": "495c05d5f3012d7fb57f4be9f4073ddf3811669b",
-  "branch": "agent/device-cba000d3779d/spatial-review-integrate",
-  "candidate_status": "Source-bound scene review integration successor. Runtime bytes are the tested published candidate; this successor refreshes source provenance and five-role metadata only. Physical acceptance and Production remain unverified.",
-  "worktree": "/Users/katrina/Documents/GitHub/.worktrees/GameXR/device-cba000d3779d--spatial-review",
+  "observed_at": "2026-09-27T14:48:56.354971+00:00",
+  "base_revision": "a9340b3c8dfca66623a975d54b9601a803595e9d",
+  "branch": "agent/device-0232231d4a19/drone-consumer-plan",
+  "candidate_status": "Planning ownership successor only; runtime inputs unchanged. Protected source integration pending; no new Production or physical acceptance claim.",
+  "worktree": "/Users/huijoohwee/Documents/GitHub/.worktrees/GameXR/device-0232231d4a19--drone-consumer-plan",
   "specification_input": {
     "path": "/Users/katrina/Documents/GitHub/.workspace/.artifacts/gamexr-esp32-drone-control/prd-tad-adr-mvp-gtm-gamexr-esp32-drone-control.md",
     "revision": "DRONE-RC-001@0.1.0",
@@ -42,7 +42,7 @@
     "docs/drone/history/evidence/validation.json": "133d5e8514352c7109fe2247939321b0967a2fe49b9b5ee8e3c04854b25f7662",
     "docs/drone/history/prd-tad-adr-mvp-gtm-gamexr-esp32-drone-control-v0.1.0.md": "fc68aa6ce590869e20aaa6980347d6e1d10ef992dfed9146ba58babf0a549b54",
     "docs/drone/history/provenance.json": "0ec82633e885f6b511bb151acbb5769678ae5e6f5d381244dec6cd61c60faed6",
-    "docs/drone/prd-tad-adr-mvp-gtm-drone-flight-path.md": "d37bef42f70c1646e7932fe21e920f72a0934bb36f8e59cb0c84ce74b3ea6ac7",
+    "docs/drone/prd-tad-adr-mvp-gtm-drone-flight-path.md": "079b9323e9a2d7e145fe4ca0e64a4e378723bd2b2fc11399b2eee3586aca1a0f",
     "docs/drone/prd-tad-adr-mvp-gtm-gamexr-esp32-drone-control.md": "35d737710f2c56f3ae2d29ac99a4905642383548af6146c0244a0664ba797654",
     "docs/drone/prd-tad-adr-mvp-gtm-usb-diagnostics-dashboard.md": "cd24dbf6be8ced2180d849a13a89f28b2ccaa5ec649ed0d5dd1d119facd1776f",
     "docs/prd-tad-adr-mvp-gtm-scene-review.md": "fa70b7dcbabf114c63a5306e3b80d4e39e4713dbb90c9af1fc5ecdee0bc00ed7",
@@ -184,7 +184,11 @@
     "vendor/grph-shared-0.0.0.tgz": "12b943cd79be56c258b3fd4a97dac1c0db7ffc334719942376fb5f3c38ad5363",
     "vite.config.ts": "fe13e079e6c64c339db61cf42784b902b2be3ffc20a8b98a9e9a069ebab374eb"
   },
-  "previous_snapshot": "docs/drone/history/evidence/source-snapshot-runtime-economy-input.json",
+  "previous_snapshot": {
+    "revision": "a9340b3c8dfca66623a975d54b9601a803595e9d",
+    "path": "docs/drone/evidence/source-snapshot.json",
+    "sha256": "9cce4fe684a363439ce9ddbc565b30c8a1482024c0b5e97cc1da81e2a7c3b43d"
+  },
   "previous_candidate_snapshot": {
     "revision": "495c05d5f3012d7fb57f4be9f4073ddf3811669b",
     "path": "docs/drone/evidence/source-snapshot.json",

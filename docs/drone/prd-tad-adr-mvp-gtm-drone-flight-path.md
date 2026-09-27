@@ -1,15 +1,15 @@
 ---
 title: GameXR execution of Graph drone paths
 doc_type: PRD-TAD-ADR-MVP-GTM
-version: 1.2.0
-date: 2026-09-26
+version: 1.2.1
+date: 2026-09-27
 owner: GameXR bench maintainer
-continuity_id: DRONE-FLIGHT-PATH-001
-prd_revision: "1.2.0"
-tad_revision: "1.2.0"
-adr_revision: "1.2.0"
-mvp_revision: "1.2.0"
-gtm_revision: "1.2.0"
+continuity_id: GAMEXR-DRONE-PATH-CONSUMER-001
+prd_revision: "1.2.1"
+tad_revision: "1.2.1"
+adr_revision: "1.2.1"
+mvp_revision: "1.2.1"
+gtm_revision: "1.2.1"
 status: implementation
 frontmatter_contract: required
 ---
@@ -18,7 +18,7 @@ frontmatter_contract: required
 
 ## PRD
 
-DRONE-FLIGHT-PATH-001@1.2.0 consumes the Graph-owned portable data contract in
+GAMEXR-DRONE-PATH-CONSUMER-001@1.2.1 consumes the Graph-owned portable data contract in
 `agentic-graph/docs/documents/prd-tad-adr-mvp-gtm-drone-flight-path.md`. The user explicitly
 confirmed simulated bench operation. Import, review, connect and Run on iPhone/Safari
 must preserve the authored route, visibly acknowledge takeoff/travel/landing, and
@@ -180,3 +180,25 @@ contain the supplied pairing token. Measure task completion before adding live s
 Release/rollback: native source publication only, with separate protected merge/production
 receipts. Revert this increment for file-only transfer. No firmware, bridge endpoint, pairing
 policy or physical command route changed. Evidence prefix: external flight-transfer-*.
+
+## Consumer ownership correction — 1.2.1
+
+PRD / P1: remove the fleet ownership conflict caused by both repositories declaring
+DRONE-FLIGHT-PATH-001. This consumer keeps its existing acceptance and runtime behavior.
+TAD: GAMEXR-DRONE-PATH-CONSUMER-001 owns GameXR validation, review and simulated transport;
+Graph alone owns DRONE-FLIGHT-PATH-001 and the portable contract. The consumed published
+contract is [Graph 1.8.1 at 09e6250c](https://github.com/huijoohwee/agentic-graph/blob/09e6250c39657812b224b57eddb714d949f5753e/docs/documents/prd-tad-adr-mvp-gtm-drone-flight-path.md);
+its metadata-only 1.8.2 successor retains those contract bytes.
+ADR: assign this existing consumer its own CID rather than duplicate source authority.
+The predecessor identity and all historical claims remain immutable at
+`a9340b3c8dfca66623a975d54b9601a803595e9d`; no runtime/API, package pin or hardware change.
+MVP: run the unchanged provenance verifier, native selected checks and fleet ownership
+with both candidate roots. Refresh only the source fingerprint and its evidence ledger,
+retaining predecessor revision/digests; no check is relaxed. Required CI, protected
+merge and native closeout remain pending until their exact receipts are observed.
+GTM: repair traceability; demand and real-device/physical-flight acceptance stay unknown.
+Budget: three documentation/evidence files, <4 kB new text, zero dependencies or spend;
+headless review within the shared 25-active-minute metadata sprint plus external gates.
+Delivery: classify these exact paths against Vite/public release inputs; do not infer
+deployment from source integration. Append the observed outcome through the private
+workspace Context/board owner. Rollback is a reviewed document/evidence revert.

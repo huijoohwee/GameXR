@@ -3,8 +3,8 @@
   "observed_at": "2026-09-27T14:48:56.354971+00:00",
   "continuity": "DRONE-RC-001@0.2.0 + GAMEXR-DRONE-PATH-CONSUMER-001@1.2.1 + GAMEXR-SCENE-REVIEW-001@0.1.0",
   "surface": "authoring",
-  "result": "All 11 unchanged provenance checks pass for the planning ownership successor. No runtime bytes changed; existing runtime/browser evidence retains its original subjects. Protected integration remains pending.",
-  "source_snapshot_sha256": "c4cf7583eeae6caaf4075ba05cec79987ef939e44f4384053ef7b174017f383a",
+  "result": "All 11 structural/provenance checks pass for the Huhou multi-game route and release-contract refresh. No new drone runtime, Production, or physical acceptance claim is made here. Protected integration remains pending.",
+  "source_snapshot_sha256": "3b3fcca2c25fcd5c783b76991f7ea96acaf9ded350d3949a580c8b40dfecbd3a",
   "previous_validation": {
     "revision": "a9340b3c8dfca66623a975d54b9601a803595e9d",
     "path": "docs/drone/evidence/validation.json",

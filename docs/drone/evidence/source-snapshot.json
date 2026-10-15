@@ -1,10 +1,10 @@
 {
   "schema": "drone-host-source-snapshot/v1",
   "observed_at": "2026-09-27T14:48:56.354971+00:00",
-  "base_revision": "a9340b3c8dfca66623a975d54b9601a803595e9d",
-  "branch": "agent/device-0232231d4a19/drone-consumer-plan",
-  "candidate_status": "Planning ownership successor only; runtime inputs unchanged. Protected source integration pending; no new Production or physical acceptance claim.",
-  "worktree": "/Users/huijoohwee/Documents/GitHub/.worktrees/GameXR/device-0232231d4a19--drone-consumer-plan",
+  "base_revision": "d92d536961b58c13afc423e2375bcf19eb03a6b4",
+  "branch": "agent/katrinas-macbook-pro/gamexr-multi-game-huhou",
+  "candidate_status": "Huhou multi-game routing, release contract, and redirect assertions changed on this lane. No new drone runtime, Production, or physical acceptance claim is made here.",
+  "worktree": "/Users/katrina/Documents/GitHub/GameXR",
   "specification_input": {
     "path": "/Users/katrina/Documents/GitHub/.workspace/.artifacts/gamexr-esp32-drone-control/prd-tad-adr-mvp-gtm-gamexr-esp32-drone-control.md",
     "revision": "DRONE-RC-001@0.1.0",
@@ -151,7 +151,7 @@
     "tests/input-controller.test.ts": "6cdbf3d81b70ca16140ac0bfcd45dd0520bc12b8b5034f64b34b10043cb6d615",
     "tests/manifest.test.ts": "9c7813bd40203aecb608fa2a34f635975f36d126ea12736cb825eeb904941ca6",
     "tests/mcp-contract.test.ts": "897e7f783b70c1b6f3f8cfb9731ac29548846202da13313f4afa044c401e0516",
-    "tests/mobile-motion-ui.test.ts": "92759266396c05753fdfafb25f1aa61619c617064483dcbc90130fe19fcbdd33",
+    "tests/mobile-motion-ui.test.ts": "6dca0977ef90c758dcc6e31b445bf01c50b0767af8fafb39ad62b7c7ff270c33",
     "tests/persistent-strategy.test.ts": "d0972852ee378a4a5a860b2cc72cc97a3410c02420d6b599ef525315c3b36eec",
     "tests/procedural-animation-projection.test.ts": "f3737dbe5030df39a164ba994c0855064f594d16f33e3f698d80f7eacc9da84a",
     "tests/release-generation.test.ts": "689e0d910429b881c053896aaef2bf448b5fde14b31557be5a984b75cc11d621",
@@ -198,6 +198,6 @@
     "continuity": "GAMEXR-SCENE-REVIEW-001@0.1.0",
     "runtime_revision": "495c05d5f3012d7fb57f4be9f4073ddf3811669b",
     "review": "https://github.com/huijoohwee/GameXR/pull/36",
-    "scope": "Reviewed source-bound preview/local acceptance; existing drone source, native shared pins and verifier bytes preserved. Intentional MCP/test changes are bound to the published runtime revision, rather than claimed unchanged from the earlier drone implementation."
+    "scope": "Huhou multi-game routing and release-contract bytes changed on this lane. The refreshed redirect assertion is bound to this lane head rather than claimed unchanged from the earlier drone implementation."
   }
 }

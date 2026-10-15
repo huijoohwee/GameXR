@@ -32,7 +32,7 @@ export default defineConfig({
     },
   ],
   webServer: externalE2eUrl ? undefined : {
-    command: 'npm run check && npm run preview -- --host 127.0.0.1 --port 4187 --strictPort',
+    command: 'npm run build && npm run release:prepare && npm run release:check && npm run preview -- --host 127.0.0.1 --port 4187 --strictPort',
     url: `${baseURL}/gamexr/`,
     reuseExistingServer: false,
     timeout: 120_000,

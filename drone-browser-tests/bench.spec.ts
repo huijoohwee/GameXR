@@ -25,7 +25,7 @@ test('mobile panel maps independent axes through UDP and displays honest telemet
   const errors: string[] = []
   page.on('pageerror', error => errors.push(error.message))
   await openBench(page)
-  await expect(page.locator('#offline-status')).toHaveText('Offline shell ready')
+  await expect(page.locator('#offline-status')).toHaveText('Online · local runtime')
   await expect(page.getByText('Simulated receiver · No motor outputs', { exact: true })).toBeVisible()
   await expect(page.getByText('Unavailable in simulated receiver', { exact: true })).toBeVisible()
   await expectInhibited(page)

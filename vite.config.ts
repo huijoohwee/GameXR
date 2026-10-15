@@ -13,12 +13,12 @@ const PRECACHE_STATIC_FILES = [
   ['schemas/default-scene.json', 'contract'],
   ['schemas/gamexr.scene.schema.json', 'contract'],
   ['schemas/apple-spatial-input.schema.json', 'contract'],
-  ['huhou/index.html', 'document'],
-  ['huhou/assets/huhou.css', 'style'],
-  ['huhou/assets/huhou.js', 'script'],
-  ['huhou/assets/character-sheet.jpg', 'image'],
-  ['huhou/assets/hero.jpg', 'image'],
-  ['huhou/assets/logo.jpg', 'image'],
+  ['games/huhou/index.html', 'document'],
+  ['games/huhou/assets/huhou.css', 'style'],
+  ['games/huhou/assets/huhou.js', 'script'],
+  ['games/huhou/assets/character-sheet.jpg', 'image'],
+  ['games/huhou/assets/hero.jpg', 'image'],
+  ['games/huhou/assets/logo.jpg', 'image'],
 ] as const
 
 function contentBytes(source: string | Uint8Array): Uint8Array {

@@ -17,7 +17,6 @@ test('production redirect fragment keeps the canonical GameXR route and retires 
     '/GameXR /gamexr/ 301',
     '/GameXR/* /gamexr/:splat 301',
     '/gamexr /gamexr/ 301',
-    '/gamexr/huhou /gamexr/huhou/ 301',
     '/gamexr/* /content/gamexr/:splat 200',
     '/content/gamexr /gamexr 301',
     '/content/gamexr/ /gamexr/ 301',

@@ -28,7 +28,7 @@
     "browser-tests/production-runtime.spec.ts": "b69fc217bcabedeb71c09c9e997c3775eac06ebc0f7fe078e7d73f028cd2fc26",
     "browser-tests/spatial-review.spec.ts": "65d7e6486024b7f4bbaf274022688ccf89f226f708c9eeea8128e725f6298e24",
     "deployment/cloudflare/headers.fragment": "82cb9b298accb86573502cafc10e6939d15c23a549fd7c7089b1ed55da992616",
-    "deployment/cloudflare/redirects.fragment": "3032841cb0dc7e87b3a93134df4761dd6a383bcd90f9abf4493c4156a2ddf5ff",
+    "deployment/cloudflare/redirects.fragment": "280947d8105b0b94e50b4973109611c566a061fb34f2da3411ed96b9ec2a1f31",
     "docs/AGENTIC-GRAPH-HARMONIZATION.md": "274596eedf142e4bbf00ae5ebce3c43fad1871eb585207d3eb83cf124d6fdee5",
     "docs/APPLE-COMPATIBILITY.md": "b819de501ba6769ac8cf3dd2197c0d9d914042d8287d20731c3780d7864da73f",
     "docs/DRONE-CONTROL.md": "7e8308fc124f295c4af683de5d638ceffaef6fc7d810b606bc57fcb97a8083f0",

@@ -27,8 +27,8 @@
     "browser-tests/persistent-strategy.spec.ts": "592271d6c2cc3cb58d574d80a75fcdb582ff883da5406d7070327f2a47d8aba1",
     "browser-tests/production-runtime.spec.ts": "b69fc217bcabedeb71c09c9e997c3775eac06ebc0f7fe078e7d73f028cd2fc26",
     "browser-tests/spatial-review.spec.ts": "65d7e6486024b7f4bbaf274022688ccf89f226f708c9eeea8128e725f6298e24",
-    "deployment/cloudflare/headers.fragment": "82cb9b298accb86573502cafc10e6939d15c23a549fd7c7089b1ed55da992616",
-    "deployment/cloudflare/redirects.fragment": "280947d8105b0b94e50b4973109611c566a061fb34f2da3411ed96b9ec2a1f31",
+    "deployment/cloudflare/headers.fragment": "f79687aa82030278bae3c43a29ed3a4e9e3a7ae336c53b70bcd37bb86fce1295",
+    "deployment/cloudflare/redirects.fragment": "7380a4abaa8aaefd781f8de9a04c09ea2378fd2390ffb10c793b4e3284c252f1",
     "docs/AGENTIC-GRAPH-HARMONIZATION.md": "274596eedf142e4bbf00ae5ebce3c43fad1871eb585207d3eb83cf124d6fdee5",
     "docs/APPLE-COMPATIBILITY.md": "b819de501ba6769ac8cf3dd2197c0d9d914042d8287d20731c3780d7864da73f",
     "docs/DRONE-CONTROL.md": "7e8308fc124f295c4af683de5d638ceffaef6fc7d810b606bc57fcb97a8083f0",
@@ -82,10 +82,10 @@
     "public/icons/gamexr.svg": "23eeceaad838265f9098dd471c767ef1b7f4ff7761c5c6d32079bd1649f3a632",
     "public/llms.txt": "73d123371c97fce814636a7c3a534fda25d577ae7bfc1502b553ab30594a1aac",
     "public/manifest.webmanifest": "dfe3799064544f7b0421c85860efc640b57c1bf4ef83946f0358c3a3cc473e12",
-    "public/sw.js": "169590b48260ee82f42669b4a3160e663ede9b291910c8d45575b3e50f2b172c",
+    "public/sw.js": "40087b95d402a5263b1a76930ce9a14082206be0a41f6eb0fd6055727243516e",
     "scripts/check-native.mjs": "857124c8869d23b0a9a4173bc62cecee9f188056589f5f883812ecb6d7c9f980",
     "scripts/check-release.mjs": "a3c492615a11e46372ff0c46a5e9354712383c1c69c55a490496bf722614ba4d",
-    "scripts/prepare-release.mjs": "df16c63fd74d139abb5eb1059b23db3119f1d237dbcc9dba18c84944989afb06",
+    "scripts/prepare-release.mjs": "c3fff72e4bbce00d0e0e4c216c8350fd98d60a26ea61f8ff942394f0ee561e95",
     "scripts/release-common.mjs": "ae9508eae1d268ff4016fade42af0dba527d25be73a13117f4771ef9a4a73384",
     "shared/default-scene.json": "338c70784c15ff0dc8278e97abdd64c298b6de847e9860b207d3be8794d38a55",
     "shared/gamexr.scene.schema.json": "6a52682e0134996c202ca8bad88d570d9817261770e4cd6e3f8dc75e780d37b1",
@@ -182,7 +182,7 @@
     "vendor/agentic-graph-spatial-review-0.1.0.tgz": "167c71cc54a60848cc649db6f7f5d59eb902adbb63cbbfc98b880a1d61a20c99",
     "vendor/agenticgraph-apple-spatial-input-0.1.0.tgz": "06ce0ee14b53a97f5981df38d66f0b83bdb0aedd8b54a313b02aa47ca4a7028b",
     "vendor/grph-shared-0.0.0.tgz": "12b943cd79be56c258b3fd4a97dac1c0db7ffc334719942376fb5f3c38ad5363",
-    "vite.config.ts": "fef54a23415660eb188764c1dba0ba7c9aa37d7f5f4baf706a025220cd3ef5ca"
+    "vite.config.ts": "04ac959a277dbf300335a03ae470cdf8c40ee4b88e8c3d2c2685f97342e55c70"
   },
   "previous_snapshot": {
     "revision": "a9340b3c8dfca66623a975d54b9601a803595e9d",

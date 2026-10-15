@@ -4,7 +4,7 @@
   "continuity": "DRONE-RC-001@0.2.0 + GAMEXR-DRONE-PATH-CONSUMER-001@1.2.1 + GAMEXR-SCENE-REVIEW-001@0.1.0",
   "surface": "authoring",
   "result": "All 11 unchanged provenance checks pass for the planning ownership successor. No runtime bytes changed; existing runtime/browser evidence retains its original subjects. Protected integration remains pending.",
-  "source_snapshot_sha256": "d825e358133d25ab6a1657b1ae0b2fb6fb7cac0241d44b05f6a02e44d2b8f4f1",
+  "source_snapshot_sha256": "c4cf7583eeae6caaf4075ba05cec79987ef939e44f4384053ef7b174017f383a",
   "previous_validation": {
     "revision": "a9340b3c8dfca66623a975d54b9601a803595e9d",
     "path": "docs/drone/evidence/validation.json",

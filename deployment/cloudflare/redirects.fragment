@@ -2,7 +2,11 @@
 /GameXR /gamexr/ 301
 /GameXR/* /gamexr/:splat 301
 /gamexr /gamexr/ 301
+/gamexr/huhou /gamexr/games/huhou/ 301
+/gamexr/huhou/ /gamexr/games/huhou/ 301
 /gamexr/* /content/gamexr/:splat 200
+/content/gamexr/huhou /gamexr/games/huhou/ 301
+/content/gamexr/huhou/ /gamexr/games/huhou/ 301
 /content/gamexr /gamexr 301
 /content/gamexr/ /gamexr/ 301
 /content/gamexr/* /gamexr/:splat 301

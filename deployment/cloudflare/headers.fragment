@@ -47,16 +47,16 @@
 /gamexr/icons/*
   Cache-Control: public, no-store, no-cache, no-transform, must-revalidate, max-age=0
 
-/gamexr/huhou
+/gamexr/games/huhou
   Cache-Control: public, no-store, no-cache, no-transform, must-revalidate, max-age=0
 
-/gamexr/huhou/
+/gamexr/games/huhou/
   Cache-Control: public, no-store, no-cache, no-transform, must-revalidate, max-age=0
 
-/gamexr/huhou/index.html
+/gamexr/games/huhou/index.html
   Cache-Control: public, no-store, no-cache, no-transform, must-revalidate, max-age=0
 
-/gamexr/huhou/assets/*
+/gamexr/games/huhou/assets/*
   Cache-Control: public, max-age=31536000, immutable, no-transform
 
 /gamexr/assets/*

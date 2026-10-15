@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import { readFile } from 'node:fs/promises'
+import { readFile, readdir, rm } from 'node:fs/promises'
 import { realpathSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { execFileSync } from 'node:child_process'
@@ -59,9 +59,22 @@ function candidateStatus(source) {
   return 'unsealed-source-status-unknown'
 }
 
+async function removeIgnoredArtifacts(directory) {
+  const entries = await readdir(directory, { withFileTypes: true })
+  await Promise.all(entries.map(async (entry) => {
+    const path = resolve(directory, entry.name)
+    if (entry.isDirectory()) {
+      await removeIgnoredArtifacts(path)
+      return
+    }
+    if (entry.name === '.DS_Store') await rm(path, { force: true })
+  }))
+}
+
 const root = realpathSync(resolve(option('root', 'dist/gamexr')))
 const basePath = option('base', '/gamexr/')
 const packageJson = JSON.parse(await readFile(resolve('package.json'), 'utf8'))
+await removeIgnoredArtifacts(root)
 const artifacts = generationManifest(root, { exclude: ['release-manifest.json'],
   maxEntries: 2000, maxBytes: 64 * 1024 * 1024, maxFileBytes: 16 * 1024 * 1024,
 }).files.map(({ path, bytes, sha256 }) => ({ path, bytes, sha256 }))

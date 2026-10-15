@@ -353,7 +353,13 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url)
   if (url.origin !== self.location.origin) return
   const scopePath = new URL(self.registration.scope).pathname
-  if (request.mode === 'navigate' && url.pathname.startsWith(`${scopePath}huhou/`)) return
+  if (
+    request.mode === 'navigate'
+    && (
+      url.pathname.startsWith(`${scopePath}games/`)
+      || url.pathname.startsWith(`${scopePath}huhou/`)
+    )
+  ) return
 
   event.respondWith(request.mode === 'navigate'
     ? networkFirstNavigation(request)

@@ -1,0 +1,16 @@
+{
+  "schema": "gamexr-games-registry/v1",
+  "basePath": "/gamexr/games/",
+  "entries": [
+    {
+      "slug": "huhou",
+      "title": "Huhou",
+      "kind": "static",
+      "canonicalRoute": "/gamexr/games/huhou/",
+      "aliases": [
+        "/gamexr/huhou/"
+      ],
+      "sourceRoot": "public/games/huhou"
+    }
+  ]
+}

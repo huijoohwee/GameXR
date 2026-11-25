@@ -29,6 +29,10 @@ jobs:
         with:
           node-version: 24
           cache: npm
+      - name: Enforce shared owner reuse
+        uses: huijoohwee/agentic-os/.github/actions/owner-reuse@d2accfda2bbf1f96175267d2ae2bf9be596801c6
+        with:
+          baseline: e0e668779cb12d412c7004386d6b1dc3a33b39af
       - name: Install locked dependencies
         run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Install WebKit runtime

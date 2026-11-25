@@ -19,7 +19,8 @@ lane: "authoring"
 load_policy: "on-demand"
 worktree_id: "device-cba000d3779d--spatial-review"
 agent_id: "codex-01a0dba4"
-guidelines_ref: "huijoohwee.github.io/guidelines/prd-tad-adr-mvp-gtm-guidelines.md@2.7.0"
+guideline_revision: "2.7.0"
+guideline_reference: "https://github.com/huijoohwee/agentic-gateway/blob/cdb000925729a729732206a32de36e6bc7db011c/references/README.md#guidelineprd-tad-adr-mvp-gtm"
 ---
 
 # GameXR saved scene review — reference implementation
